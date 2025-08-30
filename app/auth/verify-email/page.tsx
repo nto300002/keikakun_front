@@ -22,9 +22,13 @@ function VerifyEmailContent() {
       try {
         await authApi.verifyEmail(token);
         setStatus('success');
-      } catch (err: any) {
+      } catch (err: unknown) {
         setStatus('error');
-        setError(err.message || 'An unknown error occurred.');
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unknown error occurred.');
+        }
       }
     };
 

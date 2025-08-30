@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { authApi } from '@/lib/api';
+import { authApi } from '@/lib/auth';
 import Link from 'next/link';
 
 function VerifyEmailContent() {
@@ -38,7 +38,7 @@ function VerifyEmailContent() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
       <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md text-center">
-        <h1 className="text-2xl font-bold mb-4">Eメール認証</h1>
+        <h1 className="text-2xl font-bold mb-4 text-gray-800">Eメール認証</h1>
         {status === 'verifying' && (
           <p className="text-gray-600">Eメール認証中..</p>
         )}

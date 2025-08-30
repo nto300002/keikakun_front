@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { authApi, tokenUtils } from '@/lib/auth';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'; // アイコンをインポート
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -27,28 +29,22 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: new URLSearchParams({
-          username: formData.email,
-          password: formData.password,
-        }),
+      const data = await authApi.login({ 
+        username: formData.email, 
+        password: formData.password 
       });
+      
+      tokenUtils.setToken(data.access_token);
+      
+      const params = new URLSearchParams({
+        hotbar_message: 'ログインに成功しました',
+        hotbar_type: 'success'
+      });
+      router.push(`/dashboard?${params.toString()}`);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // ログイン成功 - トークンを保存
-        localStorage.setItem('access_token', data.access_token);
-        router.push('/dashboard');
-      } else {
-        setError(data.detail || 'ログインに失敗しました');
-      }
-    } catch (error) {
-      setError('サーバーに接続できませんでした');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'ログインに失敗しました';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -57,17 +53,16 @@ export default function LoginForm() {
   return (
     <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* ヘッダー */}
+        {/* ... header ... */}
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white mb-2">
-            スタッフログイン
+            ログイン
           </h2>
           <p className="text-gray-400">
             ケイカくんにログインして、個別支援計画を管理しましょう
           </p>
         </div>
 
-        {/* フォーム */}
         <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
@@ -76,7 +71,7 @@ export default function LoginForm() {
               </div>
             )}
 
-            {/* メールアドレス */}
+            {/* ... email input ... */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                 メールアドレス <span className="text-red-400">*</span>
@@ -93,7 +88,6 @@ export default function LoginForm() {
               />
             </div>
 
-            {/* パスワード */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
                 パスワード <span className="text-red-400">*</span>
@@ -114,12 +108,12 @@ export default function LoginForm() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  {showPassword ? <AiOutlineEyeInvisible className="h-5 w-5" /> : <AiOutlineEye className="h-5 w-5" />}
                 </button>
               </div>
             </div>
 
-            {/* ログイン状態を保持 */}
+            {/* ... remember me and forgot password ... */}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
@@ -137,7 +131,6 @@ export default function LoginForm() {
               </a>
             </div>
 
-            {/* ログインボタン */}
             <button
               type="submit"
               disabled={isLoading}
@@ -147,7 +140,6 @@ export default function LoginForm() {
             </button>
           </form>
 
-          {/* サインアップリンク */}
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
               まだアカウントをお持ちでない方は
@@ -157,8 +149,6 @@ export default function LoginForm() {
             </p>
           </div>
         </div>
-
-
       </div>
     </div>
   );

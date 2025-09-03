@@ -1,6 +1,14 @@
 'use client';
 
-export default function SignupSuccess() {
+import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+
+function SignupSuccessContent() {
+  const searchParams = useSearchParams();
+  const role = searchParams.get('role');
+
+  const loginUrl = role === 'owner' ? '/auth/admin/login' : '/auth/login';
+
   return (
     <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-lg w-full text-center">
@@ -15,7 +23,7 @@ export default function SignupSuccess() {
         </h1>
         
         <p className="text-lg text-gray-300 mb-8">
-          管理者アカウントの作成が完了しました。
+          アカウントの作成が完了しました。
           <br />
           メール認証を行ってログインしてください。
         </p>
@@ -59,7 +67,7 @@ export default function SignupSuccess() {
         {/* アクションボタン */}
         <div className="space-y-4">
           <a
-            href="/auth/admin/login"
+            href={loginUrl}
             className="block w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
             ログインページへ
@@ -91,3 +99,11 @@ export default function SignupSuccess() {
     </div>
   );
 }
+
+export default function SignupSuccess() {
+    return (
+      <Suspense fallback={<div>Loading...</div>}>
+        <SignupSuccessContent />
+      </Suspense>
+    );
+  }

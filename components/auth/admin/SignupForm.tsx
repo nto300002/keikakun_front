@@ -2,124 +2,108 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import StepWizard from '@/components/ui/StepWizard';
+import { authApi } from '@/lib/auth';
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+
+const signupSchema = z.object({
+  name: z.string().min(1, '名前を入力してください'),
+  email: z.string().email('有効なメールアドレスを入力してください'),
+  password: z.string()
+    .min(8, 'パスワードは8文字以上で入力してください')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
+      '英字大小文字・数字・記号を組み合わせてください'),
+  confirmPassword: z.string(),
+}).refine(data => data.password === data.confirmPassword, {
+  message: 'パスワードが一致しません',
+  path: ['confirmPassword']
+});
+
+type SignupFormData = z.infer<typeof signupSchema>;
 
 export default function AdminSignupForm() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setError: setFormError
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema)
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  const steps = [
+    { id: 'signup', title: 'サインアップ', status: 'current' as const },
+    { id: 'verify', title: 'メール認証', status: 'pending' as const },
+    { id: 'login', title: 'ログイン', status: 'pending' as const },
+    { id: 'office', title: '事務所登録', status: 'pending' as const }
+  ];
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
+  const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
 
-    // パスワード確認チェック
-    if (formData.password !== formData.confirmPassword) {
-      setError('パスワードが一致しません');
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/register-admin', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-        }),
+      await authApi.registerAdmin({
+        name: data.name,
+        email: data.email,
+        password: data.password,
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // サインアップ成功
-        router.push('/auth/signup-success');
-      } else {
-        setError(data.detail || 'サインアップに失敗しました');
-      }
+      router.push('/auth/signup-success');
     } catch (error) {
-      setError('サーバーに接続できませんでした');
+      setFormError('root', { 
+        message: error instanceof Error ? error.message : 'サインアップに失敗しました' 
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        {/* ヘッダー */}
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-white mb-2">
+    <div className="min-h-screen bg-[#0C1421] py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto">
+        {/* ... header ... */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold text-white mb-2">
             管理者アカウント作成
-          </h2>
+          </h1>
           <p className="text-gray-400">
             ケイカくんへようこそ。まずは管理者アカウントを作成してください。
           </p>
         </div>
 
-        {/* フォーム */}
+        <StepWizard steps={steps} />
+
         <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {error && (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {errors.root && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm">
-                {error}
+                {errors.root.message}
               </div>
             )}
 
-            {/* 名前 */}
+            {/* ... name and email inputs ... */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
                 お名前 <span className="text-red-400">*</span>
               </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
-                placeholder="山田 太郎"
-              />
+              <input id="name" type="text" {...register('name')} className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="山田 太郎" />
+              {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>}
             </div>
-
-            {/* メールアドレス */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                 メールアドレス <span className="text-red-400">*</span>
               </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
-                placeholder="admin@example.com"
-              />
+              <input id="email" type="email" {...register('email')} className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="admin@example.com" />
+              {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>}
             </div>
 
-            {/* パスワード */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
                 パスワード <span className="text-red-400">*</span>
@@ -127,11 +111,8 @@ export default function AdminSignupForm() {
               <div className="relative">
                 <input
                   id="password"
-                  name="password"
                   type={showPassword ? "text" : "password"}
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
+                  {...register('password')}
                   className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent pr-10"
                   placeholder="パスワードを入力してください"
                 />
@@ -140,49 +121,24 @@ export default function AdminSignupForm() {
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? '🙈' : '👁️'}
+                  {showPassword ? <AiOutlineEyeInvisible className="h-5 w-5" /> : <AiOutlineEye className="h-5 w-5" />}
                 </button>
               </div>
+              {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>}
               <p className="text-xs text-gray-500 mt-1">
                 8文字以上で、英字大小文字・数字・記号を組み合わせてください
               </p>
             </div>
 
-            {/* パスワード確認 */}
+            {/* ... confirm password ... */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
                 パスワード（確認） <span className="text-red-400">*</span>
               </label>
-              <input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                required
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
-                placeholder="パスワードを再入力してください"
-              />
+              <input id="confirmPassword" type="password" {...register('confirmPassword')} className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="パスワードを再入力してください" />
+              {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword.message}</p>}
             </div>
 
-            {/* 利用規約同意 */}
-            <div className="flex items-start">
-              <input
-                id="agree"
-                type="checkbox"
-                required
-                className="mt-1 mr-2 text-[#10B981] bg-[#1A1A1A] border-gray-600 rounded focus:ring-[#10B981]"
-              />
-              <label htmlFor="agree" className="text-sm text-gray-300">
-                <span className="text-red-400">* </span>
-                <a href="#" className="text-[#10B981] hover:text-[#0F9F6E] underline">利用規約</a>
-                および
-                <a href="#" className="text-[#10B981] hover:text-[#0F9F6E] underline">プライバシーポリシー</a>
-                に同意します
-              </label>
-            </div>
-
-            {/* サブミットボタン */}
             <button
               type="submit"
               disabled={isLoading}
@@ -192,7 +148,6 @@ export default function AdminSignupForm() {
             </button>
           </form>
 
-          {/* ログインリンク */}
           <div className="mt-6 text-center">
             <p className="text-gray-400 text-sm">
               すでにアカウントをお持ちの方は

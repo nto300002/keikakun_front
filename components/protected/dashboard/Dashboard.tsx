@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { authApi } from '@/lib/auth';
+import { StaffResponse } from '@/types/staff';
 
 interface ServiceRecipient {
   id: string;
@@ -12,6 +14,7 @@ interface ServiceRecipient {
 }
 
 export default function Dashboard() {
+  const [staff, setStaff] = useState<StaffResponse | null>(null);
   const [serviceRecipients] = useState<ServiceRecipient[]>([
     {
       id: '1',
@@ -55,6 +58,19 @@ export default function Dashboard() {
     }
   ]);
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const userData = await authApi.getCurrentUser();
+        setStaff(userData);
+      } catch (error) {
+        console.error('Failed to fetch user:', error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'safe': return 'text-green-400 bg-green-400/20';
@@ -87,11 +103,11 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm text-gray-400">ようこそ</p>
-              <p className="font-semibold">管理者 様</p>
+              <p className="font-semibold">{staff ? `${staff.name} 様` : '読み込み中...'}</p>
+              <p className="text-xs text-gray-500">{staff ? staff.email : ''}</p>
             </div>
             <div className="w-10 h-10 bg-[#10B981] rounded-full flex items-center justify-center">
-              <span className="text-white font-semibold">管</span>
+              <span className="text-white font-semibold">{staff ? staff.name.charAt(0) : ''}</span>
             </div>
           </div>
         </div>

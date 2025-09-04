@@ -2,22 +2,24 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'; // アイコンをインポート
+import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { authApi } from '@/lib/auth';
+import { StaffCreateData } from '@/types/staff';
 
 export default function SignupForm() {
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<StaffCreateData & { confirmPassword: string }> ({
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    role: 'employee', // デフォルト値を 'employee' に設定
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -37,15 +39,22 @@ export default function SignupForm() {
     }
 
     try {
-      const data = await authApi.registerAdmin({
+      // registerAdmin を registerStaff に変更
+      const data = await authApi.registerStaff({
         name: formData.name,
         email: formData.email,
         password: formData.password,
+        role: formData.role,
       });
       router.push(`/auth/signup-success?role=${data.role}`);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message || 'サインアップに失敗しました');
+        const errorDetails = (err as any).response?.data?.detail;
+        if (typeof errorDetails === 'string' && errorDetails.includes("already exists")) {
+          setError("このメールアドレスは既に使用されています。");
+        } else {
+          setError(err.message || 'サインアップに失敗しました');
+        }
       } else {
         setError('予期せぬエラーが発生しました。');
       }
@@ -57,7 +66,6 @@ export default function SignupForm() {
   return (
     <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* ... header ... */}
         <div className="text-center">
           <h2 className="text-3xl font-bold text-white mb-2">
             スタッフアカウント作成
@@ -75,7 +83,6 @@ export default function SignupForm() {
               </div>
             )}
 
-            {/* ... name and email inputs ... */}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
                 お名前 <span className="text-red-400">*</span>
@@ -86,7 +93,28 @@ export default function SignupForm() {
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                 メールアドレス <span className="text-red-400">*</span>
               </label>
-              <input id="email" name="email" type="email" required value={formData.email} onChange={handleChange} className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="admin@example.com" />
+              <input id="email" name="email" type="email" required value={formData.email} onChange={handleChange} className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="staff@example.com" />
+            </div>
+
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-300 mb-2">
+                役割 <span className="text-red-400">*</span>
+              </label>
+              <select
+                id="role"
+                name="role"
+                required
+                value={formData.role}
+                onChange={handleChange}
+                className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+              >
+                <option value="employee">従業員</option>
+                <option value="manager">マネージャー</option>
+              </select>
+              <p className="text-xs text-gray-400 mt-2">
+                <strong>従業員:</strong> 閲覧以外の操作には管理者の承認が必要です。<br />
+                <strong>マネージャー:</strong> 利用者の登録や個別支援計画の作成が可能です。
+              </p>
             </div>
 
             <div>
@@ -117,7 +145,6 @@ export default function SignupForm() {
               </p>
             </div>
 
-            {/* ... confirm password and terms ... */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
                 パスワード（確認） <span className="text-red-400">*</span>

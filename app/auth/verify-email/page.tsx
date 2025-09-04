@@ -10,6 +10,7 @@ function VerifyEmailContent() {
   const token = searchParams.get('token');
   const [status, setStatus] = useState('verifying'); // verifying, success, error
   const [error, setError] = useState('');
+  const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
     if (!token) {
@@ -20,7 +21,8 @@ function VerifyEmailContent() {
 
     const verify = async () => {
       try {
-        await authApi.verifyEmail(token);
+        const response = await authApi.verifyEmail(token);
+        setUserRole(response.role);
         setStatus('success');
       } catch (err: unknown) {
         setStatus('error');
@@ -45,9 +47,15 @@ function VerifyEmailContent() {
         {status === 'success' && (
           <div>
             <p className="text-green-600 mb-4">Eメールの確認が完了しました。</p>
-            <Link href="/auth/admin/login" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-              事務所登録
-            </Link>
+            {userRole === 'owner' ? (
+              <Link href="/auth/admin/login" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                事務所登録
+              </Link>
+            ) : (
+              <Link href="/auth/login" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                ログイン
+              </Link>
+            )}
           </div>
         )}
         {status === 'error' && (

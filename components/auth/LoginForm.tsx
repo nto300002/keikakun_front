@@ -36,11 +36,21 @@ export default function LoginForm() {
       
       tokenUtils.setToken(data.access_token);
       
-      const params = new URLSearchParams({
-        hotbar_message: 'ログインに成功しました',
-        hotbar_type: 'success'
-      });
-      router.push(`/dashboard?${params.toString()}`);
+      // ログインユーザーの情報を取得
+      const currentUser = await authApi.getCurrentUser();
+
+      // 条件分岐
+      if (currentUser.role !== 'owner' && !currentUser.office) {
+        // ownerではなく、事業所にも所属していない場合
+        router.push('/auth/select-office');
+      } else {
+        // それ以外はダッシュボードへ
+        const params = new URLSearchParams({
+          hotbar_message: 'ログインに成功しました',
+          hotbar_type: 'success'
+        });
+        router.push(`/dashboard?${params.toString()}`);
+      }
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'ログインに失敗しました';

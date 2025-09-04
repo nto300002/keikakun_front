@@ -101,10 +101,11 @@ export default function Dashboard() {
             <h1 className="text-2xl font-bold">ケイカくん ダッシュボード</h1>
             <p className="text-gray-400 text-sm">個別支援計画管理システム</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
+          <div className="flex items-center gap-4 transition-colors bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 hover:bg-gray-800">
+            <div className="text-right group rounded-md p-2">
+              <p className="text-xs text-gray-400 invisible opacity-0 transition-opacity duration-300 delay-150 group-hover:visible group-hover:opacity-100">role: {staff ? staff.role : ''}</p>
               <p className="font-semibold">{staff ? `${staff.name} 様` : '読み込み中...'}</p>
-              <p className="text-xs text-gray-500">{staff ? staff.email : ''}</p>
+              <p className="text-xs text-gray-500 invisible opacity-0 transition-opacity duration-300 delay-200 group-hover:visible group-hover:opacity-100">{staff ? staff.email : ''}</p>
             </div>
             <div className="w-10 h-10 bg-[#10B981] rounded-full flex items-center justify-center">
               <span className="text-white font-semibold">{staff ? staff.name.charAt(0) : ''}</span>

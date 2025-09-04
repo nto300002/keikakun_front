@@ -49,8 +49,7 @@ export default function SignupForm() {
       router.push(`/auth/signup-success?role=${data.role}`);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        const errorDetails = (err as any).response?.data?.detail;
-        if (typeof errorDetails === 'string' && errorDetails.includes("already exists")) {
+        if (err.message.includes("already exists")) {
           setError("このメールアドレスは既に使用されています。");
         } else {
           setError(err.message || 'サインアップに失敗しました');

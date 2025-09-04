@@ -66,7 +66,7 @@ export default function SelectOffice() {
         hotbar_message: '事業所が設定されました',
         hotbar_type: 'success'
       });
-      router.push(`/dashboard?${params.toString()}`);
+      router.push(`/auth/setup-success?${params.toString()}`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : '事業所の設定に失敗しました';
       setError(errorMessage);

@@ -38,12 +38,15 @@ export default function AdminLoginForm() {
         password: data.password,
       });
 
+      if (!response || !response.access_token) {
+        // 明示的に失敗扱いにする
+        throw new Error('認証トークンが返却されませんでした。')
+      }
       tokenUtils.setToken(response.access_token);
       router.push('/auth/admin/office_setup');
-    } catch (error) {
-      setFormError('root', { 
-        message: error instanceof Error ? error.message : 'ログインに失敗しました' 
-      });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error)
+      setFormError('root', { message: msg });
     } finally {
       setIsLoading(false);
     }

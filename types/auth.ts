@@ -5,6 +5,7 @@ export interface AuthResponse {
   requires_mfa_setup?: boolean;
   requires_mfa_verification?: boolean;
   temporary_token?: string;
+  expires_in?: number
 }
 
 export interface LoginData {

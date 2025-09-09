@@ -44,6 +44,14 @@ export const authApi = {
   verifyEmail: (token: string): Promise<{ message: string; role: string }> => {
     return http.get(`${API_V1_PREFIX}/auth/verify-email?token=${token}`);
   },
+
+  logout: (): Promise<{ message: string }> => {
+    return http.post(`${API_V1_PREFIX}/auth/logout`, {});
+  },
+
+  verifyMfa: (data: { temporary_token: string; totp_code: string }): Promise<AuthResponse> => {
+    return http.post(`${API_V1_PREFIX}/auth/token/verify-mfa`, data);
+  },
 };
 
 // Office API calls

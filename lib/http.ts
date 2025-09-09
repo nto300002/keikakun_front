@@ -2,6 +2,29 @@ import { tokenUtils } from './token';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+// ログアウト処理をまとめる
+const handleLogout = async () => {
+  try {
+    const token = tokenUtils.getToken();
+    if (token) {
+      await fetch(`${API_BASE_URL}/api/v1/auth/mfa/disable-on-logout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+    }
+  } catch (error) {
+    console.error('Failed to disable MFA on logout:', error);
+  } finally {
+    tokenUtils.removeToken();
+    // ログインページ以外にいる場合のみリダイレクト
+    if (window.location.pathname !== '/auth/login') {
+      window.location.href = '/auth/login';
+    }
+  }
+};
+
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   const token = tokenUtils.getToken();
@@ -25,6 +48,12 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   const response = await fetch(url, config);
 
   if (!response.ok) {
+    if (response.status === 401) {
+      // 認証エラーの場合はログアウト処理
+      await handleLogout();
+      // エラーを投げて処理を中断
+      throw new Error('Not authenticated');
+    }
     const errorData = await response.json().catch(() => ({ detail: `Request failed with status ${response.status}` }));
     throw new Error(errorData.detail);
   }

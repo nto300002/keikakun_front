@@ -47,13 +47,19 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
     fetchData();
   }, [router]);
 
-  const handleLogout = () => {
-    tokenUtils.removeToken();
-    const params = new URLSearchParams({
-        hotbar_message: 'ログアウトしました',
-        hotbar_type: 'success'
-    });
-    router.push(`/auth/login?${params.toString()}`);
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      tokenUtils.removeToken();
+      const params = new URLSearchParams({
+          hotbar_message: 'ログアウトしました',
+          hotbar_type: 'success'
+      });
+      router.push(`/auth/login?${params.toString()}`);
+    }
   };
 
   if (isLoading) {

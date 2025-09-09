@@ -33,23 +33,32 @@ export default function LoginForm() {
         username: formData.email, 
         password: formData.password 
       });
-      
-      tokenUtils.setToken(data.access_token);
-      
-      // ログインユーザーの情報を取得
-      const currentUser = await authApi.getCurrentUser();
 
-      // 条件分岐
-      if (currentUser.role !== 'owner' && !currentUser.office) {
-        // ownerではなく、事業所にも所属していない場合
-        router.push('/auth/select-office');
+      if (data.access_token) {
+        tokenUtils.setToken(data.access_token);
+        
+        // ログインユーザーの情報を取得
+        const currentUser = await authApi.getCurrentUser();
+
+        // 条件分岐
+        if (currentUser.role !== 'owner' && !currentUser.office) {
+          // ownerではなく、事業所にも所属していない場合
+          router.push('/auth/select-office');
+        } else {
+          // それ以外はダッシュボードへ
+          const params = new URLSearchParams({
+            hotbar_message: 'ログインに成功しました',
+            hotbar_type: 'success'
+          });
+          router.push(`/dashboard?${params.toString()}`);
+        }
+      } else if (data.requires_mfa_verification && data.temporary_token) {
+        // MFA認証が必要な場合
+        tokenUtils.setTemporaryToken(data.temporary_token);
+        router.push('/auth/mfa-verify');
       } else {
-        // それ以外はダッシュボードへ
-        const params = new URLSearchParams({
-          hotbar_message: 'ログインに成功しました',
-          hotbar_type: 'success'
-        });
-        router.push(`/dashboard?${params.toString()}`);
+        // 予期せぬレスポンス
+        setError('ログインプロセスを完了できませんでした。予期せぬエラーが発生しました。');
       }
 
     } catch (err) {

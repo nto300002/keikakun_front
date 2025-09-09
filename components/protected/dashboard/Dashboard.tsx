@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { authApi } from '@/lib/auth';
 import { StaffResponse } from '@/types/staff';
+import MfaPrompt from '@/components/auth/MfaPrompt';
 
 interface ServiceRecipient {
   id: string;
@@ -69,6 +70,7 @@ export default function Dashboard() {
     };
 
     fetchUser();
+    
   }, []);
 
   const getStatusColor = (status: string) => {
@@ -91,6 +93,15 @@ export default function Dashboard() {
 
   const urgentCount = serviceRecipients.filter(sr => sr.status === 'urgent').length;
   const warningCount = serviceRecipients.filter(sr => sr.status === 'warning').length;
+
+  // ローディング状態の追加
+  if (!staff) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gray-900">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-400"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0C1421] text-white">
@@ -116,151 +127,158 @@ export default function Dashboard() {
 
       {/* メインコンテンツ */}
       <main className="px-4 sm:px-6 lg:px-8 py-8">
-        {/* サマリーカード */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-[#2A2A2A] rounded-lg p-6 border border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">緊急対応</p>
-                <p className="text-2xl font-bold text-red-400">{urgentCount}件</p>
+        {/* MFAが有効でない場合にプロンプトを表示 */}
+        {!staff.is_mfa_enabled ? (
+          <MfaPrompt />
+        ) : (
+          <>
+            {/* サマリーカード */}
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              <div className="bg-[#2A2A2A] rounded-lg p-6 border border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">緊急対応</p>
+                    <p className="text-2xl font-bold text-red-400">{urgentCount}件</p>
+                  </div>
+                  <div className="w-12 h-12 bg-red-400/20 rounded-lg flex items-center justify-center">
+                    <span className="text-red-400 text-xl">⚠️</span>
+                  </div>
+                </div>
               </div>
-              <div className="w-12 h-12 bg-red-400/20 rounded-lg flex items-center justify-center">
-                <span className="text-red-400 text-xl">⚠️</span>
+
+              <div className="bg-[#2A2A2A] rounded-lg p-6 border border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">要注意</p>
+                    <p className="text-2xl font-bold text-yellow-400">{warningCount}件</p>
+                  </div>
+                  <div className="w-12 h-12 bg-yellow-400/20 rounded-lg flex items-center justify-center">
+                    <span className="text-yellow-400 text-xl">📋</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-[#2A2A2A] rounded-lg p-6 border border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-gray-400 text-sm">利用者総数</p>
+                    <p className="text-2xl font-bold text-[#10B981]">{serviceRecipients.length}名</p>
+                  </div>
+                  <div className="w-12 h-12 bg-[#10B981]/20 rounded-lg flex items-center justify-center">
+                    <span className="text-[#10B981] text-xl">👥</span>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-[#2A2A2A] rounded-lg p-6 border border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">要注意</p>
-                <p className="text-2xl font-bold text-yellow-400">{warningCount}件</p>
+            {/* 利用者一覧 */}
+            <div className="bg-[#2A2A2A] rounded-lg border border-gray-700">
+              <div className="px-6 py-4 border-b border-gray-700">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold">利用者一覧</h2>
+                  <button className="bg-[#10B981] hover:bg-[#0F9F6E] text-white px-4 py-2 rounded-lg transition-colors">
+                    新規登録
+                  </button>
+                </div>
               </div>
-              <div className="w-12 h-12 bg-yellow-400/20 rounded-lg flex items-center justify-center">
-                <span className="text-yellow-400 text-xl">📋</span>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-[#1A1A1A]">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        利用者名
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        計画種別
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        残り日数
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        ステータス
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        次回期限
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                        アクション
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-700">
+                    {serviceRecipients.map((recipient) => (
+                      <tr key={recipient.id} className="hover:bg-[#1A1A1A] transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-white font-medium">{recipient.name}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-300">
+                          {recipient.planType}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`${recipient.daysRemaining <= 7 ? 'text-red-400' : recipient.daysRemaining <= 14 ? 'text-yellow-400' : 'text-green-400'} font-medium`}>
+                            {recipient.daysRemaining}日
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(recipient.status)}`}>
+                            {getStatusText(recipient.status)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-300">
+                          {new Date(recipient.nextDeadline).toLocaleDateString('ja-JP')}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button className="text-[#10B981] hover:text-[#0F9F6E] mr-4 transition-colors">
+                            詳細
+                          </button>
+                          <button className="text-blue-400 hover:text-blue-300 transition-colors">
+                            編集
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
-          </div>
 
-          <div className="bg-[#2A2A2A] rounded-lg p-6 border border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-400 text-sm">利用者総数</p>
-                <p className="text-2xl font-bold text-[#10B981]">{serviceRecipients.length}名</p>
-              </div>
-              <div className="w-12 h-12 bg-[#10B981]/20 rounded-lg flex items-center justify-center">
-                <span className="text-[#10B981] text-xl">👥</span>
-              </div>
-            </div>
-          </div>
-        </div>
+            {/* クイックアクション */}
+            <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <button className="bg-[#2A2A2A] hover:bg-[#353535] border border-gray-700 rounded-lg p-6 text-center transition-colors">
+                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <span className="text-blue-400 text-xl">📄</span>
+                </div>
+                <p className="font-medium text-white">新規計画作成</p>
+                <p className="text-gray-400 text-sm mt-1">個別支援計画を新規作成</p>
+              </button>
 
-        {/* 利用者一覧 */}
-        <div className="bg-[#2A2A2A] rounded-lg border border-gray-700">
-          <div className="px-6 py-4 border-b border-gray-700">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">利用者一覧</h2>
-              <button className="bg-[#10B981] hover:bg-[#0F9F6E] text-white px-4 py-2 rounded-lg transition-colors">
-                新規登録
+              <button className="bg-[#2A2A2A] hover:bg-[#353535] border border-gray-700 rounded-lg p-6 text-center transition-colors">
+                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <span className="text-purple-400 text-xl">📊</span>
+                </div>
+                <p className="font-medium text-white">レポート作成</p>
+                <p className="text-gray-400 text-sm mt-1">月次・年次レポート</p>
+              </button>
+
+              <button className="bg-[#2A2A2A] hover:bg-[#353535] border border-gray-700 rounded-lg p-6 text-center transition-colors">
+                <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <span className="text-green-400 text-xl">⚙️</span>
+                </div>
+                <p className="font-medium text-white">設定</p>
+                <p className="text-gray-400 text-sm mt-1">システム設定・権限管理</p>
+              </button>
+
+              <button className="bg-[#2A2A2A] hover:bg-[#353535] border border-gray-700 rounded-lg p-6 text-center transition-colors">
+                <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                  <span className="text-yellow-400 text-xl">❓</span>
+                </div>
+                <p className="font-medium text-white">ヘルプ</p>
+                <p className="text-gray-400 text-sm mt-1">使い方・よくある質問</p>
               </button>
             </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-[#1A1A1A]">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    利用者名
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    計画種別
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    残り日数
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    ステータス
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    次回期限
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    アクション
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700">
-                {serviceRecipients.map((recipient) => (
-                  <tr key={recipient.id} className="hover:bg-[#1A1A1A] transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-white font-medium">{recipient.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-300">
-                      {recipient.planType}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`${recipient.daysRemaining <= 7 ? 'text-red-400' : recipient.daysRemaining <= 14 ? 'text-yellow-400' : 'text-green-400'} font-medium`}>
-                        {recipient.daysRemaining}日
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(recipient.status)}`}>
-                        {getStatusText(recipient.status)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-300">
-                      {new Date(recipient.nextDeadline).toLocaleDateString('ja-JP')}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-[#10B981] hover:text-[#0F9F6E] mr-4 transition-colors">
-                        詳細
-                      </button>
-                      <button className="text-blue-400 hover:text-blue-300 transition-colors">
-                        編集
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* クイックアクション */}
-        <div className="mt-8 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button className="bg-[#2A2A2A] hover:bg-[#353535] border border-gray-700 rounded-lg p-6 text-center transition-colors">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <span className="text-blue-400 text-xl">📄</span>
-            </div>
-            <p className="font-medium text-white">新規計画作成</p>
-            <p className="text-gray-400 text-sm mt-1">個別支援計画を新規作成</p>
-          </button>
-
-          <button className="bg-[#2A2A2A] hover:bg-[#353535] border border-gray-700 rounded-lg p-6 text-center transition-colors">
-            <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <span className="text-purple-400 text-xl">📊</span>
-            </div>
-            <p className="font-medium text-white">レポート作成</p>
-            <p className="text-gray-400 text-sm mt-1">月次・年次レポート</p>
-          </button>
-
-          <button className="bg-[#2A2A2A] hover:bg-[#353535] border border-gray-700 rounded-lg p-6 text-center transition-colors">
-            <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <span className="text-green-400 text-xl">⚙️</span>
-            </div>
-            <p className="font-medium text-white">設定</p>
-            <p className="text-gray-400 text-sm mt-1">システム設定・権限管理</p>
-          </button>
-
-          <button className="bg-[#2A2A2A] hover:bg-[#353535] border border-gray-700 rounded-lg p-6 text-center transition-colors">
-            <div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-              <span className="text-yellow-400 text-xl">❓</span>
-            </div>
-            <p className="font-medium text-white">ヘルプ</p>
-            <p className="text-gray-400 text-sm mt-1">使い方・よくある質問</p>
-          </button>
-        </div>
+          </>
+        )}
       </main>
     </div>
   );

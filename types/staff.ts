@@ -13,5 +13,6 @@ export interface StaffResponse {
   name: string;
   email: string;
   role: 'owner' | 'manager' | 'employee';
+  is_mfa_enabled: boolean;
   office?: { id: string; name: string; } | null;
 }

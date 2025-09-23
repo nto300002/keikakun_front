@@ -8,7 +8,8 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'; // アイ�
 export default function LoginForm() {
   const [formData, setFormData] = useState({
     email: '',
-    password: ''
+    password: '',
+    rememberMe: false
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -16,10 +17,10 @@ export default function LoginForm() {
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -29,13 +30,21 @@ export default function LoginForm() {
     setIsLoading(true);
 
     try {
-      const data = await authApi.login({ 
-        username: formData.email, 
-        password: formData.password 
+      const data = await authApi.login({
+        username: formData.email,
+        password: formData.password,
+        rememberMe: formData.rememberMe
       });
 
       if (data.access_token) {
         tokenUtils.setToken(data.access_token);
+
+        // セッション期間と期限をlocalStorageに保存
+        if (data.session_duration) {
+          const expiresAt = new Date(Date.now() + data.session_duration * 1000);
+          localStorage.setItem('session_duration', data.session_duration.toString());
+          localStorage.setItem('session_expires_at', expiresAt.toISOString());
+        }
         
         // ログインユーザーの情報を取得
         const currentUser = await authApi.getCurrentUser();
@@ -136,12 +145,15 @@ export default function LoginForm() {
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
-                  id="remember"
+                  id="rememberMe"
+                  name="rememberMe"
                   type="checkbox"
+                  checked={formData.rememberMe}
+                  onChange={handleChange}
                   className="text-[#10B981] bg-[#1A1A1A] border-gray-600 rounded focus:ring-[#10B981]"
                 />
-                <label htmlFor="remember" className="ml-2 text-sm text-gray-300">
-                  ログイン状態を保持する
+                <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-300">
+                  ログイン状態を保持(8時間)
                 </label>
               </div>
               

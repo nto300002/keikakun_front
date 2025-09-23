@@ -26,6 +26,7 @@ export const authApi = {
       body: new URLSearchParams({
         username: data.username,
         password: data.password,
+        rememberMe: data.rememberMe ? 'true' : 'false',
       }),
     });
 

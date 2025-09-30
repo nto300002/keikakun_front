@@ -1,8 +1,12 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { BiSort, BiFilterAlt } from 'react-icons/bi';
+import { useRouter } from 'next/navigation';
+import { BiSort, BiFilterAlt, BiUserPlus } from 'react-icons/bi';
+import { DocumentTextIcon } from '@heroicons/react/24/outline';
 import { dashboardApi, DashboardParams } from '@/lib/dashboard';
+import { welfareRecipientsApi } from '@/lib/welfare-recipients';
 import { DashboardData } from '@/types/dashboard';
 import { authApi } from '@/lib/auth';
 import { StaffResponse } from '@/types/staff';
@@ -10,11 +14,13 @@ import MfaPrompt from '@/components/auth/MfaPrompt';
 import { SmartDropdown } from '@/components/ui/smart-dropdown';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { TableLoadingOverlay } from '@/components/ui/table-loading-overlay';
+import Alert from '@/components/ui/Alert';
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [staff, setStaff] = useState<StaffResponse | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
   const [monitoringDays, setMonitoringDays] = useState(7);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [sortBy, setSortBy] = useState('name_phonetic');
@@ -31,6 +37,7 @@ export default function Dashboard() {
     isUpcoming: false,
     status: null,
   });
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     isLoadingRef.current = isLoading;
@@ -155,6 +162,40 @@ export default function Dashboard() {
     }
   }, []);
 
+  const handleDelete = useCallback(async (recipientId: string, recipientName: string) => {
+    if (isLoadingRef.current) return;
+
+    if (window.confirm(`本当に「${recipientName}」さんを削除しますか？\nこの操作は元に戻せません。`)) {
+      try {
+        setIsLoading(true);
+        await welfareRecipientsApi.delete(recipientId);
+        
+        setDashboardData(prevData => {
+          if (!prevData) return null;
+          return {
+            ...prevData,
+            recipients: prevData.recipients.filter(r => r.id !== recipientId)
+          };
+        });
+
+      } catch (error: unknown) {
+        console.error('Failed to delete recipient:', error);
+        if (error && typeof error === 'object' && 'response' in error) {
+          const axiosError = error as { response?: { data?: { detail?: string } } };
+          if (axiosError.response?.data?.detail) {
+            setError(axiosError.response.data.detail);
+          } else {
+            setError('利用者の削除に失敗しました。');
+          }
+        } else {
+          setError('利用者の削除に失敗しました。');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }, []);
+
   const getStepBadgeStyle = (step: string | null) => {
     switch (step) {
       case 'assessment': return 'bg-purple-600 text-white';
@@ -196,6 +237,14 @@ export default function Dashboard() {
   const getCurrentDate = () => {
     const today = new Date();
     return `${today.getMonth() + 1}/${today.getDate()}`;
+  };
+
+  const canEditOrDelete = () => {
+    return staff && ['manager', 'owner'].includes(staff.role);
+  };
+
+  const isEmployee = () => {
+    return staff && staff.role === 'employee';
   };
 
   // recipients をメモ化して毎レンダーで参照が変わらないようにする
@@ -270,6 +319,7 @@ export default function Dashboard() {
           <MfaPrompt />
         ) : (
           <>
+            {error && <Alert message={error} type="error" onClose={() => setError(null)} />}
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
               <div className="flex items-center gap-4">
                 <h1 className="text-2xl font-bold text-white">ダッシュボード</h1>
@@ -341,10 +391,38 @@ export default function Dashboard() {
               <div className="bg-gradient-to-br from-[#1f2f3d] to-[#15202a] rounded-lg p-6 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-white text-sm font-medium">利用者総数</p>
+                    <p className="text-white text-sm font-medium">利用者数</p>
                     <p className="text-2xl font-bold text-white mt-2">{serviceRecipients.length}名</p>
                   </div>
                   <div className="flex items-center gap-3">
+                    {canEditOrDelete() ? (
+                      <button
+                        type="button"
+                        data-testid="add-recipient-stats-button"
+                        aria-label="新規利用者を追加"
+                        onClick={() => router.push('/recipients/new')}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            router.push('/recipients/new');
+                          }
+                        }}
+                        className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-200 hidden md:flex items-center gap-1"
+                      >
+                        <BiUserPlus className="h-4 w-4" />
+                        <span className="lg:hidden">追加</span>
+                      </button>
+                    ) : isEmployee() ? (
+                      <button
+                        type="button"
+                        data-testid="add-recipient-stats-button-employee"
+                        aria-label="新規利用者追加申請"
+                        className="bg-[#2a3441]/50 text-gray-400 px-3 py-1 rounded-lg text-xs font-medium cursor-default hidden md:flex items-center gap-1"
+                        disabled
+                      >
+                        <DocumentTextIcon className="h-4 w-4" />
+                        <span className="lg:hidden">申請</span>
+                      </button>
+                    ) : null}
                     <div className="relative">
                       <input
                         type="text"
@@ -357,6 +435,36 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
+                <div className="md:hidden mt-4">
+                  {canEditOrDelete() ? (
+                    <button
+                      type="button"
+                      data-testid="add-recipient-stats-button-mobile"
+                      aria-label="新規利用者を追加"
+                      onClick={() => router.push('/recipients/new')}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          router.push('/recipients/new');
+                        }
+                      }}
+                      className="bg-[#10b981] hover:bg-[#0f9f6e] font-bold text-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full flex items-center justify-center gap-2"
+                    >
+                      <BiUserPlus className="h-4 w-4" />
+                      <span>利用者追加</span>
+                    </button>
+                  ) : isEmployee() ? (
+                    <button
+                      type="button"
+                      data-testid="add-recipient-stats-button-mobile-employee"
+                      aria-label="新規利用者追加申請"
+                      className="bg-[#2a3441]/50 text-gray-400 px-4 py-2 rounded-lg text-sm font-medium cursor-default w-full flex items-center justify-center gap-2"
+                      disabled
+                    >
+                      <DocumentTextIcon className="h-4 w-4" />
+                      <span>利用者追加申請</span>
+                    </button>
+                  ) : null}
+                </div>
               </div>
 
             </div>
@@ -366,13 +474,40 @@ export default function Dashboard() {
                 <div className="px-6 py-4 border-b border-[#2a3441]">
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-white">利用者一覧</h2>
-                                                  <button
-                    onClick={handleResetDisplay}
-                    className="bg-[#6b7280] hover:bg-[#4b5563] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full md:w-auto flex items-center gap-2"
-                  >
-                    <span>🔄</span>
-                    <span>表示リセット</span>
-                  </button> 
+                    <div className="flex items-center gap-3">
+                      {canEditOrDelete() ? (
+                        <button
+                          type="button"
+                          data-testid="add-recipient-table-button"
+                          aria-label="新規利用者を追加"
+                          onClick={() => router.push('/recipients/new')}
+                          className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+                        >
+                          <BiUserPlus className="h-4 w-4" />
+                          <span className="hidden sm:inline">利用者追加</span>
+                          <span className="sm:hidden">追加</span>
+                        </button>
+                      ) : isEmployee() ? (
+                        <button
+                          type="button"
+                          data-testid="add-recipient-table-button-employee"
+                          aria-label="新規利用者追加申請"
+                          className="bg-[#2a3441]/50 text-gray-400 px-4 py-2 rounded-lg text-sm font-medium cursor-default flex items-center gap-2"
+                          disabled
+                        >
+                          <DocumentTextIcon className="h-4 w-4" />
+                          <span className="hidden sm:inline">利用者追加申請</span>
+                          <span className="sm:hidden">申請</span>
+                        </button>
+                      ) : null}
+                      <button
+                        onClick={handleResetDisplay}
+                        className="bg-[#6b7280] hover:bg-[#4b5563] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full md:w-auto flex items-center gap-2"
+                      >
+                        <span>🔄</span>
+                        <span>表示リセット</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -445,10 +580,10 @@ export default function Dashboard() {
                           }`}
                         >
                           <td className="px-4 py-4">
-                            <div className="cursor-pointer hover:underline">
+                            <Link href={`/recipients/${recipient.id}`} className="cursor-pointer hover:underline">
                               <div className="text-white font-bold text-base">{recipient.full_name}</div>
                               <div className="text-[#6b7280] text-xs mt-1">{recipient.furigana}</div>
-                            </div>
+                            </Link>
                           </td>
                           
                           <td className="px-4 py-4 text-center">
@@ -509,12 +644,59 @@ export default function Dashboard() {
                                   📝 アセスメント
                                 </DropdownMenuItem>
                               </SmartDropdown>
-                              <button className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-2 py-1 rounded text-xs font-medium transition-all duration-200 hover:shadow-lg hover:scale-95 flex items-center gap-1 w-12 h-7">
-                                編集
-                              </button>
-                              <button className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-2 py-1 rounded text-xs font-medium transition-all duration-200 hover:shadow-lg hover:scale-95 flex items-center gap-1 w-12 h-7">
-                                削除
-                              </button>
+{canEditOrDelete() ? (
+                                <>
+                                  <Link href={`/recipients/${recipient.id}/edit`}>
+                                    <button
+                                      type="button"
+                                      data-testid={`edit-recipient-${recipient.id}`}
+                                      aria-label={`${recipient.full_name}の情報を編集`}
+                                      onClick={() => console.log(`利用者編集: ${recipient.id}`)}
+                                      onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                          console.log(`利用者編集: ${recipient.id}`);
+                                        }
+                                      }}
+                                      className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-2 py-1 rounded text-xs font-medium transition-all duration-200 hover:shadow-lg hover:scale-95 flex items-center gap-1 w-12 h-7"
+                                    >
+                                      編集
+                                    </button>
+                                  </Link>
+                                  <button
+                                    type="button"
+                                    data-testid={`delete-recipient-${recipient.id}`}
+                                    aria-label={`${recipient.full_name}を削除`}
+                                    onClick={() => handleDelete(recipient.id, recipient.full_name)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        handleDelete(recipient.id, recipient.full_name);
+                                      }
+                                    }}
+                                    className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-2 py-1 rounded text-xs font-medium transition-all duration-200 hover:shadow-lg hover:scale-95 flex items-center gap-1 w-12 h-7"
+                                  >
+                                    削除
+                                  </button>
+                                </>
+                              ) : isEmployee() ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="bg-[#2a3441]/50 text-gray-400 px-1 py-1 rounded text-xs font-medium cursor-default flex items-center gap-1 min-w-[60px] h-7"
+                                    disabled
+                                  >
+                                    <DocumentTextIcon className="w-3 h-3" />
+                                    編集申請
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="bg-red-600/10 text-red-600/50 px-1 py-1 rounded text-xs font-medium cursor-default flex items-center gap-1 min-w-[60px] h-7"
+                                    disabled
+                                  >
+                                    <DocumentTextIcon className="w-3 h-3" />
+                                    削除申請
+                                  </button>
+                                </>
+                              ) : null}
                             </div>
                           </td>
                         </tr>
@@ -531,8 +713,10 @@ export default function Dashboard() {
                     >
                       <div className="space-y-3">
                         <div>
-                          <div className="text-white font-bold text-base">{recipient.full_name}</div>
-                          <div className="text-[#6b7280] text-xs">{recipient.furigana}</div>
+                          <Link href={`/recipients/${recipient.id}`} className="cursor-pointer hover:underline">
+                            <div className="text-white font-bold text-base">{recipient.full_name}</div>
+                            <div className="text-[#6b7280] text-xs">{recipient.furigana}</div>
+                          </Link>
                         </div>
                         
                         <div className="flex items-center justify-between">
@@ -592,14 +776,59 @@ export default function Dashboard() {
                               📝 アセス
                             </DropdownMenuItem>
                           </SmartDropdown>
-                          <div className="flex gap-2">
-                            <button className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-3 py-2 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1 flex-1">
-                              編集
-                            </button>
-                            <button className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-3 py-2 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1 flex-1">
-                              削除
-                            </button>
-                          </div>
+                          {canEditOrDelete() ? (
+                            <div className="flex gap-2">
+                              <Link href={`/recipients/${recipient.id}/edit`} className="flex-1">
+                                <button
+                                  type="button"
+                                  data-testid={`edit-recipient-mobile-${recipient.id}`}
+                                  aria-label={`${recipient.full_name}の情報を編集`}
+                                  onClick={() => console.log(`利用者編集: ${recipient.id}`)}
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      console.log(`利用者編集: ${recipient.id}`);
+                                    }
+                                  }}
+                                  className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-3 py-2 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1 w-full justify-center"
+                                >
+                                  編集
+                                </button>
+                              </Link>
+                              <button
+                                type="button"
+                                data-testid={`delete-recipient-mobile-${recipient.id}`}
+                                aria-label={`${recipient.full_name}を削除`}
+                                onClick={() => handleDelete(recipient.id, recipient.full_name)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleDelete(recipient.id, recipient.full_name);
+                                  }
+                                }}
+                                className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-3 py-2 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1 flex-1"
+                              >
+                                削除
+                              </button>
+                            </div>
+                          ) : isEmployee() ? (
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                className="bg-[#2a3441]/50 text-gray-400 px-3 py-2 rounded text-xs font-medium cursor-default flex items-center gap-1 flex-1 justify-center"
+                                disabled
+                              >
+                                <DocumentTextIcon className="w-4 h-4" />
+                                編集申請
+                              </button>
+                              <button
+                                type="button"
+                                className="bg-red-600/10 text-red-600/50 px-3 py-2 rounded text-xs font-medium cursor-default flex items-center gap-1 flex-1 justify-center"
+                                disabled
+                              >
+                                <DocumentTextIcon className="w-4 h-4" />
+                                削除申請
+                              </button>
+                            </div>
+                          ) : null}
                         </div>
                       </div>
                     </div>

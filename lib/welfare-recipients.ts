@@ -61,6 +61,11 @@ export interface EmergencyContact {
   address?: string;
   notes?: string;
   priority: number;
+  // Support camelCase aliases from API
+  firstName?: string;
+  lastName?: string;
+  firstNameFurigana?: string;
+  lastNameFurigana?: string;
 }
 
 export interface ServiceRecipientDetail {
@@ -73,6 +78,11 @@ export interface ServiceRecipientDetail {
   means_of_transportation_other_text?: string;
   tel: string;
   emergency_contacts: EmergencyContact[];
+  // Support camelCase aliases from API
+  formOfResidence?: string;
+  formOfResidenceOtherText?: string;
+  meansOfTransportation?: string;
+  meansOfTransportationOtherText?: string;
 }
 
 export interface DisabilityDetail {
@@ -83,6 +93,11 @@ export interface DisabilityDetail {
   physical_disability_type?: string;
   physical_disability_type_other_text?: string;
   application_status: string;
+  // Support camelCase aliases from API
+  gradeOrLevel?: string;
+  physicalDisabilityType?: string;
+  physicalDisabilityTypeOtherText?: string;
+  applicationStatus?: string;
 }
 
 export interface DisabilityStatus {
@@ -92,6 +107,10 @@ export interface DisabilityStatus {
   livelihood_protection: string;
   special_remarks?: string;
   details: DisabilityDetail[];
+  // Support camelCase aliases from API
+  disabilityOrDiseaseName?: string;
+  livelihoodProtection?: string;
+  specialRemarks?: string;
 }
 
 export interface WelfareRecipient {
@@ -120,8 +139,55 @@ export interface RepairSupportPlanResponse {
   recipient_id: string;
 }
 
+// フロントエンドのフォームデータの型定義
+interface EmergencyContactFormData {
+  firstName: string;
+  lastName: string;
+  firstNameFurigana: string;
+  lastNameFurigana: string;
+  relationship: string;
+  tel: string;
+  address?: string;
+  notes?: string;
+  priority: number;
+}
+
+interface DisabilityDetailFormData {
+  category: string;
+  gradeOrLevel?: string;
+  physicalDisabilityType?: string;
+  physicalDisabilityTypeOtherText?: string;
+  applicationStatus: string;
+}
+
+interface RecipientFormData {
+  basicInfo: {
+    firstName: string;
+    lastName: string;
+    firstNameFurigana: string;
+    lastNameFurigana: string;
+    birthDay: string;
+    gender: string;
+  };
+  contactAddress: {
+    address: string;
+    formOfResidence: string;
+    formOfResidenceOtherText?: string;
+    meansOfTransportation: string;
+    meansOfTransportationOtherText?: string;
+    tel: string;
+  };
+  emergencyContacts: EmergencyContactFormData[];
+  disabilityInfo: {
+    disabilityOrDiseaseName: string;
+    livelihoodProtection: string;
+    specialRemarks?: string;
+  };
+  disabilityDetails: DisabilityDetailFormData[];
+}
+
 // Transform frontend form data to backend format
-export const transformFormDataToBackend = (formData: any): UserRegistrationRequest => {
+export const transformFormDataToBackend = (formData: RecipientFormData): UserRegistrationRequest => {
   return {
     basic_info: {
       firstName: formData.basicInfo.firstName,
@@ -139,7 +205,7 @@ export const transformFormDataToBackend = (formData: any): UserRegistrationReque
       meansOfTransportationOtherText: formData.contactAddress.meansOfTransportationOtherText,
       tel: formData.contactAddress.tel,
     },
-    emergency_contacts: formData.emergencyContacts.map((contact: any) => ({
+    emergency_contacts: formData.emergencyContacts.map((contact: EmergencyContactFormData) => ({
       firstName: contact.firstName,
       lastName: contact.lastName,
       firstNameFurigana: contact.firstNameFurigana,
@@ -155,11 +221,11 @@ export const transformFormDataToBackend = (formData: any): UserRegistrationReque
       livelihoodProtection: formData.disabilityInfo.livelihoodProtection,
       specialRemarks: formData.disabilityInfo.specialRemarks,
     },
-    disability_details: formData.disabilityDetails.map((detail: any) => ({
+    disability_details: formData.disabilityDetails.map((detail: DisabilityDetailFormData) => ({
       category: detail.category,
-      gradeOrLevel: detail.gradeOrLevel || null,
-      physicalDisabilityType: detail.physicalDisabilityType || null,
-      physicalDisabilityTypeOtherText: detail.physicalDisabilityTypeOtherText || null,
+      gradeOrLevel: detail.gradeOrLevel || undefined,
+      physicalDisabilityType: detail.physicalDisabilityType || undefined,
+      physicalDisabilityTypeOtherText: detail.physicalDisabilityTypeOtherText || undefined,
       applicationStatus: detail.applicationStatus,
     })),
   };

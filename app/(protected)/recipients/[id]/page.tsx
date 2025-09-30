@@ -339,16 +339,16 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-gray-400 text-sm">居住形態</p>
-                  <p className="text-white">{getResidenceLabel(recipient.detail.form_of_residence)}</p>
-                  {recipient.detail.form_of_residence_other_text && (
-                    <p className="text-gray-400 text-sm mt-1">{recipient.detail.form_of_residence_other_text}</p>
+                  <p className="text-white">{getResidenceLabel((recipient.detail.formOfResidence || recipient.detail.form_of_residence) as string)}</p>
+                  {(recipient.detail.formOfResidenceOtherText || recipient.detail.form_of_residence_other_text) && (
+                    <p className="text-gray-400 text-sm mt-1">{recipient.detail.formOfResidenceOtherText || recipient.detail.form_of_residence_other_text}</p>
                   )}
                 </div>
                 <div>
                   <p className="text-gray-400 text-sm">交通手段</p>
-                  <p className="text-white">{getTransportationLabel(recipient.detail.means_of_transportation)}</p>
-                  {recipient.detail.means_of_transportation_other_text && (
-                    <p className="text-gray-400 text-sm mt-1">{recipient.detail.means_of_transportation_other_text}</p>
+                  <p className="text-white">{getTransportationLabel((recipient.detail.meansOfTransportation || recipient.detail.means_of_transportation) as string)}</p>
+                  {(recipient.detail.meansOfTransportationOtherText || recipient.detail.means_of_transportation_other_text) && (
+                    <p className="text-gray-400 text-sm mt-1">{recipient.detail.meansOfTransportationOtherText || recipient.detail.means_of_transportation_other_text}</p>
                   )}
                 </div>
               </div>
@@ -366,10 +366,10 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <p className="text-white font-medium">
-                        {contact.last_name} {contact.first_name}
+                        {contact.lastName || contact.last_name} {contact.firstName || contact.first_name}
                       </p>
                       <p className="text-gray-400 text-sm">
-                        {contact.last_name_furigana} {contact.first_name_furigana}
+                        {contact.lastNameFurigana || contact.last_name_furigana} {contact.firstNameFurigana || contact.first_name_furigana}
                       </p>
                     </div>
                     <span className="px-2 py-1 bg-[#10b981]/20 text-[#10b981] text-xs rounded">
@@ -408,16 +408,16 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
             <div className="space-y-4">
               <div>
                 <p className="text-gray-400 text-sm">障害または疾患名</p>
-                <p className="text-white">{recipient.disability_status.disability_or_disease_name}</p>
+                <p className="text-white">{recipient.disability_status.disabilityOrDiseaseName || recipient.disability_status.disability_or_disease_name}</p>
               </div>
               <div>
                 <p className="text-gray-400 text-sm">生活保護受給状況</p>
-                <p className="text-white">{getLivelihoodProtectionLabel(recipient.disability_status.livelihood_protection)}</p>
+                <p className="text-white">{getLivelihoodProtectionLabel((recipient.disability_status.livelihoodProtection || recipient.disability_status.livelihood_protection) as string)}</p>
               </div>
-              {recipient.disability_status.special_remarks && (
+              {(recipient.disability_status.specialRemarks || recipient.disability_status.special_remarks) && (
                 <div>
                   <p className="text-gray-400 text-sm">特記事項</p>
-                  <p className="text-white whitespace-pre-wrap">{recipient.disability_status.special_remarks}</p>
+                  <p className="text-white whitespace-pre-wrap">{recipient.disability_status.specialRemarks || recipient.disability_status.special_remarks}</p>
                 </div>
               )}
 
@@ -433,26 +433,26 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
                             <span className="text-gray-400">カテゴリ: </span>
                             <span className="text-white">{getCategoryLabel(detail.category)}</span>
                           </div>
-                          {detail.grade_or_level && (
+                          {(detail.gradeOrLevel || detail.grade_or_level) && (
                             <div>
                               <span className="text-gray-400">等級・レベル: </span>
-                              <span className="text-white">{detail.grade_or_level}</span>
+                              <span className="text-white">{detail.gradeOrLevel || detail.grade_or_level}</span>
                             </div>
                           )}
                           <div>
                             <span className="text-gray-400">申請状況: </span>
-                            <span className="text-white">{getApplicationStatusLabel(detail.application_status)}</span>
+                            <span className="text-white">{getApplicationStatusLabel((detail.applicationStatus || detail.application_status) as string)}</span>
                           </div>
-                          {detail.physical_disability_type && (
+                          {(detail.physicalDisabilityType || detail.physical_disability_type) && (
                             <div>
                               <span className="text-gray-400">身体障害種別: </span>
-                              <span className="text-white">{getPhysicalDisabilityTypeLabel(detail.physical_disability_type)}</span>
+                              <span className="text-white">{getPhysicalDisabilityTypeLabel((detail.physicalDisabilityType || detail.physical_disability_type) as string)}</span>
                             </div>
                           )}
-                          {detail.physical_disability_type_other_text && (
+                          {(detail.physicalDisabilityTypeOtherText || detail.physical_disability_type_other_text) && (
                             <div className="md:col-span-2">
                               <span className="text-gray-400">その他詳細: </span>
-                              <span className="text-white">{detail.physical_disability_type_other_text}</span>
+                              <span className="text-white">{detail.physicalDisabilityTypeOtherText || detail.physical_disability_type_other_text}</span>
                             </div>
                           )}
                         </div>

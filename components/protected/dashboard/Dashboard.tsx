@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { BiSort, BiFilterAlt, BiUserPlus } from 'react-icons/bi';
-import { DocumentTextIcon } from '@heroicons/react/24/outline';
 import { dashboardApi, DashboardParams } from '@/lib/dashboard';
 import { welfareRecipientsApi } from '@/lib/welfare-recipients';
 import { DashboardData } from '@/types/dashboard';
@@ -14,14 +13,11 @@ import MfaPrompt from '@/components/auth/MfaPrompt';
 import { SmartDropdown } from '@/components/ui/smart-dropdown';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { TableLoadingOverlay } from '@/components/ui/table-loading-overlay';
-import Alert from '@/components/ui/Alert';
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [staff, setStaff] = useState<StaffResponse | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const router = useRouter();
-  const [monitoringDays, setMonitoringDays] = useState(7);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [sortBy, setSortBy] = useState('name_phonetic');
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,7 +33,9 @@ export default function Dashboard() {
     isUpcoming: false,
     status: null,
   });
-  const [error, setError] = useState<string | null>(null);
+
+    
+
 
   useEffect(() => {
     isLoadingRef.current = isLoading;
@@ -162,58 +160,71 @@ export default function Dashboard() {
     }
   }, []);
 
-  const handleDelete = useCallback(async (recipientId: string, recipientName: string) => {
-    if (isLoadingRef.current) return;
-
-    if (window.confirm(`本当に「${recipientName}」さんを削除しますか？\nこの操作は元に戻せません。`)) {
+  const handleDeleteRecipient = useCallback(async (recipientId: string, recipientName: string) => {
+    if (window.confirm(`${recipientName}さんを本当に削除しますか？この操作は元に戻せません。`)) {
       try {
         setIsLoading(true);
+
+        // APIを呼び出してバックエンドのデータを削除
         await welfareRecipientsApi.delete(recipientId);
-        
+
+        // フロントエンドの状態を直接更新してUIから即座に削除
         setDashboardData(prevData => {
           if (!prevData) return null;
-          return {
-            ...prevData,
-            recipients: prevData.recipients.filter(r => r.id !== recipientId)
-          };
+          const updatedRecipients = prevData.recipients.filter(
+            recipient => recipient.id !== recipientId
+          );
+          return { ...prevData, recipients: updatedRecipients };
         });
 
-      } catch (error: unknown) {
+      } catch (error) {
         console.error('Failed to delete recipient:', error);
-        if (error && typeof error === 'object' && 'response' in error) {
-          const axiosError = error as { response?: { data?: { detail?: string } } };
-          if (axiosError.response?.data?.detail) {
-            setError(axiosError.response.data.detail);
-          } else {
-            setError('利用者の削除に失敗しました。');
-          }
-        } else {
-          setError('利用者の削除に失敗しました。');
-        }
+        // ユーザーにエラーを通知するUIをここに追加することもできる
+        alert('利用者の削除に失敗しました。ページをリロードして再度お試しください。');
       } finally {
         setIsLoading(false);
       }
     }
   }, []);
 
-  const getStepBadgeStyle = (step: string | null) => {
-    switch (step) {
-      case 'assessment': return 'bg-purple-600 text-white';
-      case 'draft_plan': return 'bg-purple-600 text-white';
-      case 'staff_meeting': return 'bg-blue-600 text-white';
-      case 'monitoring': return 'bg-orange-600 text-white';
-      case 'final_plan_signed': return 'bg-red-600 text-white';
-      default: return 'bg-gray-600 text-white';
+  const getStepBadgeStyle = (step: string | null, cycleNumber: number) => {
+    const baseStyle = 'inline-block px-2 py-1 rounded text-xs font-medium';
+    let colorStyle = 'bg-gray-600 text-white';
+
+    if (cycleNumber >= 2 && step === 'assessment') {
+      colorStyle = 'bg-orange-600 text-white';
+    } else {
+      switch (step) {
+        case 'assessment': 
+          colorStyle = 'bg-sky-600 text-white'; 
+          break;
+        case 'draft_plan': 
+          colorStyle = 'bg-blue-600 text-white'; 
+          break;
+        case 'staff_meeting': 
+          colorStyle = 'bg-indigo-600 text-white'; 
+          break;
+        case 'final_plan_signed': 
+          colorStyle = 'bg-red-600 text-white'; 
+          break;
+        case 'monitoring': 
+          colorStyle = 'bg-orange-600 text-white'; 
+          break;
+      }
     }
+    return `${baseStyle} ${colorStyle}`;
   };
 
-  const getStepText = (step: string | null) => {
+  const getStepText = (step: string | null, cycleNumber: number) => {
+    if (cycleNumber >= 2 && step === 'assessment') {
+      return 'モニタリング';
+    }
     switch (step) {
       case 'assessment': return 'アセスメント';
       case 'draft_plan': return '個別原案';
       case 'staff_meeting': return '担当者会議';
       case 'monitoring': return 'モニタリング';
-      case 'final_plan_signed': return '最終計画署名済み';
+      case 'final_plan_signed': return '個別本署名済';
       default: return '支援計画未登録';
     }
   };
@@ -237,14 +248,6 @@ export default function Dashboard() {
   const getCurrentDate = () => {
     const today = new Date();
     return `${today.getMonth() + 1}/${today.getDate()}`;
-  };
-
-  const canEditOrDelete = () => {
-    return staff && ['manager', 'owner'].includes(staff.role);
-  };
-
-  const isEmployee = () => {
-    return staff && staff.role === 'employee';
   };
 
   // recipients をメモ化して毎レンダーで参照が変わらないようにする
@@ -313,13 +316,12 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] text-white animate-in fade-in-0 slide-in-from-bottom-5 duration-300">
-
+      {/* モニタリング期限設定ボタン:いらない */}
       <main className="pt-20 pb-8 px-4 md:px-6 max-w-[1400px] mx-auto">
         {!staff.is_mfa_enabled ? (
           <MfaPrompt />
         ) : (
           <>
-            {error && <Alert message={error} type="error" onClose={() => setError(null)} />}
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
               <div className="flex items-center gap-4">
                 <h1 className="text-2xl font-bold text-white">ダッシュボード</h1>
@@ -329,14 +331,7 @@ export default function Dashboard() {
               </div>
               
               <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4">
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full md:w-auto"
-                >
-                  モニタリング期限設定
-                </button>
-
-
+  
 
                 <div className="bg-gradient-to-r from-[#4285f4] to-[#34a853] hover:from-[#3367d6] hover:to-[#2d8a44] text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer flex items-center gap-2 w-full md:w-auto justify-center md:justify-start">
                   <span>🔗</span>
@@ -395,34 +390,21 @@ export default function Dashboard() {
                     <p className="text-2xl font-bold text-white mt-2">{serviceRecipients.length}名</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    {canEditOrDelete() ? (
-                      <button
-                        type="button"
-                        data-testid="add-recipient-stats-button"
-                        aria-label="新規利用者を追加"
-                        onClick={() => router.push('/recipients/new')}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            router.push('/recipients/new');
-                          }
-                        }}
-                        className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-200 hidden md:flex items-center gap-1"
-                      >
-                        <BiUserPlus className="h-4 w-4" />
-                        <span className="lg:hidden">追加</span>
-                      </button>
-                    ) : isEmployee() ? (
-                      <button
-                        type="button"
-                        data-testid="add-recipient-stats-button-employee"
-                        aria-label="新規利用者追加申請"
-                        className="bg-[#2a3441]/50 text-gray-400 px-3 py-1 rounded-lg text-xs font-medium cursor-default hidden md:flex items-center gap-1"
-                        disabled
-                      >
-                        <DocumentTextIcon className="h-4 w-4" />
-                        <span className="lg:hidden">申請</span>
-                      </button>
-                    ) : null}
+                    <button
+                      type="button"
+                      data-testid="add-recipient-stats-button"
+                      aria-label="新規利用者を追加"
+                      onClick={() => router.push('/recipients/new')}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          router.push('/recipients/new');
+                        }
+                      }}
+                      className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-200 hidden md:flex items-center gap-1"
+                    >
+                      <BiUserPlus className="h-4 w-4" />
+                      <span className="lg:hidden">追加</span>
+                    </button>
                     <div className="relative">
                       <input
                         type="text"
@@ -436,34 +418,21 @@ export default function Dashboard() {
                   </div>
                 </div>
                 <div className="md:hidden mt-4">
-                  {canEditOrDelete() ? (
-                    <button
-                      type="button"
-                      data-testid="add-recipient-stats-button-mobile"
-                      aria-label="新規利用者を追加"
-                      onClick={() => router.push('/recipients/new')}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          router.push('/recipients/new');
-                        }
-                      }}
-                      className="bg-[#10b981] hover:bg-[#0f9f6e] font-bold text-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full flex items-center justify-center gap-2"
-                    >
-                      <BiUserPlus className="h-4 w-4" />
-                      <span>利用者追加</span>
-                    </button>
-                  ) : isEmployee() ? (
-                    <button
-                      type="button"
-                      data-testid="add-recipient-stats-button-mobile-employee"
-                      aria-label="新規利用者追加申請"
-                      className="bg-[#2a3441]/50 text-gray-400 px-4 py-2 rounded-lg text-sm font-medium cursor-default w-full flex items-center justify-center gap-2"
-                      disabled
-                    >
-                      <DocumentTextIcon className="h-4 w-4" />
-                      <span>利用者追加申請</span>
-                    </button>
-                  ) : null}
+                  <button
+                    type="button"
+                    data-testid="add-recipient-stats-button"
+                    aria-label="新規利用者を追加"
+                    onClick={() => router.push('/recipients/new')}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        router.push('/recipients/new');
+                      }
+                    }}
+                    className="bg-[#10b981] hover:bg-[#0f9f6e] font-bold text-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full flex items-center justify-center gap-2"
+                  >
+                    <BiUserPlus className="h-4 w-4" />
+                    <span>利用者追加</span>
+                  </button>
                 </div>
               </div>
 
@@ -475,31 +444,17 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-white">利用者一覧</h2>
                     <div className="flex items-center gap-3">
-                      {canEditOrDelete() ? (
-                        <button
-                          type="button"
-                          data-testid="add-recipient-table-button"
-                          aria-label="新規利用者を追加"
-                          onClick={() => router.push('/recipients/new')}
-                          className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
-                        >
-                          <BiUserPlus className="h-4 w-4" />
-                          <span className="hidden sm:inline">利用者追加</span>
-                          <span className="sm:hidden">追加</span>
-                        </button>
-                      ) : isEmployee() ? (
-                        <button
-                          type="button"
-                          data-testid="add-recipient-table-button-employee"
-                          aria-label="新規利用者追加申請"
-                          className="bg-[#2a3441]/50 text-gray-400 px-4 py-2 rounded-lg text-sm font-medium cursor-default flex items-center gap-2"
-                          disabled
-                        >
-                          <DocumentTextIcon className="h-4 w-4" />
-                          <span className="hidden sm:inline">利用者追加申請</span>
-                          <span className="sm:hidden">申請</span>
-                        </button>
-                      ) : null}
+                      <button
+                        type="button"
+                        data-testid="add-recipient-table-button"
+                        aria-label="新規利用者を追加"
+                        onClick={() => router.push('/recipients/new')}
+                        className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+                      >
+                        <BiUserPlus className="h-4 w-4" />
+                        <span className="hidden sm:inline">利用者追加</span>
+                        <span className="sm:hidden">追加</span>
+                      </button>
                       <button
                         onClick={handleResetDisplay}
                         className="bg-[#6b7280] hover:bg-[#4b5563] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full md:w-auto flex items-center gap-2"
@@ -533,19 +488,19 @@ export default function Dashboard() {
                             }
                           >
                             <DropdownMenuItem onClick={() => handleStatusFilter('assessment')}>
-                              <span className="bg-purple-600 text-white px-2 py-1 rounded text-xs">アセスメント</span>
+                              <span className={getStepBadgeStyle('assessment', 1)}>アセスメント</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('draft_plan')}>
-                              <span className="bg-purple-600 text-white px-2 py-1 rounded text-xs">個別原案</span>
+                              <span className={getStepBadgeStyle('draft_plan', 1)}>個別原案</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('staff_meeting')}>
-                              <span className="bg-blue-600 text-white px-2 py-1 rounded text-xs">担当者会議</span>
+                              <span className={getStepBadgeStyle('staff_meeting', 1)}>担当者会議</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('monitoring')}>
-                              <span className="bg-orange-600 text-white px-2 py-1 rounded text-xs">モニタリング</span>
+                              <span className={getStepBadgeStyle('monitoring', 1)}>モニタリング</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('final_plan_signed')}>
-                              <span className="bg-orange-600 text-white px-2 py-1 rounded text-xs">最終計画署名済み</span>
+                              <span className={getStepBadgeStyle('final_plan_signed', 1)}>個別本署名済</span>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => handleStatusFilter(null)}>
@@ -580,17 +535,22 @@ export default function Dashboard() {
                           }`}
                         >
                           <td className="px-4 py-4">
-                            <Link href={`/recipients/${recipient.id}`} className="cursor-pointer hover:underline">
+                            <Link href={`/recipients/${recipient.id}`} className="block">
+                            <div className="cursor-pointer hover:underline">
                               <div className="text-white font-bold text-base">{recipient.full_name}</div>
                               <div className="text-[#6b7280] text-xs mt-1">{recipient.furigana}</div>
+                            </div>
                             </Link>
                           </td>
                           
                           <td className="px-4 py-4 text-center">
                             <div className="text-[#9ca3af] text-sm mb-1">第{recipient.current_cycle_number}回</div>
-                            <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${getStepBadgeStyle(recipient.latest_step)}`}>
-                              {getStepText(recipient.latest_step)}
-                            </span>
+                            <div>
+                              <div className="text-xs text-gray-500">next</div>
+                              <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
+                                {getStepText(recipient.latest_step, recipient.current_cycle_number)}
+                              </span>
+                            </div>
                           </td>
                           
                           <td className="px-4 py-4">
@@ -613,11 +573,11 @@ export default function Dashboard() {
                                   {recipient.monitoring_due_date ? new Date(recipient.monitoring_due_date).toLocaleDateString('ja-JP', {year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '/') : '-'}
                                 </div>
                                 <div className={`text-xs mt-1 ${getDaysRemainingColor(getDaysRemaining(recipient.monitoring_due_date))}`}>
-                                  {getDaysRemaining(recipient.monitoring_due_date) < 0 
+                                  {getDaysRemaining(recipient.monitoring_due_date) < 0
                                     ? `期限切れ ${Math.abs(getDaysRemaining(recipient.monitoring_due_date))}日`
                                     : `残り${getDaysRemaining(recipient.monitoring_due_date)}日`
                                   }
-                                </div>
+                                </div>   
                               </>
                             ) : (
                               <div className="text-white text-sm">-</div>
@@ -634,9 +594,11 @@ export default function Dashboard() {
                                   </button>
                                 }
                               >
+                                <Link href={`/support_plan/${recipient.id}`}>
                                 <DropdownMenuItem>
                                   📄 個別支援
                                 </DropdownMenuItem>
+                                </Link>
                                 <DropdownMenuItem>
                                   📄 PDF一覧
                                 </DropdownMenuItem>
@@ -644,59 +606,30 @@ export default function Dashboard() {
                                   📝 アセスメント
                                 </DropdownMenuItem>
                               </SmartDropdown>
-{canEditOrDelete() ? (
-                                <>
-                                  <Link href={`/recipients/${recipient.id}/edit`}>
-                                    <button
-                                      type="button"
-                                      data-testid={`edit-recipient-${recipient.id}`}
-                                      aria-label={`${recipient.full_name}の情報を編集`}
-                                      onClick={() => console.log(`利用者編集: ${recipient.id}`)}
-                                      onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                          console.log(`利用者編集: ${recipient.id}`);
-                                        }
-                                      }}
-                                      className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-2 py-1 rounded text-xs font-medium transition-all duration-200 hover:shadow-lg hover:scale-95 flex items-center gap-1 w-12 h-7"
-                                    >
-                                      編集
-                                    </button>
-                                  </Link>
-                                  <button
-                                    type="button"
-                                    data-testid={`delete-recipient-${recipient.id}`}
-                                    aria-label={`${recipient.full_name}を削除`}
-                                    onClick={() => handleDelete(recipient.id, recipient.full_name)}
-                                    onKeyDown={(e) => {
-                                      if (e.key === 'Enter') {
-                                        handleDelete(recipient.id, recipient.full_name);
-                                      }
-                                    }}
-                                    className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-2 py-1 rounded text-xs font-medium transition-all duration-200 hover:shadow-lg hover:scale-95 flex items-center gap-1 w-12 h-7"
-                                  >
-                                    削除
-                                  </button>
-                                </>
-                              ) : isEmployee() ? (
-                                <>
-                                  <button
-                                    type="button"
-                                    className="bg-[#2a3441]/50 text-gray-400 px-1 py-1 rounded text-xs font-medium cursor-default flex items-center gap-1 min-w-[60px] h-7"
-                                    disabled
-                                  >
-                                    <DocumentTextIcon className="w-3 h-3" />
-                                    編集申請
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="bg-red-600/10 text-red-600/50 px-1 py-1 rounded text-xs font-medium cursor-default flex items-center gap-1 min-w-[60px] h-7"
-                                    disabled
-                                  >
-                                    <DocumentTextIcon className="w-3 h-3" />
-                                    削除申請
-                                  </button>
-                                </>
-                              ) : null}
+                              <Link href={`/recipients/${recipient.id}/edit`}>
+                                <button
+                                  type="button"
+                                  data-testid={`edit-recipient-${recipient.id}`}
+                                  aria-label={`${recipient.full_name}の情報を編集`}
+                                  className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-2 py-1 rounded text-xs font-medium transition-all duration-200 hover:shadow-lg hover:scale-95 flex items-center gap-1 w-12 h-7"
+                                >
+                                  編集
+                                </button>
+                              </Link>
+                              <button
+                                type="button"
+                                data-testid={`delete-recipient-${recipient.id}`}
+                                aria-label={`${recipient.full_name}を削除`}
+                                onClick={() => handleDeleteRecipient(recipient.id, recipient.full_name)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleDeleteRecipient(recipient.id, recipient.full_name);
+                                  }
+                                }}
+                                className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-2 py-1 rounded text-xs font-medium transition-all duration-200 hover:shadow-lg hover:scale-95 flex items-center gap-1 w-12 h-7"
+                              >
+                                削除
+                              </button>
                             </div>
                           </td>
                         </tr>
@@ -712,18 +645,21 @@ export default function Dashboard() {
                       className={`border-b border-[#2a3441] p-4 hover:bg-[#2a3f5f40] transition-colors duration-150`}
                     >
                       <div className="space-y-3">
-                        <div>
-                          <Link href={`/recipients/${recipient.id}`} className="cursor-pointer hover:underline">
+                        <Link href={`/recipients/${recipient.id}`}>
+                          <div>
                             <div className="text-white font-bold text-base">{recipient.full_name}</div>
                             <div className="text-[#6b7280] text-xs">{recipient.furigana}</div>
-                          </Link>
-                        </div>
-                        
+                          </div>
+                        </Link>
+
                         <div className="flex items-center justify-between">
                           <span className="text-[#9ca3af] text-sm">第{recipient.current_cycle_number}回</span>
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${getStepBadgeStyle(recipient.latest_step)}`}>
-                            {getStepText(recipient.latest_step)}
-                          </span>
+                          <div className="text-right">
+                            <div className="text-xs text-gray-500">next</div>
+                            <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
+                              {getStepText(recipient.latest_step, recipient.current_cycle_number)}
+                            </span>
+                          </div>
                         </div>
                         
                         <div className="grid grid-cols-2 gap-4 text-sm">
@@ -748,11 +684,12 @@ export default function Dashboard() {
                                   {recipient.monitoring_due_date ? new Date(recipient.monitoring_due_date).toLocaleDateString('ja-JP', {month: '2-digit', day: '2-digit'}) : '-'}
                                 </div>
                                 <div className={`text-xs ${getDaysRemainingColor(getDaysRemaining(recipient.monitoring_due_date))}`}>
-                                  {getDaysRemaining(recipient.monitoring_due_date) < 0 
+                                  {getDaysRemaining(recipient.monitoring_due_date) < 0
                                     ? `期限切れ ${Math.abs(getDaysRemaining(recipient.monitoring_due_date))}日`
                                     : `残り${getDaysRemaining(recipient.monitoring_due_date)}日`
                                   }
                                 </div>
+                                
                               </>
                             ) : (
                               <div className="text-white text-sm">-</div>
@@ -776,59 +713,36 @@ export default function Dashboard() {
                               📝 アセス
                             </DropdownMenuItem>
                           </SmartDropdown>
-                          {canEditOrDelete() ? (
-                            <div className="flex gap-2">
-                              <Link href={`/recipients/${recipient.id}/edit`} className="flex-1">
-                                <button
-                                  type="button"
-                                  data-testid={`edit-recipient-mobile-${recipient.id}`}
-                                  aria-label={`${recipient.full_name}の情報を編集`}
-                                  onClick={() => console.log(`利用者編集: ${recipient.id}`)}
-                                  onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                      console.log(`利用者編集: ${recipient.id}`);
-                                    }
-                                  }}
-                                  className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-3 py-2 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1 w-full justify-center"
-                                >
-                                  編集
-                                </button>
-                              </Link>
-                              <button
-                                type="button"
-                                data-testid={`delete-recipient-mobile-${recipient.id}`}
-                                aria-label={`${recipient.full_name}を削除`}
-                                onClick={() => handleDelete(recipient.id, recipient.full_name)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    handleDelete(recipient.id, recipient.full_name);
-                                  }
-                                }}
-                                className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-3 py-2 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1 flex-1"
-                              >
-                                削除
-                              </button>
-                            </div>
-                          ) : isEmployee() ? (
-                            <div className="flex gap-2">
-                              <button
-                                type="button"
-                                className="bg-[#2a3441]/50 text-gray-400 px-3 py-2 rounded text-xs font-medium cursor-default flex items-center gap-1 flex-1 justify-center"
-                                disabled
-                              >
-                                <DocumentTextIcon className="w-4 h-4" />
-                                編集申請
-                              </button>
-                              <button
-                                type="button"
-                                className="bg-red-600/10 text-red-600/50 px-3 py-2 rounded text-xs font-medium cursor-default flex items-center gap-1 flex-1 justify-center"
-                                disabled
-                              >
-                                <DocumentTextIcon className="w-4 h-4" />
-                                削除申請
-                              </button>
-                            </div>
-                          ) : null}
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              data-testid={`edit-recipient-mobile-${recipient.id}`}
+                              aria-label={`${recipient.full_name}の情報を編集`}
+                              onClick={() => router.push(`/recipients/${recipient.id}`)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  router.push(`/recipients/${recipient.id}`);
+                                }
+                              }}
+                              className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-3 py-2 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1 flex-1"
+                            >
+                              編集
+                            </button>
+                            <button
+                              type="button"
+                              data-testid={`delete-recipient-mobile-${recipient.id}`}
+                              aria-label={`${recipient.full_name}を削除`}
+                              onClick={() => handleDeleteRecipient(recipient.id, recipient.full_name)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  handleDeleteRecipient(recipient.id, recipient.full_name);
+                                }
+                              }}
+                              className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-3 py-2 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1 flex-1"
+                            >
+                              削除
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -839,57 +753,6 @@ export default function Dashboard() {
           </>
         )}
       </main>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-[#1a1f2e] border border-[#2a3441] rounded-xl p-6 w-96 animate-in fade-in-0 zoom-in-95 duration-200">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold text-white">モニタリング期限設定</h3>
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="mb-6">
-              <label className="block text-white text-sm font-medium mb-3">
-                モニタリング期限
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="number"
-                  min="1"
-                  max="30"
-                  value={monitoringDays}
-                  onChange={(e) => setMonitoringDays(Number(e.target.value))}
-                  className="bg-[#0f1419] border border-[#2a3441] rounded-lg px-4 py-3 text-white w-20 text-center focus:outline-none focus:border-[#3b82f6] transition-colors"
-                />
-                <span className="text-white">日</span>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3">
-              <button 
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
-              >
-                キャンセル
-              </button>
-              <button 
-                onClick={() => {
-                  console.log('モニタリング期限を', monitoringDays, '日に設定');
-                  setIsModalOpen(false);
-                }}
-                className="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-6 py-2 rounded-lg transition-colors font-medium"
-              >
-                設定
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

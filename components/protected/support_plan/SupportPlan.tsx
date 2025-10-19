@@ -9,6 +9,7 @@ import MonitoringDeadlineModal from './MonitoringDeadlineModal';
 import Breadcrumb, { BreadcrumbItem } from '@/components/ui/Breadcrumb';
 import { welfareRecipientsApi, WelfareRecipient } from '@/lib/welfare-recipients';
 import { supportPlanApi, PlanCycle } from '@/lib/support-plan';
+import CalendarLinkButton from '@/components/ui/google/CalendarLinkButton';
 
 
 export default function SupportPlan() {
@@ -278,11 +279,7 @@ export default function SupportPlan() {
 
             <div className="flex flex-col md:flex-row gap-3">
               {/* 非MVP: モニタリング期限設定 */}
-
-              <button className="bg-gradient-to-r from-[#4285f4] to-[#34a853] hover:from-[#3367d6] hover:to-[#2d8a44] text-white px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-2">
-                <span>🔗</span>
-                <span>Google Calendar連携</span>
-              </button>
+              <CalendarLinkButton />
             </div>
           </div>
         </div>

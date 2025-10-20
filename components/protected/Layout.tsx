@@ -87,7 +87,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
               {/* Right Side */}
               <div className="flex items-center space-x-4">
                 {staff?.role === 'owner' && (
-                  <Link href="/admin/settings" className="text-sm font-medium text-gray-300 hover:text-white">
+                  <Link href="/admin" className="text-sm font-medium text-gray-300 hover:text-white">
                     管理者設定
                   </Link>
                 )}

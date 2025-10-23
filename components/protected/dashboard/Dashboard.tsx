@@ -326,7 +326,7 @@ export default function Dashboard() {
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
               <div className="flex items-center gap-4">
                 <h1 className="text-2xl font-bold text-white">ダッシュボード</h1>
-                <div className="text-[#9ca3af] text-sm">
+                <div className="text-gray-300 text-sm">
                   {getCurrentDate()}
                 </div>
               </div>
@@ -452,7 +452,7 @@ export default function Dashboard() {
                       </button>
                       <button
                         onClick={handleResetDisplay}
-                        className="bg-[#6b7280] hover:bg-[#4b5563] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full md:w-auto flex items-center gap-2"
+                        className="bg-gray-500 hover:bg-[#4b5563] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full md:w-auto flex items-center gap-2"
                       >
                         <span>🔄</span>
                         <span>表示リセット</span>
@@ -465,18 +465,18 @@ export default function Dashboard() {
                   <table className="w-full">
                     <thead className="bg-[#0f1419cc]">
                       <tr>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-[#9ca3af] w-1/5">
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/5">
                           <div className="flex items-center gap-2">
                             氏名
                           </div>
                         </th>
-                        <th className="px-4 py-3 text-center text-sm font-medium text-[#9ca3af] w-[15%]">
+                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-300 w-[15%]">
                           <SmartDropdown
                             trigger={
                               <div className="flex items-center justify-center gap-2 cursor-pointer">
                                 計画の進捗
                                 <BiFilterAlt
-                                  className="text-[#6b7280] hover:text-[#9ca3af] cursor-pointer"
+                                  className="text-gray-100 hover:text-gray-300 cursor-pointer"
                                   size={16}
                                 />
                               </div>
@@ -503,20 +503,20 @@ export default function Dashboard() {
                             </DropdownMenuItem>
                           </SmartDropdown>
                         </th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-[#9ca3af] w-1/5">
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/5">
                           <div className="flex items-center gap-2">
                             次回更新日
                             <BiSort
-                              className="text-[#6b7280] hover:text-[#9ca3af] cursor-pointer"
+                              className="text-gray-100 hover:text-gray-300 cursor-pointer"
                               size={16}
                               onClick={handleNextRenewalSortClick}
                             />
                           </div>
                         </th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-[#9ca3af] w-1/5">
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/5">
                           モニタリング期限
                         </th>
-                        <th className="px-4 py-3 text-right text-sm font-medium text-[#9ca3af] w-1/4">
+                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-300 w-1/4">
                           詳細情報
                         </th>
                       </tr>
@@ -533,15 +533,15 @@ export default function Dashboard() {
                             <Link href={`/recipients/${recipient.id}`} className="block">
                             <div className="cursor-pointer hover:underline">
                               <div className="text-white font-bold text-base">{recipient.full_name}</div>
-                              <div className="text-[#6b7280] text-xs mt-1">{recipient.furigana}</div>
+                              <div className="text-gray-200 text-xs mt-1">{recipient.furigana}</div>
                             </div>
                             </Link>
                           </td>
                           
                           <td className="px-4 py-4 text-center">
-                            <div className="text-[#9ca3af] text-sm mb-1">第{recipient.current_cycle_number}回</div>
+                            <div className="text-gray-300 text-sm mb-1">第{recipient.current_cycle_number}回</div>
                             <div>
-                              <div className="text-xs text-gray-500">next</div>
+                              <div className="text-xs text-gray-300">next</div>
                               <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
                                 {getStepText(recipient.latest_step, recipient.current_cycle_number)}
                               </span>
@@ -643,14 +643,14 @@ export default function Dashboard() {
                         <Link href={`/recipients/${recipient.id}`}>
                           <div>
                             <div className="text-white font-bold text-base">{recipient.full_name}</div>
-                            <div className="text-[#6b7280] text-xs">{recipient.furigana}</div>
+                            <div className="text-gray-200 text-xs">{recipient.furigana}</div>
                           </div>
                         </Link>
 
                         <div className="flex items-center justify-between">
-                          <span className="text-[#9ca3af] text-sm">第{recipient.current_cycle_number}回</span>
+                          <span className="text-gray-300 text-sm">第{recipient.current_cycle_number}回</span>
                           <div className="text-right">
-                            <div className="text-xs text-gray-500">next</div>
+                            <div className="text-xs text-gray-3000">next</div>
                             <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
                               {getStepText(recipient.latest_step, recipient.current_cycle_number)}
                             </span>
@@ -659,7 +659,7 @@ export default function Dashboard() {
                         
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
-                            <div className="text-[#9ca3af] text-xs mb-1">次回更新日</div>
+                            <div className="text-gray-300 text-xs mb-1">次回更新日</div>
                             <div className="text-white">
                               {recipient.next_renewal_deadline ? new Date(recipient.next_renewal_deadline).toLocaleDateString('ja-JP', {month: '2-digit', day: '2-digit'}) : '-'}
                             </div>
@@ -672,7 +672,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div>
-                            <div className="text-[#9ca3af] text-xs mb-1">モニタリング期限</div>
+                            <div className="text-gray-300 text-xs mb-1">モニタリング期限</div>
                             {recipient.latest_step === 'monitoring' ? (
                               <>
                                 <div className="text-white">

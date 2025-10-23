@@ -2,6 +2,36 @@ import { tokenUtils } from './token';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+// FastAPIのバリデーションエラーの型定義
+interface ValidationError {
+  loc: (string | number)[];
+  msg: string;
+  type: string;
+}
+
+interface FastAPIErrorResponse {
+  detail: string | ValidationError[];
+}
+
+// エラーメッセージを整形する関数
+function formatErrorMessage(errorData: FastAPIErrorResponse): string {
+  if (typeof errorData.detail === 'string') {
+    return errorData.detail;
+  }
+
+  if (Array.isArray(errorData.detail)) {
+    // バリデーションエラーの場合、全てのエラーメッセージを結合
+    return errorData.detail
+      .map((err: ValidationError) => {
+        const field = err.loc[err.loc.length - 1];
+        return `${field}: ${err.msg}`;
+      })
+      .join('\n');
+  }
+
+  return 'エラーが発生しました';
+}
+
 // ログアウト処理をまとめる
 const handleLogout = async () => {
   try {
@@ -55,7 +85,8 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
       throw new Error('Not authenticated');
     }
     const errorData = await response.json().catch(() => ({ detail: `Request failed with status ${response.status}` }));
-    throw new Error(errorData.detail);
+    const errorMessage = formatErrorMessage(errorData);
+    throw new Error(errorMessage);
   }
 
   if (response.status === 204) {
@@ -89,7 +120,8 @@ async function requestWithFormData<T>(endpoint: string, formData: FormData): Pro
       throw new Error('Not authenticated');
     }
     const errorData = await response.json().catch(() => ({ detail: `Request failed with status ${response.status}` }));
-    throw new Error(errorData.detail);
+    const errorMessage = formatErrorMessage(errorData);
+    throw new Error(errorMessage);
   }
 
   if (response.status === 204) {

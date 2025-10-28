@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { BiSort, BiFilterAlt, BiUserPlus } from 'react-icons/bi';
+import { BiSort, BiFilterAlt, BiUserPlus, BiFile } from 'react-icons/bi';
 import { dashboardApi, DashboardParams } from '@/lib/dashboard';
 import { welfareRecipientsApi } from '@/lib/welfare-recipients';
 import { DashboardData } from '@/types/dashboard';
@@ -449,6 +449,17 @@ export default function Dashboard() {
                         <BiUserPlus className="h-4 w-4" />
                         <span className="hidden sm:inline">利用者追加</span>
                         <span className="sm:hidden">追加</span>
+                      </button>
+                      <button
+                        type="button"
+                        data-testid="pdf-list-button"
+                        aria-label="PDF一覧を表示"
+                        onClick={() => router.push('/pdf-list')}
+                        className="bg-[#6366f1] hover:bg-[#4f46e5] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+                      >
+                        <BiFile className="h-4 w-4" />
+                        <span className="hidden sm:inline">PDF一覧</span>
+                        <span className="sm:hidden">PDF</span>
                       </button>
                       <button
                         onClick={handleResetDisplay}

@@ -23,17 +23,28 @@ export default function MfaVerifyPage() {
     }
 
     try {
-      const data = await authApi.verifyMfa({
+      await authApi.verifyMfa({
         temporary_token: temporaryToken,
         totp_code: totpCode,
       });
 
-      if (data.access_token) {
-        tokenUtils.setToken(data.access_token);
-        tokenUtils.removeTemporaryToken();
-        router.push('/dashboard');
+      // Cookie認証: access_tokenはサーバー側でCookieに設定される
+      // レスポンス成功 = 認証成功
+      tokenUtils.removeTemporaryToken();
+
+      // ログインユーザーの情報を取得して適切なページに遷移
+      const currentUser = await authApi.getCurrentUser();
+
+      if (currentUser.role !== 'owner' && !currentUser.office) {
+        // ownerではなく、事業所にも所属していない場合
+        router.push('/auth/select-office');
       } else {
-        setError('MFA検証に失敗しました。');
+        // それ以外はダッシュボードへ
+        const params = new URLSearchParams({
+          hotbar_message: 'MFA認証に成功しました',
+          hotbar_type: 'success'
+        });
+        router.push(`/dashboard?${params.toString()}`);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'MFA検証に失敗しました。';

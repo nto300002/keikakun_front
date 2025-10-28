@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { authApi, officeApi, tokenUtils } from '@/lib/auth';
+import { authApi, officeApi } from '@/lib/auth';
 import { StaffResponse } from '@/types/staff';
 import { OfficeResponse } from '@/types/office';
 import AdminMenu from '@/components/protected/admin/AdminMenu';
@@ -15,10 +15,8 @@ export default function AdminPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!tokenUtils.getToken()) {
-        router.push('/auth/login');
-        return;
-      }
+      // Cookie認証: httpOnly Cookieから自動的に認証
+      // 401エラー時は http.ts で自動的にログインページにリダイレクト
 
       try {
         const [user, officeData] = await Promise.all([
@@ -41,8 +39,7 @@ export default function AdminPage() {
         setOffice(officeData);
       } catch (error) {
         console.error('AdminPage: データ取得エラー', error);
-        tokenUtils.removeToken();
-        router.push('/auth/login');
+        // Cookie認証: 401エラーは http.ts で自動処理されるため、ここでは何もしない
       } finally {
         setIsLoading(false);
       }

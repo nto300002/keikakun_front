@@ -36,16 +36,12 @@ export default function LoginForm() {
         rememberMe: formData.rememberMe
       });
 
-      if (data.access_token) {
-        tokenUtils.setToken(data.access_token);
-
-        // セッション期間と期限をlocalStorageに保存
-        if (data.session_duration) {
-          const expiresAt = new Date(Date.now() + data.session_duration * 1000);
-          localStorage.setItem('session_duration', data.session_duration.toString());
-          localStorage.setItem('session_expires_at', expiresAt.toISOString());
-        }
-        
+      if (data.requires_mfa_verification && data.temporary_token) {
+        // MFA認証が必要な場合
+        tokenUtils.setTemporaryToken(data.temporary_token);
+        router.push('/auth/mfa-verify');
+      } else {
+        // ログイン成功（Cookieで管理される）
         // ログインユーザーの情報を取得
         const currentUser = await authApi.getCurrentUser();
 
@@ -61,13 +57,6 @@ export default function LoginForm() {
           });
           router.push(`/dashboard?${params.toString()}`);
         }
-      } else if (data.requires_mfa_verification && data.temporary_token) {
-        // MFA認証が必要な場合
-        tokenUtils.setTemporaryToken(data.temporary_token);
-        router.push('/auth/mfa-verify');
-      } else {
-        // 予期せぬレスポンス
-        setError('ログインプロセスを完了できませんでした。予期せぬエラーが発生しました。');
       }
 
     } catch (err) {

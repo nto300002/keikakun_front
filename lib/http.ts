@@ -48,9 +48,12 @@ const handleLogout = async () => {
     console.error('Failed to disable MFA on logout:', error);
   } finally {
     tokenUtils.removeToken();
-    // ログインページ以外にいる場合のみリダイレクト
-    if (window.location.pathname !== '/auth/login') {
-      window.location.href = '/auth/login';
+    // クライアント側でのみリダイレクト処理を実行
+    if (typeof window !== 'undefined') {
+      // ログインページ以外にいる場合のみリダイレクト
+      if (window.location.pathname !== '/auth/login') {
+        window.location.href = '/auth/login';
+      }
     }
   }
 };
@@ -58,6 +61,9 @@ const handleLogout = async () => {
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   const token = tokenUtils.getToken();
+
+  console.log('[DEBUG HTTP] Request URL:', url);
+  console.log('[DEBUG HTTP] Has token:', !!token);
 
   const defaultHeaders: HeadersInit = {
     'Content-Type': 'application/json',
@@ -75,17 +81,24 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     },
   };
 
+  console.log('[DEBUG HTTP] Request config:', { method: config.method || 'GET', headers: config.headers });
+
   const response = await fetch(url, config);
+  console.log('[DEBUG HTTP] Response status:', response.status, response.statusText);
 
   if (!response.ok) {
+    console.error('[DEBUG HTTP] Response not OK. Status:', response.status);
     if (response.status === 401) {
       // 認証エラーの場合はログアウト処理
+      console.error('[DEBUG HTTP] 401 Unauthorized - triggering logout');
       await handleLogout();
       // エラーを投げて処理を中断
       throw new Error('Not authenticated');
     }
     const errorData = await response.json().catch(() => ({ detail: `Request failed with status ${response.status}` }));
+    console.error('[DEBUG HTTP] Error data:', errorData);
     const errorMessage = formatErrorMessage(errorData);
+    console.error('[DEBUG HTTP] Formatted error message:', errorMessage);
     throw new Error(errorMessage);
   }
 

@@ -38,12 +38,22 @@ export default function AdminLoginForm() {
         password: data.password,
       });
 
-      if (!response || !response.access_token) {
-        // 明示的に失敗扱いにする
-        throw new Error('認証トークンが返却されませんでした。')
+      // Cookie認証: access_tokenはサーバー側でCookieに設定される
+      // MFA認証が必要な場合の処理
+      if (response.requires_mfa_verification && response.temporary_token) {
+        tokenUtils.setTemporaryToken(response.temporary_token);
+        router.push('/auth/mfa-verify');
+        return;
       }
-      tokenUtils.setToken(response.access_token);
-      router.push('/auth/admin/office_setup');
+
+      // ログイン成功 - Cookieが有効であることを確認してから遷移
+      try {
+        await authApi.getCurrentUser();
+        router.push('/auth/admin/office_setup');
+      } catch (verifyError) {
+        console.error('Cookie verification failed:', verifyError);
+        setFormError('root', { message: '認証に失敗しました。もう一度お試しください。' });
+      }
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : String(error)
       setFormError('root', { message: msg });

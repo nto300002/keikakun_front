@@ -3,7 +3,7 @@
 import { useState, useEffect, ReactNode, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { authApi, tokenUtils, officeApi } from '@/lib/auth';
+import { authApi, officeApi } from '@/lib/auth';
 import { StaffResponse } from '@/types/staff';
 
 
@@ -15,10 +15,8 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!tokenUtils.getToken()) {
-        router.push('/auth/login');
-        return;
-      }
+      // Cookie認証: tokenUtils.getToken()は使用しない
+      // 代わりにgetCurrentUser()を呼び出して認証状態を確認
 
       try {
         const [user, office] = await Promise.all([
@@ -38,8 +36,9 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
       } catch (error) {
         console.error('認証またはデータ取得に失敗しました', error);
-        tokenUtils.removeToken();
-        router.push('/auth/login');
+        // Cookie認証では、ログアウトエンドポイントを呼び出してCookieを削除
+        // (http.tsのhandleLogout()が自動的に呼ばれる)
+        // ここでは何もせずにログイン画面にリダイレクトされるのを待つ
       } finally {
         setIsLoading(false);
       }
@@ -50,15 +49,16 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
   const handleLogout = async () => {
     try {
       await authApi.logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
-    } finally {
-      tokenUtils.removeToken();
+      // Cookie認証: Cookieはサーバー側で削除される
       const params = new URLSearchParams({
           hotbar_message: 'ログアウトしました',
           hotbar_type: 'success'
       });
       router.push(`/auth/login?${params.toString()}`);
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // エラーが発生してもログイン画面にリダイレクト
+      router.push('/auth/login');
     }
   };
 

@@ -4,7 +4,6 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { QRCodeCanvas } from 'qrcode.react'
 import { http } from '@/lib/http'
-import { tokenUtils } from '@/lib/auth'
 
 type EnrollResponse = {
   qr_code_uri: string
@@ -20,22 +19,14 @@ function MfaSetupFormComponent() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const accessToken = tokenUtils.getToken()
-        if (!accessToken) {
-            router.push('/auth/login')
-            return
-        }
+        // Cookie認証: httpOnly Cookieから自動的に認証
+        // 401エラー時は http.ts で自動的にログインページにリダイレクト
 
         const enrollMfa = async () => {
             try {
                 const response = await http.post<EnrollResponse>(
                     `/api/v1/auth/mfa/enroll`,
-                    {},
-                    {
-                        headers: {
-                            Authorization: `Bearer ${accessToken}`,
-                        },
-                    }
+                    {}
                 )
                 // http.request は body を直接返す（fetch ベース）
                 setQrCodeUri(response.qr_code_uri)
@@ -54,22 +45,13 @@ function MfaSetupFormComponent() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
-        const accessToken = tokenUtils.getToken()
-        if (!accessToken) {
-            router.push('/auth/login')
-            return
-        }
 
+        // Cookie認証: httpOnly Cookieから自動的に認証
         try {
-            await http.post(`/api/v1/auth/mfa/verify`, 
-                { totp_code: totpCode },
-                {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                }
+            await http.post(`/api/v1/auth/mfa/verify`,
+                { totp_code: totpCode }
             )
-            
+
             alert('2段階認証が有効になりました。ダッシュボードに戻ります。')
             router.push('/dashboard')
 

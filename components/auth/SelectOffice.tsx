@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { officeApi } from '@/lib/auth';
 import { OfficeResponse } from '@/types/office';
-import { tokenUtils } from '@/lib/auth';
 
 export default function SelectOffice() {
   const [offices, setOffices] = useState<OfficeResponse[]>([]);
@@ -13,23 +12,10 @@ export default function SelectOffice() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const [tokenReady, setTokenReady] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const token = tokenUtils.getToken();
-      if (token) {
-        setTokenReady(true);
-      } else {
-        setError("認証トークンが見つかりません。ログインページに戻ります。");
-        setTimeout(() => router.push('/auth/login'), 3000);
-      }
-    }
-  }, [router]);
-
-  useEffect(() => {
-    if (!tokenReady) return;
-
+    // Cookie認証: httpOnly Cookieから自動的に認証
+    // 401エラー時は http.ts で自動的にログインページにリダイレクト
     const fetchOffices = async () => {
       setIsLoading(true);
       try {
@@ -47,7 +33,7 @@ export default function SelectOffice() {
       }
     };
     fetchOffices();
-  }, [tokenReady]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

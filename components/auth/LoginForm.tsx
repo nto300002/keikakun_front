@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi, tokenUtils } from '@/lib/auth';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'; // アイコンをインポート
 
@@ -15,6 +15,7 @@ export default function LoginForm() {
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -50,12 +51,21 @@ export default function LoginForm() {
           // ownerではなく、事業所にも所属していない場合
           router.push('/auth/select-office');
         } else {
-          // それ以外はダッシュボードへ
+          // それ以外は、リダイレクト元があればそこへ、なければダッシュボードへ
+          const from = searchParams.get('from');
           const params = new URLSearchParams({
             hotbar_message: 'ログインに成功しました',
             hotbar_type: 'success'
           });
-          router.push(`/dashboard?${params.toString()}`);
+
+          // リダイレクト先を決定
+          let redirectTo = '/dashboard';
+          if (from && from.startsWith('/') && !from.startsWith('/auth')) {
+            // `from` パラメータが有効な内部パスの場合はそこへリダイレクト
+            redirectTo = from;
+          }
+
+          router.push(`${redirectTo}?${params.toString()}`);
         }
       }
 

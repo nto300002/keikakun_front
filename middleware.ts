@@ -102,20 +102,10 @@ export function middleware(request: NextRequest) {
 
   // 公開ルートへのアクセス
   if (isPublicPath(pathname)) {
-    // ログインページにアクセスしようとしているが、既に認証済みの場合
-    if (pathname === '/auth/login' && accessToken) {
-      console.log('[Middleware] Redirect to dashboard: Already authenticated');
-
-      // `from` パラメータがある場合は元のページへリダイレクト
-      const fromParam = request.nextUrl.searchParams.get('from');
-      if (fromParam && isProtectedPath(fromParam)) {
-        return NextResponse.redirect(new URL(fromParam, request.url));
-      }
-
-      // なければダッシュボードへリダイレクト
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-
+    // Cookie認証の制限: Next.jsミドルウェアはサーバーサイドで動作するため、
+    // クロスドメインCookie（k-back-*.run.app → www.keikakun.com）を読み取れない。
+    // したがって、ログインページへのアクセス制御はクライアントサイドで行う。
+    // ミドルウェアでは公開ページを常に許可する。
     console.log('[Middleware] Allowed: Public path');
     return NextResponse.next();
   }

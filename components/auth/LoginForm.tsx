@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi, tokenUtils } from '@/lib/auth';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'; // アイコンをインポート
@@ -16,6 +16,20 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // 既にログイン済みの場合はリダイレクト
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await authApi.getCurrentUser();
+        // 認証済みの場合はダッシュボードへ
+        router.push('/dashboard');
+      } catch {
+        // 未認証の場合は何もしない（ログインフォームを表示）
+      }
+    };
+    checkAuth();
+  }, [router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;

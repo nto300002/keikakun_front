@@ -63,17 +63,14 @@ export const supportPlanApi = {
     formData.append('plan_cycle_id', cycleId);
     formData.append('deliverable_type', deliverableType);
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
     console.log('API URL:', `${API_BASE_URL}/api/v1/support-plans/plan-deliverables`);
-    console.log('Has token:', !!token);
 
+    // Cookieで認証されるため、credentials: 'include'を追加
     return fetch(`${API_BASE_URL}/api/v1/support-plans/plan-deliverables`, {
       method: 'POST',
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
+      credentials: 'include', // Cookie自動送信
       body: formData,
     }).then(async (res) => {
       console.log('Response status:', res.status, res.statusText);
@@ -103,14 +100,12 @@ export const supportPlanApi = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
+    // Cookieで認証されるため、credentials: 'include'を追加
     return fetch(`${API_BASE_URL}/api/v1/support-plans/deliverables/${deliverableId}`, {
       method: 'PUT',
-      headers: {
-        ...(token && { Authorization: `Bearer ${token}` }),
-      },
+      credentials: 'include', // Cookie自動送信
       body: formData,
     }).then((res) => {
       if (!res.ok) throw new Error('Reupload failed');

@@ -7,6 +7,9 @@ import { LoginData, AuthResponse } from '@/types/auth';
 import { AdminCreateData, StaffCreateData, StaffResponse } from '@/types/staff';
 import { OfficeCreateData, OfficeResponse } from '@/types/office';
 
+// Re-export tokenUtils for convenience
+export { tokenUtils };
+
 // Authentication API calls
 export const authApi = {
   registerAdmin: (data: AdminCreateData): Promise<StaffResponse> => {
@@ -20,6 +23,7 @@ export const authApi = {
   login: async (data: LoginData): Promise<AuthResponse> => {
     const response = await fetch(`${API_BASE_URL}${API_V1_PREFIX}/auth/token`, {
       method: 'POST',
+      credentials: 'include', // Cookie送信のため追加
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
@@ -35,7 +39,12 @@ export const authApi = {
       throw new Error(error.detail || 'Login failed');
     }
 
-    return response.json();
+    const authResponse = await response.json();
+
+    // access_tokenはCookieで管理されるため、localStorageへの保存は不要
+    // Cookieはサーバー側で自動的に設定される
+
+    return authResponse;
   },
 
   getCurrentUser: (): Promise<StaffResponse> => {
@@ -73,5 +82,3 @@ export const officeApi = {
     return http.post(`${API_V1_PREFIX}/staff/associate-office`, { office_id });
   },
 };
-
-export { tokenUtils };

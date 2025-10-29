@@ -1,5 +1,3 @@
-import { tokenUtils } from './token';
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // FastAPIのバリデーションエラーの型定義
@@ -34,47 +32,41 @@ function formatErrorMessage(errorData: FastAPIErrorResponse): string {
 
 // ログアウト処理をまとめる
 const handleLogout = async () => {
+  // ログアウトエンドポイントを呼び出してCookieを削除
   try {
-    const token = tokenUtils.getToken();
-    if (token) {
-      await fetch(`${API_BASE_URL}/api/v1/auth/mfa/disable-on-logout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-    }
+    await fetch(`${API_BASE_URL}/api/v1/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
   } catch (error) {
-    console.error('Failed to disable MFA on logout:', error);
-  } finally {
-    tokenUtils.removeToken();
-    // クライアント側でのみリダイレクト処理を実行
-    if (typeof window !== 'undefined') {
-      // ログインページ以外にいる場合のみリダイレクト
-      if (window.location.pathname !== '/auth/login') {
-        window.location.href = '/auth/login';
-      }
+    console.error('Failed to logout:', error);
+    // ログアウトエンドポイントのエラーは無視（認証エラーの可能性があるため）
+  }
+
+  // クライアント側でのみリダイレクト処理を実行
+  if (typeof window !== 'undefined') {
+    // ログインページ以外にいる場合のみリダイレクト
+    if (window.location.pathname !== '/auth/login') {
+      window.location.href = '/auth/login';
     }
   }
 };
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const token = tokenUtils.getToken();
 
+  // Cookie認証: credentials: 'include' により自動的にCookieが送信される
+  // バックエンドはCookieから認証情報を取得する
   console.log('[DEBUG HTTP] Request URL:', url);
-  console.log('[DEBUG HTTP] Has token:', !!token);
+  console.log('[DEBUG HTTP] Environment:', typeof window === 'undefined' ? 'server' : 'client');
 
   const defaultHeaders: HeadersInit = {
     'Content-Type': 'application/json',
   };
 
-  if (token) {
-    defaultHeaders['Authorization'] = `Bearer ${token}`;
-  }
-
   const config: RequestInit = {
     ...options,
+    credentials: 'include', // Cookie送信のため必須
     headers: {
       ...defaultHeaders,
       ...options.headers,
@@ -111,18 +103,13 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 async function requestWithFormData<T>(endpoint: string, formData: FormData): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const token = tokenUtils.getToken();
 
-  const headers: HeadersInit = {};
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
+  // Cookie認証: credentials: 'include' により自動的にCookieが送信される
   const config: RequestInit = {
     method: 'POST',
-    headers,
+    credentials: 'include', // Cookie送信のため必須
     body: formData,
+    // Content-Typeヘッダーは指定しない（ブラウザが自動的にmultipart/form-dataを設定）
   };
 
   const response = await fetch(url, config);

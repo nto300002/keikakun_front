@@ -54,11 +54,13 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
           hotbar_message: 'ログアウトしました',
           hotbar_type: 'success'
       });
-      router.push(`/auth/login?${params.toString()}`);
+      // router.push()ではなくwindow.location.hrefを使用して完全なページリロードを強制
+      // これにより、Cookie削除が確実に反映された状態でログインページが読み込まれる
+      window.location.href = `/auth/login?${params.toString()}`;
     } catch (error) {
       console.error('Logout failed:', error);
       // エラーが発生してもログイン画面にリダイレクト
-      router.push('/auth/login');
+      window.location.href = '/auth/login';
     }
   };
 

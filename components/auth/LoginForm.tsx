@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi, tokenUtils } from '@/lib/auth';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'; // アイコンをインポート
@@ -12,10 +12,32 @@ export default function LoginForm() {
     rememberMe: false
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  // 既にログイン済みの場合はダッシュボードにリダイレクト
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        await authApi.getCurrentUser();
+        // 認証済みの場合、リダイレクト元があればそこへ、なければダッシュボードへ
+        const from = searchParams.get('from');
+        if (from && from.startsWith('/') && !from.startsWith('/auth')) {
+          router.push(from);
+        } else {
+          router.push('/dashboard');
+        }
+      } catch {
+        // 未認証の場合は何もしない（ログインフォームを表示）
+      } finally {
+        setIsCheckingAuth(false);
+      }
+    };
+    checkAuth();
+  }, [router, searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -76,6 +98,15 @@ export default function LoginForm() {
       setIsLoading(false);
     }
   };
+
+  // 認証チェック中はローディング表示
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-[#0C1421] flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-[#10B981]"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">

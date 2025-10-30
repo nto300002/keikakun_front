@@ -87,35 +87,20 @@ export function middleware(request: NextRequest) {
 
   // 保護されたルートへのアクセス
   if (isProtectedPath(pathname)) {
-    if (!accessToken) {
-      console.log('[Middleware] Blocked: No access token for protected path');
-
-      // 認証されていない場合はログインページにリダイレクト
-      // 元のURLを保存して、ログイン後に戻れるようにする
-      const loginUrl = createRedirectUrl(request, '/auth/login');
-      return NextResponse.redirect(loginUrl);
-    }
-
-    console.log('[Middleware] Allowed: Access token found for protected path');
+    // Cookie認証の制限: Next.jsミドルウェアはサーバーサイドで動作するため、
+    // クロスドメインCookie（k-back-*.run.app → www.keikakun.com）を読み取れない。
+    // したがって、保護されたルートへのアクセス制御はクライアントサイド（ProtectedLayout.tsx）で行う。
+    // ミドルウェアでは保護されたルートを常に許可し、クライアント側で認証チェックを実行する。
+    console.log('[Middleware] Allowed: Protected path (auth check deferred to client-side)');
     return NextResponse.next();
   }
 
   // 公開ルートへのアクセス
   if (isPublicPath(pathname)) {
-    // ログインページにアクセスしようとしているが、既に認証済みの場合
-    if (pathname === '/auth/login' && accessToken) {
-      console.log('[Middleware] Redirect to dashboard: Already authenticated');
-
-      // `from` パラメータがある場合は元のページへリダイレクト
-      const fromParam = request.nextUrl.searchParams.get('from');
-      if (fromParam && isProtectedPath(fromParam)) {
-        return NextResponse.redirect(new URL(fromParam, request.url));
-      }
-
-      // なければダッシュボードへリダイレクト
-      return NextResponse.redirect(new URL('/dashboard', request.url));
-    }
-
+    // Cookie認証の制限: Next.jsミドルウェアはサーバーサイドで動作するため、
+    // クロスドメインCookie（k-back-*.run.app → www.keikakun.com）を読み取れない。
+    // したがって、ログインページへのアクセス制御はクライアントサイドで行う。
+    // ミドルウェアでは公開ページを常に許可する。
     console.log('[Middleware] Allowed: Public path');
     return NextResponse.next();
   }

@@ -1,50 +1,42 @@
 'use client';
 
 import { useState, useEffect, ReactNode, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authApi, officeApi } from '@/lib/auth';
-import { StaffResponse } from '@/types/staff';
 
+interface User {
+  id: string;
+  email: string;
+  username: string;
+  role: string;
+  office?: {
+    id: string;
+    name: string;
+  } | null;
+}
 
-export default function ProtectedLayout({ children }: { children: ReactNode }) {
-  const [staff, setStaff] = useState<StaffResponse | null>(null);
-  const [officeName, setOfficeName] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
+interface ProtectedLayoutClientProps {
+  children: ReactNode;
+  user: User;
+}
+
+/**
+ * 保護されたレイアウト（クライアントコンポーネント）
+ * サーバーコンポーネントから認証済みユーザー情報を受け取る
+ */
+export default function ProtectedLayoutClient({ children, user }: ProtectedLayoutClientProps) {
+  const [officeName, setOfficeName] = useState<string | null>(user.office?.name || null);
 
   useEffect(() => {
-    const fetchData = async () => {
-      // Cookie認証: tokenUtils.getToken()は使用しない
-      // 代わりにgetCurrentUser()を呼び出して認証状態を確認
-
-      try {
-        const [user, office] = await Promise.all([
-          authApi.getCurrentUser(),
-          officeApi.getMyOffice().catch(error => {
-            if (error.message.includes('404') || error.message.includes('Not Found')) {
-              return null;
-            }
-            throw error;
-          })
-        ]);
-
-        setStaff(user);
-        if (office) {
-          setOfficeName(office.name);
-        }
-
-      } catch (error) {
-        console.error('認証またはデータ取得に失敗しました', error);
-        // Cookie認証では、ログアウトエンドポイントを呼び出してCookieを削除
-        // (http.tsのhandleLogout()が自動的に呼ばれる)
-        // ここでは何もせずにログイン画面にリダイレクトされるのを待つ
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [router]);
+    // 事業所情報が未取得の場合のみ取得
+    if (!officeName) {
+      officeApi.getMyOffice()
+        .then(office => setOfficeName(office.name))
+        .catch(error => {
+          console.error('事業所情報の取得に失敗しました', error);
+        });
+    }
+  }, [officeName]);
 
   const handleLogout = async () => {
     try {
@@ -64,14 +56,6 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-900">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-400"></div>
-      </div>
-    );
-  }
-
   return (
     <Suspense fallback={null}> 
       <div className="min-h-screen bg-gray-900 text-gray-200 flex flex-col">
@@ -88,7 +72,7 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
 
               {/* Right Side */}
               <div className="flex items-center space-x-4">
-                {staff?.role === 'owner' && (
+                {user?.role === 'owner' && (
                   <Link href="/admin" className="text-sm font-medium text-gray-300 hover:text-white">
                     管理者設定
                   </Link>

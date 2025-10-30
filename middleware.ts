@@ -2,124 +2,44 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Next.js Middleware for Server-Side Authentication
+ * 簡素化されたMiddleware（DALパターン対応）
  *
- * このミドルウェアは保護されたルート（(protected)配下）へのアクセスを
- * サーバーサイドでチェックし、認証されていないユーザーをブロックします。
+ * - Cookie存在チェックのみ実施（軽量なリダイレクト判定）
+ * - 実際の認証検証はDAL (lib/dal.ts) で実施
+ * - CVE-2025-29927対策
  */
-
-// 認証が必要なパスのプレフィックス
-const PROTECTED_PATHS = [
-  '/dashboard',
-  '/recipients',
-  '/support_plan',
-  '/pdf-list',
-  '/profile',
-];
-
-// 認証不要なパス（公開ページ）
-const PUBLIC_PATHS = [
-  '/',
-  '/auth/login',
-  '/auth/signup',
-  '/auth/admin/login',
-  '/auth/admin/signup',
-  '/auth/admin/office_setup',
-  '/auth/signup-success',
-  '/auth/setup-success',
-  '/auth/select-office',
-  '/auth/verify-email',
-  '/auth/mfa-setup',
-  '/auth/mfa-verify',
-];
-
-/**
- * パスが保護されたルートかどうかを判定
- */
-function isProtectedPath(pathname: string): boolean {
-  return PROTECTED_PATHS.some(path => pathname.startsWith(path));
-}
-
-/**
- * パスが公開ルートかどうかを判定
- */
-function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some(path => pathname === path || pathname.startsWith(path));
-}
-
-/**
- * Cookieからアクセストークンを取得
- */
-function getAccessToken(request: NextRequest): string | undefined {
-  return request.cookies.get('access_token')?.value;
-}
-
-/**
- * リダイレクト前のURLを保存するためのクエリパラメータを生成
- */
-function createRedirectUrl(request: NextRequest, destination: string): string {
-  const url = new URL(destination, request.url);
-
-  // 現在のパスを `from` パラメータとして保存
-  const currentPath = request.nextUrl.pathname + request.nextUrl.search;
-  url.searchParams.set('from', currentPath);
-
-  return url.toString();
-}
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const accessToken = getAccessToken(request);
+  const accessToken = request.cookies.get('access_token');
 
-  console.log('[Middleware] Path:', pathname);
-  console.log('[Middleware] Has access token:', !!accessToken);
+  // 保護ルート
+  const isProtectedPath = pathname.startsWith('/dashboard') ||
+                          pathname.startsWith('/recipients') ||
+                          pathname.startsWith('/support_plan') ||
+                          pathname.startsWith('/pdf-list') ||
+                          pathname.startsWith('/admin') ||
+                          pathname.startsWith('/profile');
 
-  // 静的ファイルやAPIルートは処理をスキップ
-  if (
-    pathname.startsWith('/_next') ||
-    pathname.startsWith('/api') ||
-    pathname.includes('/favicon.ico') ||
-    pathname.includes('/images/') ||
-    pathname.includes('/fonts/')
-  ) {
-    return NextResponse.next();
+  // 公開ルート
+  const isPublicPath = pathname.startsWith('/auth/login') ||
+                       pathname.startsWith('/auth/signup') ||
+                       pathname.startsWith('/auth/admin/login') || // 後に office_ownerに変更(admin -> office_owner)
+                       pathname.startsWith('/auth/admin/signup') ||
+                       pathname === '/';
+
+  // 保護ルートでCookieがない場合のみリダイレクト
+  if (isProtectedPath && !accessToken) {
+    const loginUrl = new URL('/auth/login', request.url);
+    loginUrl.searchParams.set('from', pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
-  // 保護されたルートへのアクセス
-  if (isProtectedPath(pathname)) {
-    // Cookie認証の制限: Next.jsミドルウェアはサーバーサイドで動作するため、
-    // クロスドメインCookie（k-back-*.run.app → www.keikakun.com）を読み取れない。
-    // したがって、保護されたルートへのアクセス制御はクライアントサイド（ProtectedLayout.tsx）で行う。
-    // ミドルウェアでは保護されたルートを常に許可し、クライアント側で認証チェックを実行する。
-    console.log('[Middleware] Allowed: Protected path (auth check deferred to client-side)');
-    return NextResponse.next();
-  }
-
-  // 公開ルートへのアクセス
-  if (isPublicPath(pathname)) {
-    // Cookie認証の制限: Next.jsミドルウェアはサーバーサイドで動作するため、
-    // クロスドメインCookie（k-back-*.run.app → www.keikakun.com）を読み取れない。
-    // したがって、ログインページへのアクセス制御はクライアントサイドで行う。
-    // ミドルウェアでは公開ページを常に許可する。
-    console.log('[Middleware] Allowed: Public path');
-    return NextResponse.next();
-  }
-
-  // その他のパスは通過させる
-  console.log('[Middleware] Allowed: Other path');
   return NextResponse.next();
 }
 
-// ミドルウェアを適用するパスの設定
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder files
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
   ],
 };

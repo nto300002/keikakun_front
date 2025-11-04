@@ -1,5 +1,6 @@
 export interface AdminCreateData {
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
   password: string;
 }
@@ -10,9 +11,16 @@ export interface StaffCreateData extends AdminCreateData {
 
 export interface StaffResponse {
   id: string;
-  name: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
   email: string;
   role: 'owner' | 'manager' | 'employee';
   is_mfa_enabled: boolean;
   office?: { id: string; name: string; } | null;
+  // ふりがなフィールド（オプション）
+  last_name_furigana?: string;
+  first_name_furigana?: string;
+  // DEPRECATED: 後方互換性のため残す。新規コードではfull_nameを使用すること
+  name?: string;
 }

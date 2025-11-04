@@ -259,7 +259,7 @@ export default function AdminMenu({ staff, office }: AdminMenuProps) {
               <div className="p-3 rounded-lg bg-gray-700">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="font-semibold">{staff.name}</p>
+                    <p className="font-semibold">{staff.full_name}</p>
                     <p className="text-sm text-gray-400">{staff.email}</p>
                   </div>
                   <span
@@ -348,7 +348,7 @@ export default function AdminMenu({ staff, office }: AdminMenuProps) {
                   <div className="space-y-3">
                     <div>
                       <label className="text-gray-400 text-sm">氏名</label>
-                      <p className="text-white">{staff.name}</p>
+                      <p className="text-white">{staff.full_name}</p>
                     </div>
                     <div>
                       <label className="text-gray-400 text-sm">メールアドレス</label>

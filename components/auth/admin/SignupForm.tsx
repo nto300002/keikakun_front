@@ -10,11 +10,18 @@ import { authApi } from '@/lib/auth';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 
 const signupSchema = z.object({
-  name: z.string().min(1, '名前を入力してください'),
+  last_name: z.string()
+    .min(1, '姓を入力してください')
+    .max(50, '姓は50文字以内で入力してください')
+    .regex(/^[ぁ-ん ァ-ヶー一-龥々・　]+$/, '姓は日本語のみ使用可能です'),
+  first_name: z.string()
+    .min(1, '名を入力してください')
+    .max(50, '名は50文字以内で入力してください')
+    .regex(/^[ぁ-ん ァ-ヶー一-龥々・　]+$/, '名は日本語のみ使用可能です'),
   email: z.string().email('有効なメールアドレスを入力してください'),
   password: z.string()
     .min(8, 'パスワードは8文字以上で入力してください')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
       '英字大小文字・数字・記号を組み合わせてください'),
   confirmPassword: z.string(),
 }).refine(data => data.password === data.confirmPassword, {
@@ -50,15 +57,16 @@ export default function AdminSignupForm() {
 
     try {
       await authApi.registerAdmin({
-        name: data.name,
+        first_name: data.first_name,
+        last_name: data.last_name,
         email: data.email,
         password: data.password,
       });
 
       router.push('/auth/signup-success');
     } catch (error) {
-      setFormError('root', { 
-        message: error instanceof Error ? error.message : 'サインアップに失敗しました' 
+      setFormError('root', {
+        message: error instanceof Error ? error.message : 'サインアップに失敗しました'
       });
     } finally {
       setIsLoading(false);
@@ -88,14 +96,36 @@ export default function AdminSignupForm() {
               </div>
             )}
 
-            {/* ... name and email inputs ... */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                お名前 <span className="text-red-400">*</span>
-              </label>
-              <input id="name" type="text" {...register('name')} className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="山田 太郎" />
-              {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name.message}</p>}
+            {/* 名前フィールド (姓・名) */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="last_name" className="block text-sm font-medium text-gray-300 mb-2">
+                  姓 <span className="text-red-400">*</span>
+                </label>
+                <input
+                  id="last_name"
+                  type="text"
+                  {...register('last_name')}
+                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                  placeholder="山田"
+                />
+                {errors.last_name && <p className="text-red-400 text-sm mt-1">{errors.last_name.message}</p>}
+              </div>
+              <div>
+                <label htmlFor="first_name" className="block text-sm font-medium text-gray-300 mb-2">
+                  名 <span className="text-red-400">*</span>
+                </label>
+                <input
+                  id="first_name"
+                  type="text"
+                  {...register('first_name')}
+                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                  placeholder="太郎"
+                />
+                {errors.first_name && <p className="text-red-400 text-sm mt-1">{errors.first_name.message}</p>}
+              </div>
             </div>
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                 メールアドレス <span className="text-red-400">*</span>

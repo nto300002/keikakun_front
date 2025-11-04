@@ -605,12 +605,11 @@ export default function Dashboard() {
                                   📄 個別支援
                                 </DropdownMenuItem>
                                 </Link>
-                                <DropdownMenuItem>
-                                  📄 PDF一覧
-                                </DropdownMenuItem>
+                                <Link href={`/recipients/${recipient.id}`}>
                                 <DropdownMenuItem>
                                   📝 アセスメント
                                 </DropdownMenuItem>
+                                </Link>
                               </SmartDropdown>
                               <Link href={`/recipients/${recipient.id}/edit`}>
                                 <button

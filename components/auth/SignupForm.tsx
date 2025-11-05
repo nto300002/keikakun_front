@@ -8,7 +8,8 @@ import { StaffCreateData } from '@/types/staff';
 
 export default function SignupForm() {
   const [formData, setFormData] = useState<StaffCreateData & { confirmPassword: string }> ({
-    name: '',
+    first_name: '',
+    last_name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -41,7 +42,8 @@ export default function SignupForm() {
     try {
       // registerAdmin を registerStaff に変更
       const data = await authApi.registerStaff({
-        name: formData.name,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
         email: formData.email,
         password: formData.password,
         role: formData.role,
@@ -82,12 +84,46 @@ export default function SignupForm() {
               </div>
             )}
 
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-2">
-                お名前 <span className="text-red-400">*</span>
-              </label>
-              <input id="name" name="name" type="text" required value={formData.name} onChange={handleChange} className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="山田 太郎" />
+            {/* 名前フィールド (姓・名) */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="last_name" className="block text-sm font-medium text-gray-300 mb-2">
+                  姓 <span className="text-red-400">*</span>
+                </label>
+                <input
+                  id="last_name"
+                  name="last_name"
+                  type="text"
+                  required
+                  value={formData.last_name}
+                  onChange={handleChange}
+                  pattern="^[ぁ-ん ァ-ヶー一-龥々・　]+$"
+                  maxLength={50}
+                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                  placeholder="山田"
+                  title="姓は日本語のみ使用可能です"
+                />
+              </div>
+              <div>
+                <label htmlFor="first_name" className="block text-sm font-medium text-gray-300 mb-2">
+                  名 <span className="text-red-400">*</span>
+                </label>
+                <input
+                  id="first_name"
+                  name="first_name"
+                  type="text"
+                  required
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  pattern="^[ぁ-ん ァ-ヶー一-龥々・　]+$"
+                  maxLength={50}
+                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                  placeholder="太郎"
+                  title="名は日本語のみ使用可能です"
+                />
+              </div>
             </div>
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                 メールアドレス <span className="text-red-400">*</span>

@@ -2,6 +2,9 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
+import EmployeeActionRequestModal from '@/components/common/EmployeeActionRequestModal';
+import { useStaffRole } from '@/hooks/useStaffRole';
+import { ActionType, ResourceType } from '@/types/employeeActionRequest';
 
 interface PlanDeliverableModalProps {
   isOpen: boolean;
@@ -35,6 +38,11 @@ export default function PlanDeliverableModal({
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
   const [loadedPdfUrl, setLoadedPdfUrl] = useState<string | null>(null);
+
+  // Employee Action Request Modal state
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+
+  const { isEmployee } = useStaffRole();
 
   // PDFをBlobとして読み込む
   useEffect(() => {
@@ -138,6 +146,19 @@ export default function PlanDeliverableModal({
       return;
     }
 
+    // Employeeの場合はリクエスト申請モーダルを表示
+    if (isEmployee) {
+      setIsRequestModalOpen(true);
+      return;
+    }
+
+    // Manager/Ownerの場合は直接実行
+    await executeUpload();
+  };
+
+  const executeUpload = async () => {
+    if (!selectedFile) return;
+
     setIsUploading(true);
     setUploadProgress(0);
 
@@ -175,6 +196,12 @@ export default function PlanDeliverableModal({
       setIsUploading(false);
       setUploadProgress(0);
     }
+  };
+
+  const handleRequestSuccess = () => {
+    // リクエスト送信成功時の処理
+    onClose();
+    setSelectedFile(null);
   };
 
 
@@ -338,6 +365,24 @@ export default function PlanDeliverableModal({
           </button>
         </div>
       </div>
+
+      {/* Employee Action Request Modal */}
+      {selectedFile && (
+        <EmployeeActionRequestModal
+          isOpen={isRequestModalOpen}
+          onClose={() => setIsRequestModalOpen(false)}
+          onSuccess={handleRequestSuccess}
+          actionType={deliverableId && existingPdfUrl ? ActionType.UPDATE : ActionType.CREATE}
+          resourceType={ResourceType.SUPPORT_PLAN_STATUS}
+          requestData={{
+            step_type: stepType,
+            cycle_number: cycleNumber,
+            file_name: selectedFile.name,
+            file_size: selectedFile.size,
+          }}
+          actionDescription={`${getStepLabel()}のPDFを${deliverableId && existingPdfUrl ? '再' : ''}アップロード`}
+        />
+      )}
     </div>
   );
 }

@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DateDrumPicker from '@/components/ui/DateDrumPicker';
+import EmployeeActionRequestModal from '@/components/common/EmployeeActionRequestModal';
+import { useStaffRole } from '@/hooks/useStaffRole';
+import { ActionType, ResourceType } from '@/types/employeeActionRequest';
 
 // Basic Information Section
 interface BasicInfoData {
@@ -215,6 +218,12 @@ export default function UserRegistrationForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
 
+  // Employee Action Request Modal state
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
+
+  const { isEmployee } = useStaffRole();
+
   const sections = [
     { id: 0, title: '基本情報', description: '氏名・ふりがな・生年月日・性別' },
     { id: 1, title: '連絡先・住所情報', description: '住所・居住形態・交通手段・電話番号' },
@@ -288,13 +297,25 @@ export default function UserRegistrationForm() {
       return;
     }
 
+    // Employeeの場合はリクエスト申請モーダルを表示
+    if (isEmployee) {
+      setPendingFormData(formData);
+      setIsRequestModalOpen(true);
+      return;
+    }
+
+    // Manager/Ownerの場合は直接実行
+    await executeSubmit(formData);
+  };
+
+  const executeSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
       // Import the API client and transformer
       const { welfareRecipientsApi, transformFormDataToBackend } = await import('@/lib/welfare-recipients');
 
       // Transform form data to backend format
-      const registrationData = transformFormDataToBackend(formData);
+      const registrationData = transformFormDataToBackend(data);
 
       // Submit to API
       const response = await welfareRecipientsApi.create(registrationData);
@@ -315,6 +336,11 @@ export default function UserRegistrationForm() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRequestSuccess = () => {
+    // リクエスト送信成功時の処理
+    router.push('/dashboard?message=' + encodeURIComponent('利用者登録リクエストを送信しました。Manager/Ownerの承認をお待ちください。'));
   };
 
   // Add emergency contact
@@ -1021,6 +1047,25 @@ export default function UserRegistrationForm() {
             </div>
           </div>
         </div>
+
+      {/* Employee Action Request Modal */}
+      {pendingFormData && (
+        <EmployeeActionRequestModal
+          isOpen={isRequestModalOpen}
+          onClose={() => {
+            setIsRequestModalOpen(false);
+            setPendingFormData(null);
+          }}
+          onSuccess={handleRequestSuccess}
+          actionType={ActionType.CREATE}
+          resourceType={ResourceType.WELFARE_RECIPIENT}
+          requestData={{
+            recipient_name: `${pendingFormData.basicInfo.lastName} ${pendingFormData.basicInfo.firstName}`,
+            form_data: pendingFormData,
+          }}
+          actionDescription={`利用者「${pendingFormData.basicInfo.lastName} ${pendingFormData.basicInfo.firstName}」を登録`}
+        />
+      )}
     </>
   );
 }

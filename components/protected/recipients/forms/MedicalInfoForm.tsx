@@ -2,9 +2,6 @@
 
 import { useState } from 'react';
 import { assessmentApi, type MedicalInfo, type MedicalInfoInput } from '@/lib/assessment';
-import EmployeeActionRequestModal from '@/components/common/EmployeeActionRequestModal';
-import { useStaffRole } from '@/hooks/useStaffRole';
-import { ActionType, ResourceType } from '@/types/employeeActionRequest';
 
 interface MedicalInfoFormProps {
   recipientId: string;
@@ -28,25 +25,8 @@ export default function MedicalInfoForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Employee Action Request Modal state
-  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
-
-  const { isEmployee } = useStaffRole();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Employeeの場合はリクエスト申請モーダルを表示
-    if (isEmployee) {
-      setIsRequestModalOpen(true);
-      return;
-    }
-
-    // Manager/Ownerの場合は直接実行
-    await executeSubmit();
-  };
-
-  const executeSubmit = async () => {
     setIsSubmitting(true);
     setError(null);
 
@@ -63,11 +43,6 @@ export default function MedicalInfoForm({
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleRequestSuccess = () => {
-    // リクエスト送信成功時の処理
-    onSuccess();
   };
 
   return (
@@ -160,20 +135,6 @@ export default function MedicalInfoForm({
           {medicalInfo ? '更新' : '追加'}
         </button>
       </div>
-
-      {/* Employee Action Request Modal */}
-      <EmployeeActionRequestModal
-        isOpen={isRequestModalOpen}
-        onClose={() => setIsRequestModalOpen(false)}
-        onSuccess={handleRequestSuccess}
-        actionType={medicalInfo ? ActionType.UPDATE : ActionType.CREATE}
-        resourceType={ResourceType.WELFARE_RECIPIENT}
-        resourceId={recipientId}
-        requestData={{
-          medical_info: formData,
-        }}
-        actionDescription={`医療基本情報を${medicalInfo ? '更新' : '登録'}`}
-      />
     </form>
   );
 }

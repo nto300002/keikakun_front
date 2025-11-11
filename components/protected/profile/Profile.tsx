@@ -54,6 +54,9 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
   // Role変更リクエストモーダル用のstate
   const [isRoleChangeModalOpen, setIsRoleChangeModalOpen] = useState<boolean>(false);
 
+  // 権限説明ポップオーバー用のstate
+  const [isRoleHelpOpen, setIsRoleHelpOpen] = useState<boolean>(false);
+
   // フィードバック用のstate
   const [feedbackContent, setFeedbackContent] = useState<string>('');
 
@@ -507,7 +510,62 @@ ${feedbackContent}
 
                 {/* 権限 */}
                 <div>
-                  <label className="text-gray-400 text-sm block mb-2">権限</label>
+                  <div className="flex items-center gap-2 mb-2">
+                    <label className="text-gray-400 text-sm">権限</label>
+                    <div className="relative">
+                      <button
+                        onClick={() => setIsRoleHelpOpen(!isRoleHelpOpen)}
+                        className="w-5 h-5 rounded-full bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 flex items-center justify-center text-xs font-bold transition-colors"
+                        title="権限の説明を表示"
+                      >
+                        ?
+                      </button>
+                      {isRoleHelpOpen && (
+                        <>
+                          {/* 背景オーバーレイ */}
+                          <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setIsRoleHelpOpen(false)}
+                          />
+                          {/* ポップオーバー */}
+                          <div className="absolute left-0 top-full mt-2 w-80 bg-[#0f1419] border border-[#2a2a3e] rounded-lg shadow-xl z-50 p-4">
+                            <div className="flex items-start justify-between mb-3">
+                              <h4 className="text-white font-semibold text-sm">権限について</h4>
+                              <button
+                                onClick={() => setIsRoleHelpOpen(false)}
+                                className="text-gray-400 hover:text-white transition-colors"
+                                aria-label="閉じる"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                            <div className="space-y-3 text-sm">
+                              <div>
+                                <div className="font-medium text-blue-400 mb-1">管理者(事務所オーナー)</div>
+                                <p className="text-gray-300 text-xs leading-relaxed">
+                                  事務所の情報やスタッフを管理できる
+                                </p>
+                              </div>
+                              <div>
+                                <div className="font-medium text-blue-400 mb-1">マネージャー</div>
+                                <p className="text-gray-300 text-xs leading-relaxed">
+                                  個別支援計画のPDFアップロード、利用者の作成・編集・削除
+                                </p>
+                              </div>
+                              <div>
+                                <div className="font-medium text-blue-400 mb-1">一般社員</div>
+                                <p className="text-gray-300 text-xs leading-relaxed">
+                                  利用者の作成・編集・削除には許可が必要、PDFアップロード不可
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="inline-block px-3 py-1 rounded-2xl text-sm font-medium bg-[#4a9eff] text-white">

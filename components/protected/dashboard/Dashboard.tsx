@@ -14,6 +14,9 @@ import { SmartDropdown } from '@/components/ui/smart-dropdown';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { TableLoadingOverlay } from '@/components/ui/table-loading-overlay';
 import CalendarLinkButton from '@/components/ui/google/CalendarLinkButton';
+import EmployeeActionRequestModal from '@/components/common/EmployeeActionRequestModal';
+import { useStaffRole } from '@/hooks/useStaffRole';
+import { ActionType, ResourceType } from '@/types/employeeActionRequest';
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -34,6 +37,15 @@ export default function Dashboard() {
     isUpcoming: false,
     status: null,
   });
+
+  // Employee Action Request Modal state
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [pendingDeleteRequest, setPendingDeleteRequest] = useState<{
+    recipientId: string;
+    recipientName: string;
+  } | null>(null);
+
+  const { isEmployee } = useStaffRole();
 
     
 
@@ -162,6 +174,14 @@ export default function Dashboard() {
   }, []);
 
   const handleDeleteRecipient = useCallback(async (recipientId: string, recipientName: string) => {
+    // Employeeの場合はリクエスト申請モーダルを表示
+    if (isEmployee) {
+      setPendingDeleteRequest({ recipientId, recipientName });
+      setIsRequestModalOpen(true);
+      return;
+    }
+
+    // Manager/Ownerの場合は従来通り削除確認
     if (window.confirm(`${recipientName}さんを本当に削除しますか？この操作は元に戻せません。`)) {
       try {
         setIsLoading(true);
@@ -186,7 +206,13 @@ export default function Dashboard() {
         setIsLoading(false);
       }
     }
-  }, []);
+  }, [isEmployee]);
+
+  const handleRequestSuccess = () => {
+    // リクエスト送信成功時の処理
+    alert('削除リクエストを送信しました。Manager/Ownerの承認をお待ちください。');
+    setPendingDeleteRequest(null);
+  };
 
   const getStepBadgeStyle = (step: string | null, cycleNumber: number) => {
     const baseStyle = 'inline-block px-2 py-1 rounded text-xs font-medium';
@@ -758,6 +784,25 @@ export default function Dashboard() {
           </>
         )}
       </main>
+
+      {/* Employee Action Request Modal */}
+      {pendingDeleteRequest && (
+        <EmployeeActionRequestModal
+          isOpen={isRequestModalOpen}
+          onClose={() => {
+            setIsRequestModalOpen(false);
+            setPendingDeleteRequest(null);
+          }}
+          onSuccess={handleRequestSuccess}
+          actionType={ActionType.DELETE}
+          resourceType={ResourceType.WELFARE_RECIPIENT}
+          resourceId={pendingDeleteRequest.recipientId}
+          requestData={{
+            recipient_name: pendingDeleteRequest.recipientName,
+          }}
+          actionDescription={`利用者「${pendingDeleteRequest.recipientName}」を削除`}
+        />
+      )}
     </div>
   );
 }

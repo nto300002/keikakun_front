@@ -28,7 +28,9 @@ export default function NotificationsTab() {
         filteredNotices = filteredNotices.filter(
           (n) =>
             n.type === NoticeType.ROLE_CHANGE_PENDING ||
-            n.type === NoticeType.EMPLOYEE_ACTION_PENDING
+            n.type === NoticeType.ROLE_CHANGE_REQUEST_SENT ||
+            n.type === NoticeType.EMPLOYEE_ACTION_PENDING ||
+            n.type === NoticeType.EMPLOYEE_ACTION_REQUEST_SENT
         );
       } else if (filter === 'approved') {
         filteredNotices = filteredNotices.filter(

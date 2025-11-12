@@ -56,6 +56,15 @@ export default function NoticeCard({
           borderColor: 'border-yellow-700/50',
           textColor: 'text-yellow-400',
         };
+      case NoticeType.ROLE_CHANGE_REQUEST_SENT:
+      case NoticeType.EMPLOYEE_ACTION_REQUEST_SENT:
+        return {
+          icon: '📤',
+          color: 'blue',
+          bgColor: 'bg-blue-900/30',
+          borderColor: 'border-blue-700/50',
+          textColor: 'text-blue-400',
+        };
       default:
         return {
           icon: 'ℹ',
@@ -69,9 +78,14 @@ export default function NoticeCard({
 
   const noticeType = notice.type as NoticeType;
   const style = getNoticeStyle(noticeType);
+  // 承認/却下ボタンを表示するのは承認者向けのpending通知のみ（送信者向けの通知は除外）
   const isPendingNotice =
     noticeType === NoticeType.ROLE_CHANGE_PENDING ||
     noticeType === NoticeType.EMPLOYEE_ACTION_PENDING;
+  // 送信者向けの通知かどうか
+  const isRequesterNotice =
+    noticeType === NoticeType.ROLE_CHANGE_REQUEST_SENT ||
+    noticeType === NoticeType.EMPLOYEE_ACTION_REQUEST_SENT;
 
   return (
     <div
@@ -99,6 +113,10 @@ export default function NoticeCard({
                   ? noticeType === NoticeType.ROLE_CHANGE_PENDING
                     ? '権限変更リクエスト'
                     : '一般社員の作成、編集、削除リクエスト'
+                  : isRequesterNotice
+                  ? noticeType === NoticeType.ROLE_CHANGE_REQUEST_SENT
+                    ? '権限変更リクエスト送信済み'
+                    : '一般社員の作成、編集、削除リクエスト送信済み'
                   : noticeType === NoticeType.ROLE_CHANGE_APPROVED ||
                     noticeType === NoticeType.ROLE_CHANGE_REJECTED
                   ? '権限変更通知'

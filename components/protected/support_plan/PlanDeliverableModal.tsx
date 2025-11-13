@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { useStaffRole } from '@/hooks/useStaffRole';
 
 interface PlanDeliverableModalProps {
   isOpen: boolean;
@@ -35,6 +36,8 @@ export default function PlanDeliverableModal({
   const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
   const [isLoadingPdf, setIsLoadingPdf] = useState(false);
   const [loadedPdfUrl, setLoadedPdfUrl] = useState<string | null>(null);
+
+  const { isEmployee } = useStaffRole();
 
   // PDFをBlobとして読み込む
   useEffect(() => {
@@ -138,6 +141,13 @@ export default function PlanDeliverableModal({
       return;
     }
 
+    // アップロード実行
+    await executeUpload();
+  };
+
+  const executeUpload = async () => {
+    if (!selectedFile) return;
+
     setIsUploading(true);
     setUploadProgress(0);
 
@@ -176,8 +186,6 @@ export default function PlanDeliverableModal({
       setUploadProgress(0);
     }
   };
-
-
 
   if (!isOpen) return null;
 
@@ -261,62 +269,80 @@ export default function PlanDeliverableModal({
 
           {/* 削除確認は今は実装しない(非MVP) */}
 
-
-          {/* ドラッグ&ドロップエリア */}
-            <div
-              {...getRootProps()}
-              className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${
-                isDragActive
-                  ? 'border-[#4f46e5] bg-[#4f46e5]/10'
-                  : 'border-[#2a3441] hover:border-[#4f46e5]/50 hover:bg-[#0f1419]'
-              }`}
-            >
-              <input {...getInputProps()} />
-              <div className="flex flex-col items-center gap-3">
-                <span className="text-5xl">📎</span>
-                {selectedFile ? (
-                  <>
-                    <p className="text-white font-medium">{selectedFile.name}</p>
-                    <p className="text-xs text-[#9ca3af]">
-                      {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </>
-                ) : isDragActive ? (
-                  <p className="text-white">ここにドロップしてください</p>
-                ) : (
-                  <>
-                    <p className="text-white">
-                      PDFファイルをドラッグ&ドロップ
-                      <br />
-                      または<span className="text-[#4f46e5]">クリックして選択</span>
-                    </p>
-                    <p className="text-xs text-[#9ca3af]">最大ファイルサイズ: 10MB</p>
-                  </>
-                )}
+          {/* Employee権限の場合は閲覧のみのメッセージを表示 */}
+          {isEmployee ? (
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">⚠️</span>
+                <div>
+                  <p className="text-yellow-500 font-medium mb-1">閲覧専用モード</p>
+                  <p className="text-sm text-gray-300">
+                    一般の社員権限では個別支援計画のPDFをアップロードできません。
+                    <br />
+                    PDFのアップロードが必要な場合は、マネージャー職スタッフ/事務所オーナーにご依頼ください。
+                  </p>
+                </div>
               </div>
             </div>
-
-          {/* エラー表示 */}
-          {error && (
-            <div className="mt-4 bg-[#ef4444]/10 border border-[#ef4444] rounded-lg p-3">
-              <p className="text-[#ef4444] text-sm">⚠️ {error}</p>
-            </div>
-          )}
-
-          {/* アップロード進捗 */}
-          {isUploading && uploadProgress > 0 && (
-            <div className="mt-4">
-              <div className="flex justify-between text-sm text-[#9ca3af] mb-2">
-                <span>アップロード中...</span>
-                <span>{uploadProgress}%</span>
+          ) : (
+            <>
+              {/* ドラッグ&ドロップエリア（Manager/Ownerのみ） */}
+              <div
+                {...getRootProps()}
+                className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${
+                  isDragActive
+                    ? 'border-[#4f46e5] bg-[#4f46e5]/10'
+                    : 'border-[#2a3441] hover:border-[#4f46e5]/50 hover:bg-[#0f1419]'
+                }`}
+              >
+                <input {...getInputProps()} />
+                <div className="flex flex-col items-center gap-3">
+                  <span className="text-5xl">📎</span>
+                  {selectedFile ? (
+                    <>
+                      <p className="text-white font-medium">{selectedFile.name}</p>
+                      <p className="text-xs text-[#9ca3af]">
+                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    </>
+                  ) : isDragActive ? (
+                    <p className="text-white">ここにドロップしてください</p>
+                  ) : (
+                    <>
+                      <p className="text-white">
+                        PDFファイルをドラッグ&ドロップ
+                        <br />
+                        または<span className="text-[#4f46e5]">クリックして選択</span>
+                      </p>
+                      <p className="text-xs text-[#9ca3af]">最大ファイルサイズ: 10MB</p>
+                    </>
+                  )}
+                </div>
               </div>
-              <div className="w-full bg-[#0f1419] rounded-full h-2 overflow-hidden">
-                <div
-                  className="bg-[#4f46e5] h-full transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-            </div>
+
+              {/* エラー表示 */}
+              {error && (
+                <div className="mt-4 bg-[#ef4444]/10 border border-[#ef4444] rounded-lg p-3">
+                  <p className="text-[#ef4444] text-sm">⚠️ {error}</p>
+                </div>
+              )}
+
+              {/* アップロード進捗 */}
+              {isUploading && uploadProgress > 0 && (
+                <div className="mt-4">
+                  <div className="flex justify-between text-sm text-[#9ca3af] mb-2">
+                    <span>アップロード中...</span>
+                    <span>{uploadProgress}%</span>
+                  </div>
+                  <div className="w-full bg-[#0f1419] rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-[#4f46e5] h-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -327,15 +353,17 @@ export default function PlanDeliverableModal({
             disabled={isUploading}
             className="px-4 py-2 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
           >
-            キャンセル
+            {isEmployee ? '閉じる' : 'キャンセル'}
           </button>
-          <button
-            onClick={handleUpload}
-            disabled={!selectedFile || isUploading}
-            className="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-6 py-2 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isUploading ? 'アップロード中...' : 'アップロード'}
-          </button>
+          {!isEmployee && (
+            <button
+              onClick={handleUpload}
+              disabled={!selectedFile || isUploading}
+              className="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-6 py-2 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isUploading ? 'アップロード中...' : 'アップロード'}
+            </button>
+          )}
         </div>
       </div>
     </div>

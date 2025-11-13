@@ -1,19 +1,36 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { StaffResponse } from '@/types/staff';
 import { profileApi } from '@/lib/profile';
 import { StaffNameUpdate, PasswordChange, EmailChangeRequest } from '@/types/profile';
+import { StaffRole } from '@/types/enums';
+import RoleChangeModal from './RoleChangeModal';
 
 interface ProfileProps {
   staff: StaffResponse | null;
 }
 
-type TabType = 'staff_info' | 'feedback' | 'notifications';
+type TabType = 'staff_info' | 'feedback';
 
 export default function Profile({ staff: initialStaff }: ProfileProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('staff_info');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab') as TabType | null;
+
+  const [activeTab, setActiveTab] = useState<TabType>(
+    tabParam === 'feedback' || tabParam === 'staff_info'
+      ? tabParam
+      : 'staff_info'
+  );
   const [staff, setStaff] = useState<StaffResponse | null>(initialStaff);
+
+  // URLのクエリパラメータが変更されたときにタブを切り替え
+  useEffect(() => {
+    if (tabParam === 'feedback' || tabParam === 'staff_info') {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam]);
 
   // 名前編集用のstate
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
@@ -33,6 +50,12 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
   const [newEmail, setNewEmail] = useState<string>('');
   const [emailChangePassword, setEmailChangePassword] = useState<string>('');
   const [emailModalError, setEmailModalError] = useState<string | null>(null);
+
+  // Role変更リクエストモーダル用のstate
+  const [isRoleChangeModalOpen, setIsRoleChangeModalOpen] = useState<boolean>(false);
+
+  // 権限説明ポップオーバー用のstate
+  const [isRoleHelpOpen, setIsRoleHelpOpen] = useState<boolean>(false);
 
   // フィードバック用のstate
   const [feedbackContent, setFeedbackContent] = useState<string>('');
@@ -317,16 +340,6 @@ ${feedbackContent}
           >
             フィードバック
           </button>
-          <button
-            onClick={() => setActiveTab('notifications')}
-            className={`px-6 py-3 font-medium ${
-              activeTab === 'notifications'
-                ? 'bg-gray-900 text-white border-b-2 border-blue-500'
-                : 'text-gray-400 hover:text-white'
-            }`}
-          >
-            通知
-          </button>
         </div>
       </div>
 
@@ -495,6 +508,81 @@ ${feedbackContent}
                   </div>
                 </div>
 
+                {/* 権限 */}
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <label className="text-gray-400 text-sm">権限</label>
+                    <div className="relative">
+                      <button
+                        onClick={() => setIsRoleHelpOpen(!isRoleHelpOpen)}
+                        className="w-5 h-5 rounded-full bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 flex items-center justify-center text-xs font-bold transition-colors"
+                        title="権限の説明を表示"
+                      >
+                        ?
+                      </button>
+                      {isRoleHelpOpen && (
+                        <>
+                          {/* 背景オーバーレイ */}
+                          <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setIsRoleHelpOpen(false)}
+                          />
+                          {/* ポップオーバー */}
+                          <div className="absolute left-0 top-full mt-2 w-80 bg-[#0f1419] border border-[#2a2a3e] rounded-lg shadow-xl z-50 p-4">
+                            <div className="flex items-start justify-between mb-3">
+                              <h4 className="text-white font-semibold text-sm">権限について</h4>
+                              <button
+                                onClick={() => setIsRoleHelpOpen(false)}
+                                className="text-gray-400 hover:text-white transition-colors"
+                                aria-label="閉じる"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                            <div className="space-y-3 text-sm">
+                              <div>
+                                <div className="font-medium text-blue-400 mb-1">管理者(事務所オーナー)</div>
+                                <p className="text-gray-300 text-xs leading-relaxed">
+                                  事務所の情報やスタッフを管理できる
+                                </p>
+                              </div>
+                              <div>
+                                <div className="font-medium text-blue-400 mb-1">マネージャー</div>
+                                <p className="text-gray-300 text-xs leading-relaxed">
+                                  個別支援計画のPDFアップロード、利用者の作成・編集・削除
+                                </p>
+                              </div>
+                              <div>
+                                <div className="font-medium text-blue-400 mb-1">一般社員</div>
+                                <p className="text-gray-300 text-xs leading-relaxed">
+                                  利用者の作成・編集・削除には許可が必要、PDFアップロード不可
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block px-3 py-1 rounded-2xl text-sm font-medium bg-[#4a9eff] text-white">
+                        {staff?.role === 'owner' && '管理者'}
+                        {staff?.role === 'manager' && 'マネージャー'}
+                        {staff?.role === 'employee' && '従業員'}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => setIsRoleChangeModalOpen(true)}
+                      className="bg-gray-700/50 hover:bg-gray-600/70 text-blue-400 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      権限変更をリクエスト
+                    </button>
+                  </div>
+                </div>
+
                 {/* 事業所 */}
                 <div>
                   <label className="text-gray-400 text-sm block mb-1">事業所</label>
@@ -541,97 +629,6 @@ ${feedbackContent}
                 </div>
               </div>
 
-            </div>
-          </div>
-        )}
-
-        {/* 通知タブ */}
-        {activeTab === 'notifications' && (
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6">通知設定</h2>
-
-            <p className="text-gray-400 mb-6 text-sm">
-              通知の受信設定を管理します。
-            </p>
-
-            {/* 通知一覧カード */}
-            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-6 mb-6">
-              <h3 className="text-lg font-semibold mb-4">通知の種類</h3>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="text-gray-400 text-sm block mb-2">権限</label>
-                  <span className="inline-block px-3 py-1 rounded-2xl text-sm font-medium bg-[#4a9eff] text-white">
-                    {staff?.role === 'owner' && '管理者'}
-                    {staff?.role === 'manager' && 'マネージャー'}
-                    {staff?.role === 'employee' && '従業員'}
-                  </span>
-                </div>
-
-                <div>
-                  <label className="text-gray-400 text-sm block mb-2">通知ロール切替</label>
-                  <select className="w-full bg-[#0f1419] border border-[#2a2a3e] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500">
-                    <option value="manager">マネージャー</option>
-                    <option value="employee">従業員</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="text-gray-400 text-sm block mb-2">メモ</label>
-                  <textarea
-                    rows={4}
-                    placeholder="メモを入力してください..."
-                    className="w-full bg-[#0f1419] border border-[#2a2a3e] rounded-lg px-4 py-3 text-white placeholder-[#666] focus:outline-none focus:border-blue-500 resize-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-gray-400 text-sm block mb-2">検索</label>
-                  <input
-                    type="text"
-                    placeholder="例: 重要、期日"
-                    className="w-full bg-[#0f1419] border border-[#2a2a3e] rounded-lg px-4 py-2 text-white placeholder-[#666] focus:outline-none focus:border-blue-500"
-                  />
-                </div>
-
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg>
-                  保存
-                </button>
-              </div>
-            </div>
-
-            {/* 通知履歴 */}
-            <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-6">
-              <h3 className="text-lg font-semibold mb-4">通知履歴</h3>
-
-              {/* サンプル通知 */}
-              <div className="bg-[#1a2332] border border-[#2a2a3e] rounded-lg p-4 mb-3">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <p className="text-white font-medium mb-1">サンプル通知タイトル</p>
-                    <p className="text-gray-400 text-sm">内容の要約などが入ります</p>
-                  </div>
-                  <span className="px-3 py-1 rounded-lg text-sm font-semibold bg-[#f39c12] text-white">
-                    重要
-                  </span>
-                </div>
-
-                <p className="text-gray-300 text-sm mb-4">
-                  詳細: 通知の説明が入ります。
-                </p>
-
-                <div className="flex gap-3">
-                  <button className="bg-[#2ecc71] hover:bg-[#27ae60] text-white px-4 py-2 rounded-md text-sm font-medium">
-                    承認
-                  </button>
-                  <button className="bg-transparent border border-[#e74c3c] text-[#e74c3c] hover:bg-[#e74c3c20] px-4 py-2 rounded-md text-sm font-medium">
-                    拒否
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -702,6 +699,19 @@ ${feedbackContent}
             </div>
           </div>
         </div>
+      )}
+
+      {/* Role変更リクエストモーダル */}
+      {staff && (
+        <RoleChangeModal
+          currentRole={staff.role as StaffRole}
+          isOpen={isRoleChangeModalOpen}
+          onClose={() => setIsRoleChangeModalOpen(false)}
+          onSuccess={() => {
+            setSuccessMessage('権限変更リクエストを送信しました。承認をお待ちください。');
+            setTimeout(() => setSuccessMessage(null), 5000);
+          }}
+        />
       )}
 
       {/* メールアドレス変更モーダル */}

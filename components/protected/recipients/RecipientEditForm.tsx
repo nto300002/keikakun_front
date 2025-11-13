@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { welfareRecipientsApi, transformFormDataToBackend, type WelfareRecipient } from '@/lib/welfare-recipients';
 import DateDrumPicker from '@/components/ui/DateDrumPicker';
+import EmployeeActionRequestModal from '@/components/common/EmployeeActionRequestModal';
+import { useStaffRole } from '@/hooks/useStaffRole';
+import { ActionType, ResourceType } from '@/types/employeeActionRequest';
 
 // Basic Information Section
 interface BasicInfoData {
@@ -176,6 +179,12 @@ export default function RecipientEditForm({ recipientId, initialData, onCancel }
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Employee Action Request Modal state
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
+
+  const { isEmployee } = useStaffRole();
+
   const sections = [
     { id: 0, title: '基本情報', description: '氏名・ふりがな・生年月日・性別' },
     { id: 1, title: '連絡先・住所情報', description: '住所・居住形態・交通手段・電話番号' },
@@ -323,10 +332,22 @@ export default function RecipientEditForm({ recipientId, initialData, onCancel }
       return;
     }
 
+    // Employeeの場合はリクエスト申請モーダルを表示
+    if (isEmployee) {
+      setPendingFormData(formData);
+      setIsRequestModalOpen(true);
+      return;
+    }
+
+    // Manager/Ownerの場合は直接実行
+    await executeSubmit(formData);
+  };
+
+  const executeSubmit = async (data: FormData) => {
     setIsLoading(true);
     try {
       // Transform form data to backend format
-      const registrationData = transformFormDataToBackend(formData);
+      const registrationData = transformFormDataToBackend(data);
 
       // Update recipient via API
       await welfareRecipientsApi.update(recipientId, registrationData);
@@ -343,6 +364,11 @@ export default function RecipientEditForm({ recipientId, initialData, onCancel }
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRequestSuccess = () => {
+    // リクエスト送信成功時の処理
+    router.push('/dashboard?message=' + encodeURIComponent('利用者情報更新リクエストを送信しました。Manager/Ownerの承認をお待ちください。'));
   };
 
   // Add emergency contact
@@ -1066,6 +1092,26 @@ export default function RecipientEditForm({ recipientId, initialData, onCancel }
           </div>
         </div>
       </div>
+
+      {/* Employee Action Request Modal */}
+      {pendingFormData && (
+        <EmployeeActionRequestModal
+          isOpen={isRequestModalOpen}
+          onClose={() => {
+            setIsRequestModalOpen(false);
+            setPendingFormData(null);
+          }}
+          onSuccess={handleRequestSuccess}
+          actionType={ActionType.UPDATE}
+          resourceType={ResourceType.WELFARE_RECIPIENT}
+          resourceId={recipientId}
+          requestData={{
+            recipient_name: `${pendingFormData.basicInfo.lastName} ${pendingFormData.basicInfo.firstName}`,
+            form_data: pendingFormData,
+          }}
+          actionDescription={`利用者「${pendingFormData.basicInfo.lastName} ${pendingFormData.basicInfo.firstName}」の情報を更新`}
+        />
+      )}
     </div>
   );
 }

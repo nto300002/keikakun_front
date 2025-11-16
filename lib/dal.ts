@@ -79,7 +79,7 @@ export const verifySession = cache(async (): Promise<Session | null> => {
       },
     };
   } catch (error) {
-    console.error('[DAL] Session verification failed:', error);
+    console.error('[DAL] セッション検証に失敗しました:', error);
     return null;
   }
 });
@@ -104,7 +104,7 @@ export async function requireAuth(): Promise<Session> {
   const session = await verifySession();
 
   if (!session) {
-    throw new Error('Unauthorized: Authentication required');
+    throw new Error('未認証: 認証が必要です');
   }
 
   return session;
@@ -120,7 +120,7 @@ export async function requireRole(allowedRoles: string[]): Promise<Session> {
   const session = await requireAuth();
 
   if (!allowedRoles.includes(session.user.role)) {
-    throw new Error(`Forbidden: Required role is one of [${allowedRoles.join(', ')}]`);
+    throw new Error(`アクセス拒否: 必要な権限は [${allowedRoles.join(', ')}] のいずれかです`);
   }
 
   return session;
@@ -135,7 +135,7 @@ export async function requireOffice(): Promise<Session> {
   const session = await requireAuth();
 
   if (!session.user.office) {
-    throw new Error('Forbidden: Office membership required');
+    throw new Error('アクセス拒否: 事業所への所属が必要です');
   }
 
   return session;

@@ -39,7 +39,7 @@ const handleLogout = async () => {
       credentials: 'include',
     });
   } catch (error) {
-    console.error('Failed to logout:', error);
+    console.error('ログアウトに失敗しました:', error);
     // ログアウトエンドポイントのエラーは無視（認証エラーの可能性があるため）
   }
 
@@ -57,8 +57,8 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   // Cookie認証: credentials: 'include' により自動的にCookieが送信される
   // バックエンドはCookieから認証情報を取得する
-  console.log('[DEBUG HTTP] Request URL:', url);
-  console.log('[DEBUG HTTP] Environment:', typeof window === 'undefined' ? 'server' : 'client');
+  // console.log('[DEBUG HTTP] Request URL:', url);
+  // console.log('[DEBUG HTTP] Environment:', typeof window === 'undefined' ? 'server' : 'client');
 
   const defaultHeaders: HeadersInit = {
     'Content-Type': 'application/json',
@@ -73,10 +73,10 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     },
   };
 
-  console.log('[DEBUG HTTP] Request config:', { method: config.method || 'GET', headers: config.headers });
+  // console.log('[DEBUG HTTP] Request config:', { method: config.method || 'GET', headers: config.headers });
 
   const response = await fetch(url, config);
-  console.log('[DEBUG HTTP] Response status:', response.status, response.statusText);
+  // console.log('[DEBUG HTTP] Response status:', response.status, response.statusText);
 
   if (!response.ok) {
     console.error('[DEBUG HTTP] Response not OK. Status:', response.status);
@@ -85,9 +85,9 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
       console.error('[DEBUG HTTP] 401 Unauthorized - triggering logout');
       await handleLogout();
       // エラーを投げて処理を中断
-      throw new Error('Not authenticated');
+      throw new Error('認証されていません');
     }
-    const errorData = await response.json().catch(() => ({ detail: `Request failed with status ${response.status}` }));
+    const errorData = await response.json().catch(() => ({ detail: `リクエストが失敗しました (ステータス: ${response.status})` }));
     console.error('[DEBUG HTTP] Error data:', errorData);
     const errorMessage = formatErrorMessage(errorData);
     console.error('[DEBUG HTTP] Formatted error message:', errorMessage);
@@ -117,9 +117,9 @@ async function requestWithFormData<T>(endpoint: string, formData: FormData): Pro
   if (!response.ok) {
     if (response.status === 401) {
       await handleLogout();
-      throw new Error('Not authenticated');
+      throw new Error('認証されていません');
     }
-    const errorData = await response.json().catch(() => ({ detail: `Request failed with status ${response.status}` }));
+    const errorData = await response.json().catch(() => ({ detail: `リクエストが失敗しました (ステータス: ${response.status})` }));
     const errorMessage = formatErrorMessage(errorData);
     throw new Error(errorMessage);
   }

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
+import { toast } from '@/lib/toast-debug';
 import { StaffResponse } from '@/types/staff';
 import { profileApi } from '@/lib/profile';
 import { StaffNameUpdate, PasswordChange, EmailChangeRequest } from '@/types/profile';
@@ -62,8 +63,6 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
 
   // UI状態
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // 名前編集ハンドラ
   const handleNameEdit = () => {
@@ -72,12 +71,10 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
     setEditedFirstName(staff?.first_name || '');
     setEditedLastNameFurigana(staff?.last_name_furigana || '');
     setEditedFirstNameFurigana(staff?.first_name_furigana || '');
-    setError(null);
   };
 
   const handleNameSave = async () => {
     setIsLoading(true);
-    setError(null);
 
     try {
       const nameData: StaffNameUpdate = {
@@ -101,11 +98,14 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
       });
 
       setIsEditingName(false);
-      setSuccessMessage('名前を更新しました');
-      setTimeout(() => setSuccessMessage(null), 3000);
+      console.log('🎉 [Profile] 名前更新成功 - toastを表示します');
+      toast.success('名前を更新しました');
+      console.log('🎉 [Profile] toast.success呼び出し完了');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || '名前の更新に失敗しました');
+      console.error('❌ [Profile] 名前更新失敗:', message);
+      toast.error(message || '名前の更新に失敗しました');
+      console.log('❌ [Profile] toast.error呼び出し完了');
     } finally {
       setIsLoading(false);
     }
@@ -117,13 +117,11 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
     setEditedFirstName(staff?.first_name || '');
     setEditedLastNameFurigana(staff?.last_name_furigana || '');
     setEditedFirstNameFurigana(staff?.first_name_furigana || '');
-    setError(null);
   };
 
   // パスワード変更ハンドラ
   const handlePasswordChange = async () => {
     setIsLoading(true);
-    setError(null);
 
     try {
       const passwordData: PasswordChange = {
@@ -140,8 +138,9 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
       setNewPassword('');
       setNewPasswordConfirm('');
 
-      setSuccessMessage(response.message);
-      setTimeout(() => setSuccessMessage(null), 3000);
+      console.log('🔐 [Profile] パスワード変更成功 - toastを表示します:', response.message);
+      toast.success(response.message);
+      console.log('🔐 [Profile] toast.success呼び出し完了');
 
       // パスワード変更後はログアウトされるため、ログインページにリダイレクト
       setTimeout(() => {
@@ -149,7 +148,9 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
       }, 2000);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || 'パスワードの変更に失敗しました');
+      console.error('❌ [Profile] パスワード変更失敗:', message);
+      toast.error(message || 'パスワードの変更に失敗しました');
+      console.log('❌ [Profile] toast.error呼び出し完了');
     } finally {
       setIsLoading(false);
     }
@@ -184,7 +185,6 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
     }
 
     setIsLoading(true);
-    setError(null);
 
     try {
       const emailData: EmailChangeRequest = {
@@ -200,10 +200,10 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
       setEmailChangePassword('');
       setEmailModalError(null);
 
-      setSuccessMessage(
-        `確認メールを ${newEmail} に送信しました。メール内のリンクをクリックして変更を完了してください。`
-      );
-      setTimeout(() => setSuccessMessage(null), 10000);
+      const message = `確認メールを ${newEmail} に送信しました。メール内のリンクをクリックして変更を完了してください。`;
+      console.log('📧 [Profile] メールアドレス変更リクエスト成功 - toastを表示します:', message);
+      toast.success(message, { duration: 10000 });
+      console.log('📧 [Profile] toast.success呼び出し完了');
     } catch (err: unknown) {
       // サーバーエラーをモーダル内に表示
       const message = err instanceof Error ? err.message : String(err);
@@ -216,8 +216,9 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
   // フィードバック送信ハンドラ
   const handleFeedbackSubmit = () => {
     if (!feedbackContent.trim()) {
-      setError('フィードバック内容を入力してください');
-      setTimeout(() => setError(null), 3000);
+      console.log('⚠️ [Profile] フィードバック内容が空 - エラーtoastを表示します');
+      toast.error('フィードバック内容を入力してください');
+      console.log('⚠️ [Profile] toast.error呼び出し完了');
       return;
     }
 
@@ -270,53 +271,33 @@ ${feedbackContent}
         console.info('Please include the following information in your email:', staffInfo);
       }
 
-      setSuccessMessage(message);
-      setTimeout(() => {
-        setSuccessMessage(null);
-        if (mailtoLinkWithBody.length <= 2000) {
-          setFeedbackContent('');
-        }
-      }, 5000);
+      console.log('📬 [Profile] メールクライアント起動成功 - toastを表示します:', message);
+      toast.success(message, { duration: 5000 });
+      console.log('📬 [Profile] toast.success呼び出し完了');
+      if (mailtoLinkWithBody.length <= 2000) {
+        setTimeout(() => setFeedbackContent(''), 5000);
+      }
     } catch (error) {
       console.error('メールクライアントの起動に失敗しました:', error);
 
       // 方法2: window.openを試行
       try {
         window.open(mailtoLink);
-        setSuccessMessage('メールクライアントを起動しました。');
-        setTimeout(() => {
-          setSuccessMessage(null);
-          setFeedbackContent('');
-        }, 3000);
+        console.log('📬 [Profile] フォールバックでメールクライアント起動成功 - toastを表示します');
+        toast.success('メールクライアントを起動しました。');
+        console.log('📬 [Profile] toast.success呼び出し完了');
+        setTimeout(() => setFeedbackContent(''), 3000);
       } catch (fallbackError) {
         console.error('フォールバック方法も失敗しました:', fallbackError);
-        setError('メールクライアントの起動に失敗しました。直接 samonkntd@gmail.com にメールをお送りください。');
-        setTimeout(() => setError(null), 5000);
+        console.log('❌ [Profile] メールクライアント起動失敗 - エラーtoastを表示します');
+        toast.error('メールクライアントの起動に失敗しました。直接 samonkntd@gmail.com にメールをお送りください。', { duration: 5000 });
+        console.log('❌ [Profile] toast.error呼び出し完了');
       }
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-200">
-      {/* 成功メッセージ */}
-      {successMessage && (
-        <div className="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-          {successMessage}
-        </div>
-      )}
-
-      {/* エラーメッセージ */}
-      {error && (
-        <div className="fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-          <div className="flex items-center justify-between">
-            <span>{error}</span>
-            <button onClick={() => setError(null)} className="ml-4 text-white hover:text-gray-200">
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* タブバー */}
       <div className="bg-gray-800 border-b border-gray-700">
         <div className="flex">
@@ -689,7 +670,6 @@ ${feedbackContent}
                   setCurrentPassword('');
                   setNewPassword('');
                   setNewPasswordConfirm('');
-                  setError(null);
                 }}
                 disabled={isLoading}
                 className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
@@ -708,8 +688,7 @@ ${feedbackContent}
           isOpen={isRoleChangeModalOpen}
           onClose={() => setIsRoleChangeModalOpen(false)}
           onSuccess={() => {
-            setSuccessMessage('権限変更リクエストを送信しました。承認をお待ちください。');
-            setTimeout(() => setSuccessMessage(null), 5000);
+            toast.success('権限変更リクエストを送信しました。承認をお待ちください。', { duration: 5000 });
           }}
         />
       )}
@@ -811,7 +790,6 @@ ${feedbackContent}
                   setNewEmail('');
                   setEmailChangePassword('');
                   setEmailModalError(null);
-                  setError(null);
                 }}
                 disabled={isLoading}
                 className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"

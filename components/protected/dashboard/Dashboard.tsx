@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { BiSort, BiFilterAlt, BiUserPlus, BiFile } from 'react-icons/bi';
 import { dashboardApi, DashboardParams } from '@/lib/dashboard';
 import { welfareRecipientsApi } from '@/lib/welfare-recipients';
@@ -17,16 +17,19 @@ import CalendarLinkButton from '@/components/ui/google/CalendarLinkButton';
 import EmployeeActionRequestModal from '@/components/common/EmployeeActionRequestModal';
 import { useStaffRole } from '@/hooks/useStaffRole';
 import { ActionType, ResourceType } from '@/types/employeeActionRequest';
+import { toast } from '@/lib/toast-debug';
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [staff, setStaff] = useState<StaffResponse | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [sortBy, setSortBy] = useState('name_phonetic');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const isLoadingRef = useRef(isLoading);
+  const messageShownRef = useRef(false); // メッセージ表示済みフラグ
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState<{
     isOverdue: boolean;
@@ -70,6 +73,46 @@ export default function Dashboard() {
 
     fetchInitialData();
   }, []);
+
+  // クエリパラメータからメッセージを読み取ってtoastを表示
+  useEffect(() => {
+    const message = searchParams.get('message');
+    const hotbarMessage = searchParams.get('hotbar_message');
+    const hotbarType = searchParams.get('hotbar_type') || 'success';
+
+    // メッセージが無い場合は何もしない
+    if (!message && !hotbarMessage) {
+      return;
+    }
+
+    // 既にメッセージを表示済みの場合はスキップ（重複防止）
+    if (messageShownRef.current) {
+      return;
+    }
+
+    // 表示済みフラグを先に立てる（重複防止のため）
+    messageShownRef.current = true;
+
+    if (message) {
+      toast.success(decodeURIComponent(message));
+    }
+
+    if (hotbarMessage) {
+      const decodedMessage = decodeURIComponent(hotbarMessage);
+      if (hotbarType === 'error') {
+        toast.error(decodedMessage);
+      } else {
+        toast.success(decodedMessage);
+      }
+    }
+
+    // クエリパラメータをクリア（履歴を汚さないため）
+    const url = new URL(window.location.href);
+    url.searchParams.delete('message');
+    url.searchParams.delete('hotbar_message');
+    url.searchParams.delete('hotbar_type');
+    window.history.replaceState({}, '', url.toString());
+  }, [searchParams]);
 
 
 
@@ -198,10 +241,13 @@ export default function Dashboard() {
           return { ...prevData, recipients: updatedRecipients };
         });
 
+        // 削除成功をtoastで通知
+        toast.success(`${recipientName}さんを削除しました`);
+
       } catch (error) {
         console.error('Failed to delete recipient:', error);
-        // ユーザーにエラーを通知するUIをここに追加することもできる
-        alert('利用者の削除に失敗しました。ページをリロードして再度お試しください。');
+        // toastでエラー通知
+        toast.error('利用者の削除に失敗しました。ページをリロードして再度お試しください。');
       } finally {
         setIsLoading(false);
       }
@@ -210,7 +256,7 @@ export default function Dashboard() {
 
   const handleRequestSuccess = () => {
     // リクエスト送信成功時の処理
-    alert('削除リクエストを送信しました。Manager/Ownerの承認をお待ちください。');
+    toast.success('削除リクエストを送信しました。Manager/Ownerの承認をお待ちください。');
     setPendingDeleteRequest(null);
   };
 

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi, tokenUtils } from '@/lib/auth';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'; // アイコンをインポート
+import { toast } from '@/lib/toast-debug';
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -16,9 +17,34 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const messageShownRef = useRef(false); // メッセージ表示済みフラグ
 
   // 自動認証チェックを削除: middlewareとDALパターンに委譲
   // これによりログインページでの不要な401エラーを防ぐ
+
+  // クエリパラメータからメッセージを読み取ってtoastを表示
+  useEffect(() => {
+    // 既にメッセージを表示済みの場合はスキップ（重複防止）
+    if (messageShownRef.current) {
+      console.log('📨 [LoginForm] メッセージは既に表示済みです。スキップします。');
+      return;
+    }
+
+    const message = searchParams.get('message');
+    if (message) {
+      console.log('📨 [LoginForm] クエリパラメータからメッセージを検出:', message);
+      console.log('📨 [LoginForm] toastを表示します');
+      toast.success(decodeURIComponent(message));
+      console.log('📨 [LoginForm] toast.success呼び出し完了');
+      messageShownRef.current = true; // 表示済みフラグを立てる
+
+      // クエリパラメータをクリア
+      const url = new URL(window.location.href);
+      url.searchParams.delete('message');
+      window.history.replaceState({}, '', url.toString());
+      console.log('📨 [LoginForm] クエリパラメータをクリアしました');
+    }
+  }, [searchParams]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;

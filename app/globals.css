@@ -35,3 +35,23 @@ body {
     display: none;
   }
 }
+
+/* Sonner toast位置調整 */
+[data-sonner-toaster] {
+  position: fixed !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  left: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+}
+
+[data-sonner-toaster][data-x-position="right"] {
+  right: 1rem !important;
+  left: auto !important;
+}
+
+[data-sonner-toaster][data-y-position="top"] {
+  top: 1rem !important;
+  bottom: auto !important;
+}

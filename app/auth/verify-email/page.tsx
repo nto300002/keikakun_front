@@ -15,7 +15,7 @@ function VerifyEmailContent() {
   useEffect(() => {
     if (!token) {
       setStatus('error');
-      setError('Verification token not found.');
+      setError('認証トークンが見つかりません。');
       return;
     }
 
@@ -29,7 +29,7 @@ function VerifyEmailContent() {
         if (err instanceof Error) {
           setError(err.message);
         } else {
-          setError('An unknown error occurred.');
+          setError('不明なエラーが発生しました。');
         }
       }
     };
@@ -42,7 +42,7 @@ function VerifyEmailContent() {
       <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-md text-center">
         <h1 className="text-2xl font-bold mb-4 text-gray-800">Eメール認証</h1>
         {status === 'verifying' && (
-          <p className="text-gray-600">Eメール認証中..</p>
+          <p className="text-gray-600">メール認証中...</p>
         )}
         {status === 'success' && (
           <div>

@@ -84,7 +84,7 @@ export const supportPlanApi = {
         } catch {
           console.error('Could not parse error as JSON');
         }
-        throw new Error(`Upload failed: ${res.status} ${res.statusText}`);
+        throw new Error(`アップロードに失敗しました: ${res.status} ${res.statusText}`);
       }
 
       const responseData = await res.json();
@@ -108,7 +108,7 @@ export const supportPlanApi = {
       credentials: 'include', // Cookie自動送信
       body: formData,
     }).then((res) => {
-      if (!res.ok) throw new Error('Reupload failed');
+      if (!res.ok) throw new Error('再アップロードに失敗しました');
       return res.json();
     });
   },

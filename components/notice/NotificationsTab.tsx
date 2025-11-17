@@ -6,18 +6,16 @@ import { noticesApi } from '@/lib/api/notices';
 import { roleChangeRequestsApi } from '@/lib/api/roleChangeRequests';
 import { employeeActionRequestsApi } from '@/lib/api/employeeActionRequests';
 import NoticeCard from './NoticeCard';
+import { toast } from '@/lib/toast-debug';
 
 export default function NotificationsTab() {
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [processingNoticeId, setProcessingNoticeId] = useState<string | null>(null);
 
   const loadNotices = async () => {
     setIsLoading(true);
-    setError(null);
     try {
       // 全ての通知を取得
       const data = await noticesApi.getNotices({});
@@ -50,7 +48,7 @@ export default function NotificationsTab() {
       setNotices(filteredNotices);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || '通知の取得に失敗しました');
+      toast.error(message || '通知の取得に失敗しました');
       // エラー時も空配列を設定
       setNotices([]);
     } finally {
@@ -69,12 +67,10 @@ export default function NotificationsTab() {
     try {
       await noticesApi.markAsRead(noticeId);
       await loadNotices();
-      setSuccessMessage('通知を既読にしました');
-      setTimeout(() => setSuccessMessage(null), 3000);
+      toast.success('通知を既読にしました');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || '通知の既読処理に失敗しました');
-      setTimeout(() => setError(null), 3000);
+      toast.error(message || '通知の既読処理に失敗しました');
     }
   };
 
@@ -83,12 +79,10 @@ export default function NotificationsTab() {
     try {
       await noticesApi.markAllAsRead();
       await loadNotices();
-      setSuccessMessage('すべての通知を既読にしました');
-      setTimeout(() => setSuccessMessage(null), 3000);
+      toast.success('すべての通知を既読にしました');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || '一括既読処理に失敗しました');
-      setTimeout(() => setError(null), 3000);
+      toast.error(message || '一括既読処理に失敗しました');
     }
   };
 
@@ -98,17 +92,15 @@ export default function NotificationsTab() {
     try {
       if (noticeType === NoticeType.ROLE_CHANGE_PENDING) {
         await roleChangeRequestsApi.approveRequest(requestId);
-        setSuccessMessage('Role変更リクエストを承認しました');
+        toast.success('権限変更リクエストを承認しました');
       } else if (noticeType === NoticeType.EMPLOYEE_ACTION_PENDING) {
         await employeeActionRequestsApi.approveRequest(requestId);
-        setSuccessMessage('Employee制限リクエストを承認しました');
+        toast.success('利用者の作成、編集、削除リクエストを承認しました');
       }
       await loadNotices();
-      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || '承認処理に失敗しました');
-      setTimeout(() => setError(null), 3000);
+      toast.error(message || '承認処理に失敗しました');
     } finally {
       setProcessingNoticeId(null);
     }
@@ -120,17 +112,15 @@ export default function NotificationsTab() {
     try {
       if (noticeType === NoticeType.ROLE_CHANGE_PENDING) {
         await roleChangeRequestsApi.rejectRequest(requestId);
-        setSuccessMessage('Role変更リクエストを却下しました');
+        toast.success('Role変更リクエストを却下しました');
       } else if (noticeType === NoticeType.EMPLOYEE_ACTION_PENDING) {
         await employeeActionRequestsApi.rejectRequest(requestId);
-        setSuccessMessage('Employee制限リクエストを却下しました');
+        toast.success('Employee制限リクエストを却下しました');
       }
       await loadNotices();
-      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || '却下処理に失敗しました');
-      setTimeout(() => setError(null), 3000);
+      toast.error(message || '却下処理に失敗しました');
     } finally {
       setProcessingNoticeId(null);
     }
@@ -138,29 +128,20 @@ export default function NotificationsTab() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      {/* 成功メッセージ */}
-      {successMessage && (
-        <div className="fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-          {successMessage}
-        </div>
-      )}
-
-      {/* エラーメッセージ */}
-      {error && (
-        <div className="fixed top-4 right-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-          <div className="flex items-center justify-between">
-            <span>{error}</span>
-            <button onClick={() => setError(null)} className="ml-4 text-white hover:text-gray-200">
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-
       <h2 className="text-2xl font-bold mb-6">通知</h2>
 
       {/* フィルター */}
       <div className="flex gap-2 mb-6 flex-wrap">
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-4 py-2 rounded-lg font-medium ${
+            filter === 'all'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
+          }`}
+        >
+          すべて
+        </button>
         <button
           onClick={() => setFilter('pending')}
           className={`px-4 py-2 rounded-lg font-medium ${
@@ -179,7 +160,7 @@ export default function NotificationsTab() {
               : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
           }`}
         >
-          ✓ 承認済み
+          ✓ 承認
         </button>
         <button
           onClick={() => setFilter('rejected')}
@@ -189,17 +170,7 @@ export default function NotificationsTab() {
               : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
           }`}
         >
-          ✗ 却下済み
-        </button>
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg font-medium ${
-            filter === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
-          }`}
-        >
-          すべて
+          ✗ 却下
         </button>
         <button
           onClick={handleMarkAllAsRead}

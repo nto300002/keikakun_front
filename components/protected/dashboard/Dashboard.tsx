@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { BiSort, BiFilterAlt, BiUserPlus, BiFile } from 'react-icons/bi';
+import { FaClipboardList, FaFileAlt, FaEdit, FaTrash } from 'react-icons/fa';
 import { dashboardApi, DashboardParams } from '@/lib/dashboard';
 import { welfareRecipientsApi } from '@/lib/welfare-recipients';
 import { DashboardData } from '@/types/dashboard';
@@ -17,16 +18,19 @@ import CalendarLinkButton from '@/components/ui/google/CalendarLinkButton';
 import EmployeeActionRequestModal from '@/components/common/EmployeeActionRequestModal';
 import { useStaffRole } from '@/hooks/useStaffRole';
 import { ActionType, ResourceType } from '@/types/employeeActionRequest';
+import { toast } from '@/lib/toast-debug';
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [staff, setStaff] = useState<StaffResponse | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [sortBy, setSortBy] = useState('name_phonetic');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const isLoadingRef = useRef(isLoading);
+  const messageShownRef = useRef(false); // メッセージ表示済みフラグ
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [activeFilters, setActiveFilters] = useState<{
     isOverdue: boolean;
@@ -70,6 +74,46 @@ export default function Dashboard() {
 
     fetchInitialData();
   }, []);
+
+  // クエリパラメータからメッセージを読み取ってtoastを表示
+  useEffect(() => {
+    const message = searchParams.get('message');
+    const hotbarMessage = searchParams.get('hotbar_message');
+    const hotbarType = searchParams.get('hotbar_type') || 'success';
+
+    // メッセージが無い場合は何もしない
+    if (!message && !hotbarMessage) {
+      return;
+    }
+
+    // 既にメッセージを表示済みの場合はスキップ（重複防止）
+    if (messageShownRef.current) {
+      return;
+    }
+
+    // 表示済みフラグを先に立てる（重複防止のため）
+    messageShownRef.current = true;
+
+    if (message) {
+      toast.success(decodeURIComponent(message));
+    }
+
+    if (hotbarMessage) {
+      const decodedMessage = decodeURIComponent(hotbarMessage);
+      if (hotbarType === 'error') {
+        toast.error(decodedMessage);
+      } else {
+        toast.success(decodedMessage);
+      }
+    }
+
+    // クエリパラメータをクリア（履歴を汚さないため）
+    const url = new URL(window.location.href);
+    url.searchParams.delete('message');
+    url.searchParams.delete('hotbar_message');
+    url.searchParams.delete('hotbar_type');
+    window.history.replaceState({}, '', url.toString());
+  }, [searchParams]);
 
 
 
@@ -198,10 +242,13 @@ export default function Dashboard() {
           return { ...prevData, recipients: updatedRecipients };
         });
 
+        // 削除成功をtoastで通知
+        toast.success(`${recipientName}さんを削除しました`);
+
       } catch (error) {
         console.error('Failed to delete recipient:', error);
-        // ユーザーにエラーを通知するUIをここに追加することもできる
-        alert('利用者の削除に失敗しました。ページをリロードして再度お試しください。');
+        // toastでエラー通知
+        toast.error('利用者の削除に失敗しました。ページをリロードして再度お試しください。');
       } finally {
         setIsLoading(false);
       }
@@ -210,7 +257,7 @@ export default function Dashboard() {
 
   const handleRequestSuccess = () => {
     // リクエスト送信成功時の処理
-    alert('削除リクエストを送信しました。Manager/Ownerの承認をお待ちください。');
+    toast.success('削除リクエストを送信しました。マネージャー/オーナーの承認をお待ちください。');
     setPendingDeleteRequest(null);
   };
 
@@ -345,14 +392,16 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] text-white animate-in fade-in-0 slide-in-from-bottom-5 duration-300">
       {/* モニタリング期限設定ボタン:いらない */}
       <main className="pt-20 pb-8 px-4 md:px-6 max-w-[1400px] mx-auto">
-        {!staff.is_mfa_enabled ? (
-          <MfaPrompt />
-        ) : (
-          <>
+        {!staff.is_mfa_enabled && (
+          <div className="mb-6">
+            <MfaPrompt />
+          </div>
+        )}
+        <>
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
               <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-bold text-white">ダッシュボード</h1>
-                <div className="text-gray-300 text-sm">
+                <h1 className="text-2xl font-bold text-white">利用者ダッシュボード</h1>
+                <div className="text-gray-300 text-md">
                   {getCurrentDate()}
                 </div>
               </div>
@@ -362,55 +411,48 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-in slide-in-from-top-4 duration-400 delay-150">
-              <div className="bg-gradient-to-br from-[#3d1f1f] to-[#2a1515] rounded-lg p-6 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-white text-sm font-medium">期限切れ</p>
-                      
-                    </div>
-                    <p className="text-2xl font-bold text-white mt-2">{expiredCount}件</p>
-                    <p className="text-xs text-[#ff9800] mt-1">要対応案件</p>
-                  </div>
-                  <BiFilterAlt
-                    className={`cursor-pointer ${activeFilters.isOverdue ? 'text-[#ffab40]' : 'text-[#ff9800] hover:text-[#ffab40]'}`}
-                    size={18}
-                    onClick={() => handleFilterToggle('isOverdue', !activeFilters.isOverdue)}
-                  />
-                  <div className="w-10 h-10 bg-[#ff9800]/20 rounded-lg flex items-center justify-center ml-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 animate-in slide-in-from-top-4 duration-400 delay-150">
+              <div className="bg-gradient-to-br from-[#3d1f1f] to-[#2a1515] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="w-8 h-8 bg-[#ff9800]/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <span className="text-[#ff9800] text-sm">⚠️</span>
                   </div>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-[#3d3d1f] to-[#2a2a15] rounded-lg p-6 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <p className="text-white text-sm font-medium">期限間近</p>
-                    </div>
-                    <p className="text-2xl font-bold text-white mt-2">{nearDeadlineCount}件</p>
-                    <p className="text-xs text-[#ffd700] mt-1">30日以内</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-xs font-medium">期限切れ</p>
+                    <p className="text-xl font-bold text-white">{expiredCount}<span className="text-sm font-normal ml-1">件</span></p>
                   </div>
                   <BiFilterAlt
-                    className={`cursor-pointer ${activeFilters.isUpcoming ? 'text-[#ffed4e]' : 'text-[#ffd700] hover:text-[#ffed4e]'}`}
-                    size={18}
-                    onClick={() => handleFilterToggle('isUpcoming', !activeFilters.isUpcoming)}
+                    className={`cursor-pointer flex-shrink-0 ${activeFilters.isOverdue ? 'text-[#ffab40]' : 'text-[#ff9800] hover:text-[#ffab40]'}`}
+                    size={20}
+                    onClick={() => handleFilterToggle('isOverdue', !activeFilters.isOverdue)}
                   />
-                  <div className="w-10 h-10 bg-[#ffd700]/20 rounded-lg flex items-center justify-center ml-4">
-                    <span className="text-[#ffd700] text-sm">📋</span>
-                  </div>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-[#1f2f3d] to-[#15202a] rounded-lg p-6 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-white text-sm font-medium">利用者数</p>
-                    <p className="text-2xl font-bold text-white mt-2">{serviceRecipients.length}名</p>
+              <div className="bg-gradient-to-br from-[#3d3d1f] to-[#2a2a15] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="w-8 h-8 bg-[#ffd700]/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-[#ffd700] text-sm">📋</span>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-xs font-medium">期限間近</p>
+                    <p className="text-xl font-bold text-white">{nearDeadlineCount}<span className="text-sm font-normal ml-1">件</span></p>
+                  </div>
+                  <BiFilterAlt
+                    className={`cursor-pointer flex-shrink-0 ${activeFilters.isUpcoming ? 'text-[#ffed4e]' : 'text-[#ffd700] hover:text-[#ffed4e]'}`}
+                    size={20}
+                    onClick={() => handleFilterToggle('isUpcoming', !activeFilters.isUpcoming)}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-[#1f2f3d] to-[#15202a] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-xs font-medium">利用者数</p>
+                    <p className="text-xl font-bold text-white">{serviceRecipients.length}<span className="text-sm font-normal ml-1">名</span></p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       type="button"
                       data-testid="add-recipient-stats-button"
@@ -421,20 +463,20 @@ export default function Dashboard() {
                           router.push('/recipients/new');
                         }
                       }}
-                      className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-3 py-1 rounded-lg text-xs font-medium transition-colors duration-200 hidden md:flex items-center gap-1"
+                      className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-2 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200 hidden md:flex items-center gap-1"
                     >
-                      <BiUserPlus className="h-4 w-4" />
+                      <BiUserPlus className="h-3.5 w-3.5" />
                       <span className="lg:hidden">追加</span>
                     </button>
                     <div className="relative">
                       <input
                         type="text"
-                        placeholder="利用者名で検索"
+                        placeholder="検索"
                         value={searchTerm}
                         onChange={(e) => handleSearch(e.target.value)}
-                        className="bg-[#0f1419] border border-[#2a3441] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 w-32 focus:outline-none focus:border-[#00bcd4]"
+                        className="bg-[#0f1419] border border-[#2a3441] rounded-lg px-2 py-1.5 text-xs text-white placeholder-gray-400 w-24 focus:outline-none focus:border-[#00bcd4]"
                       />
-                      <span className="absolute right-3 top-2 text-[#00bcd4]">🔍</span>
+                      <span className="absolute right-2 top-1.5 text-[#00bcd4] text-xs">🔍</span>
                     </div>
                   </div>
                 </div>
@@ -502,15 +544,25 @@ export default function Dashboard() {
                   <table className="w-full">
                     <thead className="bg-[#0f1419cc]">
                       <tr>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/5">
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-[15%]">
+                          <div className="flex items-center gap-2">
+                            次回更新日
+                            <BiSort
+                              className="text-gray-100 hover:text-gray-300 cursor-pointer"
+                              size={16}
+                              onClick={handleNextRenewalSortClick}
+                            />
+                          </div>
+                        </th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/4">
                           <div className="flex items-center gap-2">
                             氏名
                           </div>
                         </th>
-                        <th className="px-4 py-3 text-center text-sm font-medium text-gray-300 w-[15%]">
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/4">
                           <SmartDropdown
                             trigger={
-                              <div className="flex items-center justify-center gap-2 cursor-pointer">
+                              <div className="flex items-center gap-2 cursor-pointer">
                                 計画の進捗
                                 <BiFilterAlt
                                   className="text-gray-100 hover:text-gray-300 cursor-pointer"
@@ -540,21 +592,11 @@ export default function Dashboard() {
                             </DropdownMenuItem>
                           </SmartDropdown>
                         </th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/5">
-                          <div className="flex items-center gap-2">
-                            次回更新日
-                            <BiSort
-                              className="text-gray-100 hover:text-gray-300 cursor-pointer"
-                              size={16}
-                              onClick={handleNextRenewalSortClick}
-                            />
-                          </div>
-                        </th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/5">
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-[15%]">
                           モニタリング期限
                         </th>
-                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-300 w-1/4">
-                          詳細情報
+                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-300 w-1/5">
+                          詳細なアクション
                         </th>
                       </tr>
                     </thead>
@@ -567,25 +609,6 @@ export default function Dashboard() {
                           }`}
                         >
                           <td className="px-4 py-4">
-                            <Link href={`/recipients/${recipient.id}`} className="block">
-                            <div className="cursor-pointer hover:underline">
-                              <div className="text-white font-bold text-base">{recipient.full_name}</div>
-                              <div className="text-gray-200 text-xs mt-1">{recipient.furigana}</div>
-                            </div>
-                            </Link>
-                          </td>
-                          
-                          <td className="px-4 py-4 text-center">
-                            <div className="text-gray-300 text-sm mb-1">第{recipient.current_cycle_number}回</div>
-                            <div>
-                              <div className="text-xs text-gray-300">next</div>
-                              <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
-                                {getStepText(recipient.latest_step, recipient.current_cycle_number)}
-                              </span>
-                            </div>
-                          </td>
-                          
-                          <td className="px-4 py-4">
                             <div className="text-white text-sm">
                               {recipient.next_renewal_deadline ? new Date(recipient.next_renewal_deadline).toLocaleDateString('ja-JP', {year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '/') : '-'}
                             </div>
@@ -597,7 +620,28 @@ export default function Dashboard() {
                               ) : '-'}
                             </div>
                           </td>
-                          
+
+                          <td className="px-4 py-4">
+                            <Link href={`/recipients/${recipient.id}`} className="block">
+                            <div className="cursor-pointer hover:underline">
+                              <div className="text-white font-bold text-base">
+                                {staff.is_mfa_enabled ? recipient.full_name : recipient.last_name}
+                              </div>
+                              <div className="text-gray-200 text-xs mt-1">{recipient.furigana}</div>
+                            </div>
+                            </Link>
+                          </td>
+
+                          <td className="px-4 py-4">
+                            <div className="flex flex-col items-start gap-1">
+                              <div className="text-gray-300 text-sm">第{recipient.current_cycle_number}回</div>
+                              <div className="text-xs text-gray-300">next</div>
+                              <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
+                                {getStepText(recipient.latest_step, recipient.current_cycle_number)}
+                              </span>
+                            </div>
+                          </td>
+
                           <td className="px-4 py-4">
                             {recipient.latest_step === 'monitoring' ? (
                               <>
@@ -617,51 +661,75 @@ export default function Dashboard() {
                           </td>
                           
                           <td className="px-4 py-4 text-right">
-                            <div className="flex justify-end gap-2 flex-wrap">
-                              <SmartDropdown
-                                trigger={
-                                  <button className="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-3 py-1 rounded text-xs font-medium transition-all duration-200 hover:shadow-lg hover:scale-95 flex items-center gap-1 min-w-[80px] h-7">
-                                    📊 詳細データ
-                                    <span className="ml-1">▼</span>
-                                  </button>
-                                }
-                              >
-                                <Link href={`/support_plan/${recipient.id}`}>
-                                <DropdownMenuItem>
-                                  📄 個別支援
-                                </DropdownMenuItem>
-                                </Link>
+                            {staff.is_mfa_enabled ? (
+                              <div className="flex justify-end items-center gap-3">
+                                {/* アセスメント */}
                                 <Link href={`/recipients/${recipient.id}`}>
-                                <DropdownMenuItem>
-                                  📝 アセスメント
-                                </DropdownMenuItem>
+                                  <div className="relative group">
+                                    <button
+                                      type="button"
+                                      aria-label="アセスメント"
+                                      className="p-2 text-gray-400 hover:bg-gray-700 rounded-md transition-colors"
+                                    >
+                                      <FaClipboardList className="w-5 h-5" />
+                                    </button>
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                      アセスメント
+                                    </div>
+                                  </div>
                                 </Link>
-                              </SmartDropdown>
-                              <Link href={`/recipients/${recipient.id}/edit`}>
-                                <button
-                                  type="button"
-                                  data-testid={`edit-recipient-${recipient.id}`}
-                                  aria-label={`${recipient.full_name}の情報を編集`}
-                                  className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-2 py-1 rounded text-xs font-medium transition-all duration-200 hover:shadow-lg hover:scale-95 flex items-center gap-1 w-12 h-7"
-                                >
-                                  編集
-                                </button>
-                              </Link>
-                              <button
-                                type="button"
-                                data-testid={`delete-recipient-${recipient.id}`}
-                                aria-label={`${recipient.full_name}を削除`}
-                                onClick={() => handleDeleteRecipient(recipient.id, recipient.full_name)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    handleDeleteRecipient(recipient.id, recipient.full_name);
-                                  }
-                                }}
-                                className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-2 py-1 rounded text-xs font-medium transition-all duration-200 hover:shadow-lg hover:scale-95 flex items-center gap-1 w-12 h-7"
-                              >
-                                削除
-                              </button>
-                            </div>
+
+                                {/* 個別支援計画 */}
+                                <Link href={`/support_plan/${recipient.id}`}>
+                                  <div className="relative group">
+                                    <button
+                                      type="button"
+                                      aria-label="個別支援計画"
+                                      className="p-2 text-gray-400 hover:bg-gray-700 rounded-md transition-colors"
+                                    >
+                                      <FaFileAlt className="w-5 h-5" />
+                                    </button>
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
+                                      個別支援計画
+                                    </div>
+                                  </div>
+                                </Link>
+
+                                {/* 編集 */}
+                                <Link href={`/recipients/${recipient.id}/edit`}>
+                                  <div className="relative group">
+                                    <button
+                                      type="button"
+                                      data-testid={`edit-recipient-${recipient.id}`}
+                                      aria-label={`${recipient.full_name}の情報を編集`}
+                                      className="p-2 text-green-400 hover:text-green-600 rounded-md transition-colors"
+                                    >
+                                      <FaEdit className="w-5 h-5" />
+                                    </button>
+                                  </div>
+                                </Link>
+
+                                {/* 削除 */}
+                                <div className="relative group">
+                                  <button
+                                    type="button"
+                                    data-testid={`delete-recipient-${recipient.id}`}
+                                    aria-label={`${recipient.full_name}を削除`}
+                                    onClick={() => handleDeleteRecipient(recipient.id, recipient.full_name)}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        handleDeleteRecipient(recipient.id, recipient.full_name);
+                                      }
+                                    }}
+                                    className="p-2 text-red-600 hover:text-red-800 rounded-md transition-colors"
+                                  >
+                                    <FaTrash className="w-5 h-5" />
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="text-gray-500 text-sm">-</div>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -676,23 +744,6 @@ export default function Dashboard() {
                       className={`border-b border-[#2a3441] p-4 hover:bg-[#2a3f5f40] transition-colors duration-150`}
                     >
                       <div className="space-y-3">
-                        <Link href={`/recipients/${recipient.id}`}>
-                          <div>
-                            <div className="text-white font-bold text-base">{recipient.full_name}</div>
-                            <div className="text-gray-200 text-xs">{recipient.furigana}</div>
-                          </div>
-                        </Link>
-
-                        <div className="flex items-center justify-between">
-                          <span className="text-gray-300 text-sm">第{recipient.current_cycle_number}回</span>
-                          <div className="text-right">
-                            <div className="text-xs text-gray-3000">next</div>
-                            <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
-                              {getStepText(recipient.latest_step, recipient.current_cycle_number)}
-                            </span>
-                          </div>
-                        </div>
-                        
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div>
                             <div className="text-gray-300 text-xs mb-1">次回更新日</div>
@@ -727,41 +778,72 @@ export default function Dashboard() {
                             )}
                           </div>
                         </div>
-                        
-                        <div className="flex flex-col gap-2">
-                          <SmartDropdown
-                            trigger={
-                              <button className="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-3 py-2 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1 w-full justify-center">
-                                📊 詳細データ
-                                <span className="ml-1">▼</span>
-                              </button>
-                            }
-                          >
-                            <DropdownMenuItem>
-                              📄 個別支援PDF
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              📝 アセス
-                            </DropdownMenuItem>
-                          </SmartDropdown>
-                          <div className="flex gap-2">
+
+                        <Link href={`/recipients/${recipient.id}`}>
+                          <div>
+                            <div className="text-white font-bold text-base">
+                              {staff.is_mfa_enabled ? recipient.full_name : recipient.last_name}さん
+                            </div>
+                            <div className="text-gray-200 text-xs">{recipient.furigana}</div>
+                          </div>
+                        </Link>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-300 text-sm">第{recipient.current_cycle_number}回</span>
+                          <div className="text-right">
+                            <div className="text-xs text-gray-3000">next</div>
+                            <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
+                              {getStepText(recipient.latest_step, recipient.current_cycle_number)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {staff.is_mfa_enabled ? (
+                          <div className="flex justify-center items-center gap-3">
+                            {/* アセスメント */}
+                            <button
+                              type="button"
+                              title="アセスメント"
+                              aria-label="アセスメント"
+                              onClick={() => router.push(`/recipients/${recipient.id}`)}
+                              className="p-3 text-gray-400 hover:bg-gray-700 rounded-md transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            >
+                              <FaClipboardList className="w-6 h-6" />
+                            </button>
+
+                            {/* 個別支援計画 */}
+                            <button
+                              type="button"
+                              title="個別支援計画"
+                              aria-label="個別支援計画"
+                              onClick={() => router.push(`/support_plan/${recipient.id}`)}
+                              className="p-3 text-gray-400 hover:bg-gray-700 rounded-md transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                            >
+                              <FaFileAlt className="w-6 h-6" />
+                            </button>
+
+                            {/* 編集 */}
                             <button
                               type="button"
                               data-testid={`edit-recipient-mobile-${recipient.id}`}
+                              title="編集"
                               aria-label={`${recipient.full_name}の情報を編集`}
-                              onClick={() => router.push(`/recipients/${recipient.id}`)}
+                              onClick={() => router.push(`/recipients/${recipient.id}/edit`)}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
-                                  router.push(`/recipients/${recipient.id}`);
+                                  router.push(`/recipients/${recipient.id}/edit`);
                                 }
                               }}
-                              className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-3 py-2 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1 flex-1"
+                              className="p-3 text-gray-600 hover:text-gray-800 rounded-md transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                             >
-                              編集
+                              <FaEdit className="w-6 h-6" />
                             </button>
+
+                            {/* 削除 */}
                             <button
                               type="button"
                               data-testid={`delete-recipient-mobile-${recipient.id}`}
+                              title="削除"
                               aria-label={`${recipient.full_name}を削除`}
                               onClick={() => handleDeleteRecipient(recipient.id, recipient.full_name)}
                               onKeyDown={(e) => {
@@ -769,12 +851,14 @@ export default function Dashboard() {
                                   handleDeleteRecipient(recipient.id, recipient.full_name);
                                 }
                               }}
-                              className="bg-[#ef4444] hover:bg-[#dc2626] text-white px-3 py-2 rounded text-xs font-medium transition-all duration-200 flex items-center gap-1 flex-1"
+                              className="p-3 text-red-600 hover:text-red-800 rounded-md transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                             >
-                              削除
+                              <FaTrash className="w-6 h-6" />
                             </button>
                           </div>
-                        </div>
+                        ) : (
+                          <div className="text-center text-gray-500 text-sm py-4">-</div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -782,7 +866,6 @@ export default function Dashboard() {
               </div>
             </TableLoadingOverlay>
           </>
-        )}
       </main>
 
       {/* Employee Action Request Modal */}

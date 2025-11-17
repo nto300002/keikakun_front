@@ -1,6 +1,7 @@
 'use client';
 
 import { Notice, NoticeType } from '@/types/notice';
+import Link from 'next/link';
 
 interface NoticeCardProps {
   notice: Notice;
@@ -99,7 +100,12 @@ export default function NoticeCard({
           <span className={`text-3xl ${style.textColor}`}>{style.icon}</span>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <h4 className="text-white font-bold text-lg">{notice.title}</h4>
+              <Link
+                href={`/notice/${notice.id}`}
+                className="text-white font-bold text-lg hover:text-blue-400 transition-colors cursor-pointer"
+              >
+                {notice.title}
+              </Link>
               {!notice.is_read && (
                 <span className="px-2 py-1 rounded-full text-xs font-bold bg-blue-600 text-white">
                   NEW
@@ -130,19 +136,21 @@ export default function NoticeCard({
       {/* 通知内容 */}
       <div className="mb-4 pl-11">
         <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
-          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
+          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap line-clamp-3">
             {notice.content}
           </p>
         </div>
-        <p className="text-gray-500 text-xs mt-3">
-          {new Date(notice.created_at).toLocaleString('ja-JP', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </p>
+        <div className="mt-3">
+          <p className="text-gray-500 text-xs">
+            {new Date(notice.created_at).toLocaleString('ja-JP', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+          </p>
+        </div>
       </div>
 
       {/* アクションボタン */}

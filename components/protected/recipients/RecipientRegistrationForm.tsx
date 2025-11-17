@@ -1060,7 +1060,11 @@ export default function UserRegistrationForm() {
           actionType={ActionType.CREATE}
           resourceType={ResourceType.WELFARE_RECIPIENT}
           requestData={{
-            recipient_name: `${pendingFormData.basicInfo.lastName} ${pendingFormData.basicInfo.firstName}`,
+            // バックエンドが期待する形式（トップレベルにfull_name, first_name, last_nameを含める）
+            full_name: `${pendingFormData.basicInfo.lastName} ${pendingFormData.basicInfo.firstName}`,
+            first_name: pendingFormData.basicInfo.firstName,
+            last_name: pendingFormData.basicInfo.lastName,
+            // 後方互換性のため、form_dataも含める
             form_data: pendingFormData,
           }}
           actionDescription={`利用者「${pendingFormData.basicInfo.lastName} ${pendingFormData.basicInfo.firstName}」を登録`}

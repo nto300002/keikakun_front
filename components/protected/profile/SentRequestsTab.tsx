@@ -102,10 +102,10 @@ export default function SentRequestsTab() {
     try {
       if (type === 'role_change') {
         await roleChangeRequestsApi.deleteRequest(requestId);
-        setSuccessMessage('Role変更リクエストを取り消しました');
+        setSuccessMessage('権限変更リクエストを取り消しました');
       } else {
         await employeeActionRequestsApi.deleteRequest(requestId);
-        setSuccessMessage('Employee制限リクエストを取り消しました');
+        setSuccessMessage('利用者の作成、編集、削除リクエストを取り消しました');
       }
       await loadRequests();
       setTimeout(() => setSuccessMessage(null), 3000);

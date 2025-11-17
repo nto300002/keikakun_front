@@ -133,7 +133,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
               {/* Left Side */}
               <div className="flex items-center">
                 <Link href="/dashboard" className="text-lg font-semibold text-white hover:text-blue-400">
-                  {officeName ? officeName : '事務所名が登録されていません'}
+                  事務所名: {officeName ? officeName : '事務所名が登録されていません'}
                 </Link>
               </div>
 
@@ -159,7 +159,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                       : 'text-gray-300 hover:text-white hover:bg-gray-700'
                   }`}
                 >
-                  ダッシュボード
+                  利用者ダッシュボード
                 </Link>
                 <Link
                   href="/profile"

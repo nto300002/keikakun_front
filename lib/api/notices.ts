@@ -3,6 +3,7 @@
  */
 import { http } from '../http';
 import {
+  Notice,
   NoticeListResponse,
   UnreadCountResponse,
   MarkAsReadResponse,
@@ -30,6 +31,15 @@ export const noticesApi = {
       ? `${API_V1_PREFIX}/notices?${queryString}`
       : `${API_V1_PREFIX}/notices`;
     return http.get<NoticeListResponse>(endpoint);
+  },
+
+  /**
+   * 通知詳細取得
+   * @param noticeId - 通知ID
+   * @returns 通知の詳細（取得時に自動的に既読になる）
+   */
+  getNoticeDetail: (noticeId: string): Promise<Notice> => {
+    return http.get<Notice>(`${API_V1_PREFIX}/notices/${noticeId}`);
   },
 
   /**

@@ -10,6 +10,7 @@ import Breadcrumb, { BreadcrumbItem } from '@/components/ui/Breadcrumb';
 import { welfareRecipientsApi, WelfareRecipient } from '@/lib/welfare-recipients';
 import { supportPlanApi, PlanCycle } from '@/lib/support-plan';
 import CalendarLinkButton from '@/components/ui/google/CalendarLinkButton';
+import { toast } from '@/lib/toast-debug';
 
 
 export default function SupportPlan() {
@@ -151,6 +152,9 @@ export default function SupportPlan() {
       const cyclesData = await supportPlanApi.getCycles(recipientId);
       setCycles(cyclesData.cycles || []);
 
+      // 成功メッセージを表示
+      toast.success('PDFをアップロードしました');
+
       setIsModalOpen(false);
     } catch (err) {
       console.error('Failed to upload file:', err);
@@ -158,6 +162,8 @@ export default function SupportPlan() {
         message: err instanceof Error ? err.message : 'Unknown error',
         stack: err instanceof Error ? err.stack : undefined
       });
+      // エラーメッセージを表示
+      toast.error('PDFのアップロードに失敗しました');
       throw err; // モーダル側でエラーハンドリング
     }
   };
@@ -170,9 +176,14 @@ export default function SupportPlan() {
       const cyclesData = await supportPlanApi.getCycles(recipientId);
       setCycles(cyclesData.cycles || []);
 
+      // 成功メッセージを表示
+      toast.success('PDFを再アップロードしました');
+
       setIsModalOpen(false);
     } catch (err) {
       console.error('Failed to reupload file:', err);
+      // エラーメッセージを表示
+      toast.error('PDFの再アップロードに失敗しました');
       throw err;
     }
   };
@@ -180,19 +191,19 @@ export default function SupportPlan() {
   const handleSetMonitoringDeadline = async (deadlineDays: number) => {
     const latestCycle = cycles.find(c => c.is_latest_cycle);
     if (!latestCycle) {
-      alert('対象となる計画サイクルが見つかりません。');
+      toast.error('対象となる計画サイクルが見つかりません。');
       return;
     }
 
     try {
       await supportPlanApi.updateMonitoringDeadline(latestCycle.id, deadlineDays);
-      alert(`モニタリング期限を${deadlineDays}日に設定しました。`);
+      toast.success(`モニタリング期限を${deadlineDays}日に設定しました。`);
       // データを再取得して画面を更新
       const cyclesData = await supportPlanApi.getCycles(recipientId);
       setCycles(cyclesData.cycles || []);
     } catch (err) {
       console.error('Failed to set monitoring deadline:', err);
-      alert('モニタリング期限の設定に失敗しました。');
+      toast.error('モニタリング期限の設定に失敗しました。');
     }
   };
 

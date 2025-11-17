@@ -10,7 +10,7 @@ import { toast } from '@/lib/toast-debug';
 
 export default function NotificationsTab() {
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending');
+  const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [isLoading, setIsLoading] = useState(false);
   const [processingNoticeId, setProcessingNoticeId] = useState<string | null>(null);
 
@@ -92,10 +92,10 @@ export default function NotificationsTab() {
     try {
       if (noticeType === NoticeType.ROLE_CHANGE_PENDING) {
         await roleChangeRequestsApi.approveRequest(requestId);
-        toast.success('Role変更リクエストを承認しました');
+        toast.success('権限変更リクエストを承認しました');
       } else if (noticeType === NoticeType.EMPLOYEE_ACTION_PENDING) {
         await employeeActionRequestsApi.approveRequest(requestId);
-        toast.success('Employee制限リクエストを承認しました');
+        toast.success('利用者の作成、編集、削除リクエストを承認しました');
       }
       await loadNotices();
     } catch (err: unknown) {
@@ -133,6 +133,16 @@ export default function NotificationsTab() {
       {/* フィルター */}
       <div className="flex gap-2 mb-6 flex-wrap">
         <button
+          onClick={() => setFilter('all')}
+          className={`px-4 py-2 rounded-lg font-medium ${
+            filter === 'all'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
+          }`}
+        >
+          すべて
+        </button>
+        <button
           onClick={() => setFilter('pending')}
           className={`px-4 py-2 rounded-lg font-medium ${
             filter === 'pending'
@@ -150,7 +160,7 @@ export default function NotificationsTab() {
               : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
           }`}
         >
-          ✓ 承認済み
+          ✓ 承認
         </button>
         <button
           onClick={() => setFilter('rejected')}
@@ -160,17 +170,7 @@ export default function NotificationsTab() {
               : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
           }`}
         >
-          ✗ 却下済み
-        </button>
-        <button
-          onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg font-medium ${
-            filter === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
-          }`}
-        >
-          すべて
+          ✗ 却下
         </button>
         <button
           onClick={handleMarkAllAsRead}

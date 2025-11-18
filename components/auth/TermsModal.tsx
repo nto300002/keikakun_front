@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { AiOutlineClose } from 'react-icons/ai';
+import { AiOutlineClose, AiOutlineCheck } from 'react-icons/ai';
+import { MdCancel } from 'react-icons/md';
 
 interface TermsModalProps {
   isOpen: boolean;
@@ -106,28 +107,36 @@ export default function TermsModal({ isOpen, onClose, onAgree, type }: TermsModa
         </div>
 
         {/* フッター */}
-        <div className="p-6 border-t border-gray-700">
-          <div className="flex items-center justify-between gap-4">
-            <p className="text-sm text-gray-400">
+        <div className="p-3 sm:p-4 border-t border-gray-700">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 sm:gap-4">
+            <p className="text-xs sm:text-sm text-gray-400 text-center sm:text-left order-2 sm:order-1">
               📍 最後まで読んで同意してください
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3 order-1 sm:order-2">
               <button
                 onClick={onClose}
-                className="px-6 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors"
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700 transition-colors text-sm"
               >
-                キャンセル
+                <MdCancel className="h-4 w-4" />
+                <span>キャンセル</span>
               </button>
               <button
                 onClick={handleAgree}
                 disabled={!canAgree}
-                className={`px-6 py-2 rounded-lg font-semibold transition-all duration-300 ${
+                className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 sm:px-6 py-2 rounded-lg font-semibold transition-all duration-300 text-sm ${
                   canAgree
                     ? 'bg-[#10B981] hover:bg-[#0F9F6E] text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
                     : 'bg-gray-600 text-gray-400 cursor-not-allowed'
                 }`}
               >
-                {canAgree ? '✓ 同意する' : '🔒 最後までお読みください'}
+                {canAgree ? (
+                  <>
+                    <AiOutlineCheck className="h-4 w-4" />
+                    <span>同意する</span>
+                  </>
+                ) : (
+                  <span className="text-xs sm:text-sm">🔒 最後までお読みください</span>
+                )}
               </button>
             </div>
           </div>

@@ -22,8 +22,8 @@ const signupSchema = z.object({
   email: z.string().email('有効なメールアドレスを入力してください'),
   password: z.string()
     .min(8, 'パスワードは8文字以上で入力してください')
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-      '英字大小文字・数字・記号を組み合わせてください'),
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]+$/,
+      '英字大小文字・数字・記号（!@#$%^&*(),.?":{}|<>）を全て組み合わせてください'),
   confirmPassword: z.string(),
 }).refine(data => data.password === data.confirmPassword, {
   message: 'パスワードが一致しません',
@@ -159,7 +159,7 @@ export default function AdminSignupForm() {
               </div>
               {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>}
               <p className="text-xs text-gray-500 mt-1">
-                8文字以上で、英字大小文字・数字・記号を組み合わせてください
+                8文字以上で、英字大小文字・数字・記号（!@#$%^&*(),.?&quot;:{}|&lt;&gt;）を全て組み合わせてください
               </p>
             </div>
 

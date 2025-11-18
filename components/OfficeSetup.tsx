@@ -9,7 +9,9 @@ import StepWizard from '@/components/ui/StepWizard';
 import { officeApi } from '@/lib/auth';
 
 const officeSetupSchema = z.object({
-  name: z.string().min(1, '事業所名を入力してください'),
+  name: z.string()
+    .min(5, '事業所名は5文字以上で入力してください')
+    .max(100, '事業所名は100文字以内で入力してください'),
   type: z.enum(['transition_to_employment', 'type_A_office', 'type_B_office'], {
     message: '事業所種別を正しく選択してください',
   }),

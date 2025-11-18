@@ -11,6 +11,70 @@ interface FastAPIErrorResponse {
   detail: string | ValidationError[];
 }
 
+// Pydanticの英語エラーメッセージを日本語に変換する関数
+function translateValidationMessage(msg: string, field: string | number): string {
+  // フィールド名を日本語にマッピング
+  const fieldNameMap: Record<string, string> = {
+    name: '名前',
+    email: 'メールアドレス',
+    password: 'パスワード',
+    office_type: '事業所種別',
+    type: '種別',
+  };
+
+  const fieldName = typeof field === 'string' ? (fieldNameMap[field] || field) : field;
+
+  // 一般的なPydanticのバリデーションエラーメッセージを日本語に変換
+  const patterns = [
+    {
+      regex: /String should have at least (\d+) characters?/,
+      replace: (match: RegExpMatchArray) => `${fieldName}は${match[1]}文字以上で入力してください`,
+    },
+    {
+      regex: /String should have at most (\d+) characters?/,
+      replace: (match: RegExpMatchArray) => `${fieldName}は${match[1]}文字以内で入力してください`,
+    },
+    {
+      regex: /Field required/,
+      replace: () => `${fieldName}は必須項目です`,
+    },
+    {
+      regex: /Input should be/,
+      replace: () => `${fieldName}の値が不正です`,
+    },
+    {
+      regex: /value is not a valid email address/i,
+      replace: () => `有効なメールアドレスを入力してください`,
+    },
+    {
+      regex: /ensure this value has at least (\d+) characters?/i,
+      replace: (match: RegExpMatchArray) => `${fieldName}は${match[1]}文字以上で入力してください`,
+    },
+    {
+      regex: /ensure this value has at most (\d+) characters?/i,
+      replace: (match: RegExpMatchArray) => `${fieldName}は${match[1]}文字以内で入力してください`,
+    },
+    {
+      regex: /パスワードは次のうち少なくとも3つを含む必要があります/,
+      replace: () => `パスワードは英字大小文字・数字・記号（!@#$%^&*(),.?":{}|<>）を全て含める必要があります`,
+    },
+    {
+      regex: /パスワードは8文字以上である必要があります/,
+      replace: () => `パスワードは8文字以上で入力してください`,
+    },
+  ];
+
+  for (const pattern of patterns) {
+    const match = msg.match(pattern.regex);
+    if (match) {
+      return pattern.replace(match);
+    }
+  }
+
+  // パターンにマッチしない場合はフィールド名を付けて返す
+  return `${fieldName}: ${msg}`;
+}
+
 // エラーメッセージを整形する関数
 function formatErrorMessage(errorData: FastAPIErrorResponse): string {
   if (typeof errorData.detail === 'string') {
@@ -18,11 +82,11 @@ function formatErrorMessage(errorData: FastAPIErrorResponse): string {
   }
 
   if (Array.isArray(errorData.detail)) {
-    // バリデーションエラーの場合、全てのエラーメッセージを結合
+    // バリデーションエラーの場合、全てのエラーメッセージを日本語化して結合
     return errorData.detail
       .map((err: ValidationError) => {
         const field = err.loc[err.loc.length - 1];
-        return `${field}: ${err.msg}`;
+        return translateValidationMessage(err.msg, field);
       })
       .join('\n');
   }

@@ -179,7 +179,7 @@ export default function SignupForm() {
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-1">
-                8文字以上で、英字大小文字・数字・記号を組み合わせてください
+                8文字以上で、英字大小文字・数字・記号（!@#$%^&*(),.?":{}|&lt;&gt;）を全て組み合わせてください
               </p>
             </div>
 

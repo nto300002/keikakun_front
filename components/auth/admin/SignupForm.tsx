@@ -159,7 +159,7 @@ export default function AdminSignupForm() {
               </div>
               {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>}
               <p className="text-xs text-gray-500 mt-1">
-                8文字以上で、英字大小文字・数字・記号（!@#$%^&*(),.?":{}|&lt;&gt;）を全て組み合わせてください
+                8文字以上で、英字大小文字・数字・記号（!@#$%^&*(),.?&quot;:{}|&lt;&gt;）を全て組み合わせてください
               </p>
             </div>
 

@@ -178,8 +178,8 @@ export default function SignupForm() {
                   {showPassword ? <AiOutlineEyeInvisible className="h-5 w-5" /> : <AiOutlineEye className="h-5 w-5" />}
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-1">
-                8文字以上で、英字大小文字・数字・記号（!@#$%^&*(),.?":{}|&lt;&gt;）を全て組み合わせてください
+              <p className="text-gray-500 text-xs mt-1">
+                8文字以上で、英字大小文字・数字・記号（!@#$%^&*(),.?&quot;:{}|&lt;&gt;）を全て組み合わせてください
               </p>
             </div>
 

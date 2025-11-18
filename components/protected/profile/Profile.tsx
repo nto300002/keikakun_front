@@ -641,7 +641,7 @@ ${feedbackContent}
                   className="w-full bg-[#0f1419] border border-[#2a2a3e] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
                 />
                 <p className="text-gray-500 text-xs mt-1">
-                  8文字以上で、英字大小文字・数字・記号（!@#$%^&*(),.?":{}|&lt;&gt;）を全て組み合わせてください
+                  8文字以上で、英字大小文字・数字・記号（!@#$%^&*(),.?&quot;:{}|&lt;&gt;）を全て組み合わせてください
                 </p>
               </div>
 

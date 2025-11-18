@@ -8,6 +8,7 @@ import { z } from 'zod';
 import StepWizard from '@/components/ui/StepWizard';
 import { authApi } from '@/lib/auth';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
+import TermsAgreement from '@/components/auth/TermsAgreement';
 
 const signupSchema = z.object({
   last_name: z.string()
@@ -34,6 +35,8 @@ type SignupFormData = z.infer<typeof signupSchema>;
 export default function AdminSignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [termsAgreed, setTermsAgreed] = useState(false);
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const router = useRouter();
   
   const {
@@ -169,9 +172,17 @@ export default function AdminSignupForm() {
               {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword.message}</p>}
             </div>
 
+            {/* 利用規約・プライバシーポリシーへの同意 */}
+            <TermsAgreement
+              onTermsAgree={setTermsAgreed}
+              onPrivacyAgree={setPrivacyAgreed}
+              termsAgreed={termsAgreed}
+              privacyAgreed={privacyAgreed}
+            />
+
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !termsAgreed || !privacyAgreed}
               className="w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isLoading ? '作成中...' : 'アカウントを作成する'}

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { authApi } from '@/lib/auth';
 import { StaffCreateData } from '@/types/staff';
+import TermsAgreement from '@/components/auth/TermsAgreement';
 
 export default function SignupForm() {
   const [formData, setFormData] = useState<StaffCreateData & { confirmPassword: string }> ({
@@ -18,6 +19,8 @@ export default function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [termsAgreed, setTermsAgreed] = useState(false);
+  const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -186,20 +189,18 @@ export default function SignupForm() {
               </label>
               <input id="confirmPassword" name="confirmPassword" type="password" required value={formData.confirmPassword} onChange={handleChange} className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="パスワードを再入力してください" />
             </div>
-            <div className="flex items-start">
-              <input id="agree" type="checkbox" required className="mt-1 mr-2 text-[#10B981] bg-[#1A1A1A] border-gray-600 rounded focus:ring-[#10B981]" />
-              <label htmlFor="agree" className="text-sm text-gray-300">
-                <span className="text-red-400">* </span>
-                <a href="#" className="text-[#10B981] hover:text-[#0F9F6E] underline">利用規約</a>
-                および
-                <a href="#" className="text-[#10B981] hover:text-[#0F9F6E] underline">プライバシーポリシー</a>
-                に同意します
-              </label>
-            </div>
+
+            {/* 利用規約・プライバシーポリシーへの同意 */}
+            <TermsAgreement
+              onTermsAgree={setTermsAgreed}
+              onPrivacyAgree={setPrivacyAgreed}
+              termsAgreed={termsAgreed}
+              privacyAgreed={privacyAgreed}
+            />
 
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !termsAgreed || !privacyAgreed}
               className="w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isLoading ? '作成中...' : 'アカウントを作成する'}

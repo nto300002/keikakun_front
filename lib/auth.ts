@@ -30,7 +30,6 @@ export const authApi = {
       body: new URLSearchParams({
         username: data.username,
         password: data.password,
-        rememberMe: data.rememberMe ? 'true' : 'false',
       }),
     });
 
@@ -62,6 +61,44 @@ export const authApi = {
   verifyMfa: (data: { temporary_token: string; totp_code: string }): Promise<AuthResponse> => {
     return http.post(`${API_V1_PREFIX}/auth/token/verify-mfa`, data);
   },
+
+  // Admin MFA management
+  enableStaffMfa: (staffId: string): Promise<{
+    message: string;
+    staff_id: string;
+    staff_name: string;
+    qr_code_uri: string;
+    secret_key: string;
+    recovery_codes: string[];
+  }> => {
+    return http.post(`${API_V1_PREFIX}/auth/admin/staff/${staffId}/mfa/enable`, {});
+  },
+
+  disableStaffMfa: (staffId: string): Promise<{ message: string }> => {
+    return http.post(`${API_V1_PREFIX}/auth/admin/staff/${staffId}/mfa/disable`, {});
+  },
+
+  // Bulk MFA operations
+  enableAllOfficeMfa: (): Promise<{
+    message: string;
+    enabled_count: number;
+    staff_mfa_data: Array<{
+      staff_id: string;
+      staff_name: string;
+      qr_code_uri: string;
+      secret_key: string;
+      recovery_codes: string[];
+    }>;
+  }> => {
+    return http.post(`${API_V1_PREFIX}/auth/admin/office/mfa/enable-all`, {});
+  },
+
+  disableAllOfficeMfa: (): Promise<{
+    message: string;
+    disabled_count: number;
+  }> => {
+    return http.post(`${API_V1_PREFIX}/auth/admin/office/mfa/disable-all`, {});
+  },
 };
 
 // Office API calls
@@ -80,5 +117,10 @@ export const officeApi = {
 
   associateToOffice: (office_id: string): Promise<{ message: string }> => {
     return http.post(`${API_V1_PREFIX}/staff/associate-office`, { office_id });
+  },
+
+  // 事務所に所属する全スタッフを取得（Manager/Owner専用）
+  getOfficeStaffs: (): Promise<StaffResponse[]> => {
+    return http.get(`${API_V1_PREFIX}/offices/me/staffs`);
   },
 };

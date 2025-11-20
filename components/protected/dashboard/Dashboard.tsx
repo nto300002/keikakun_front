@@ -631,7 +631,7 @@ export default function Dashboard() {
                             <Link href={`/recipients/${recipient.id}`} className="block">
                             <div className="cursor-pointer hover:underline">
                               <div className="text-white font-bold text-base">
-                                {staff.is_mfa_enabled ? recipient.full_name : recipient.last_name}
+                                {staff.is_mfa_enabled ? recipient.full_name : recipient.last_name} さん
                               </div>
                               {staff.is_mfa_enabled && <div className="text-gray-200 text-xs mt-1">{recipient.furigana}</div>}
                             </div>

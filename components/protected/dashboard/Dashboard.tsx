@@ -628,14 +628,22 @@ export default function Dashboard() {
                           </td>
 
                           <td className="px-4 py-4">
-                            <Link href={`/recipients/${recipient.id}`} className="block">
-                            <div className="cursor-pointer hover:underline">
-                              <div className="text-white font-bold text-base">
-                                {staff.is_mfa_enabled ? recipient.full_name : recipient.last_name} さん
+                            {staff.is_mfa_enabled ? (
+                              <Link href={`/recipients/${recipient.id}`} className="block">
+                                <div className="cursor-pointer hover:underline">
+                                  <div className="text-white font-bold text-base">
+                                    {recipient.full_name} さん
+                                  </div>
+                                  <div className="text-gray-200 text-xs mt-1">{recipient.furigana}</div>
+                                </div>
+                              </Link>
+                            ) : (
+                              <div>
+                                <div className="text-white font-bold text-base">
+                                  {recipient.last_name} さん
+                                </div>
                               </div>
-                              {staff.is_mfa_enabled && <div className="text-gray-200 text-xs mt-1">{recipient.furigana}</div>}
-                            </div>
-                            </Link>
+                            )}
                           </td>
 
                           <td className="px-4 py-4">
@@ -785,14 +793,22 @@ export default function Dashboard() {
                           </div>
                         </div>
 
-                        <Link href={`/recipients/${recipient.id}`}>
+                        {staff.is_mfa_enabled ? (
+                          <Link href={`/recipients/${recipient.id}`}>
+                            <div>
+                              <div className="text-white font-bold text-base">
+                                {recipient.full_name}さん
+                              </div>
+                              <div className="text-gray-200 text-xs">{recipient.furigana}</div>
+                            </div>
+                          </Link>
+                        ) : (
                           <div>
                             <div className="text-white font-bold text-base">
-                              {staff.is_mfa_enabled ? recipient.full_name : recipient.last_name}さん
+                              {recipient.last_name}さん
                             </div>
-                            {staff.is_mfa_enabled && <div className="text-gray-200 text-xs">{recipient.furigana}</div>}
                           </div>
-                        </Link>
+                        )}
 
                         <div className="flex items-center justify-between">
                           <span className="text-gray-300 text-sm">第{recipient.current_cycle_number}回</span>

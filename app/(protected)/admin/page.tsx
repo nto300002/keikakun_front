@@ -66,5 +66,5 @@ export default function AdminPage() {
     );
   }
 
-  return <AdminMenu staff={staff} office={office} />;
+  return <AdminMenu office={office} />;
 }

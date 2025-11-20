@@ -9,8 +9,7 @@ import { toast } from '@/lib/toast-debug';
 export default function LoginForm() {
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    rememberMe: false
+    password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -62,11 +61,24 @@ export default function LoginForm() {
     try {
       const data = await authApi.login({
         username: formData.email,
-        password: formData.password,
-        rememberMe: formData.rememberMe
+        password: formData.password
       });
 
-      if (data.requires_mfa_verification && data.temporary_token) {
+      if (data.requires_mfa_first_setup && data.temporary_token) {
+        // 管理者が設定したMFAの初回セットアップが必要な場合
+        tokenUtils.setTemporaryToken(data.temporary_token);
+        // QRコードURIとシークレットキーをセッションストレージに保存
+        if (data.qr_code_uri) {
+          sessionStorage.setItem('mfa_qr_code_uri', data.qr_code_uri);
+        }
+        if (data.secret_key) {
+          sessionStorage.setItem('mfa_secret_key', data.secret_key);
+        }
+        if (data.message) {
+          sessionStorage.setItem('mfa_setup_message', data.message);
+        }
+        router.push('/auth/mfa-first-setup');
+      } else if (data.requires_mfa_verification && data.temporary_token) {
         // MFA認証が必要な場合
         tokenUtils.setTemporaryToken(data.temporary_token);
         router.push('/auth/mfa-verify');
@@ -169,22 +181,8 @@ export default function LoginForm() {
               </div>
             </div>
 
-            {/* ... remember me and forgot password ... */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="rememberMe"
-                  name="rememberMe"
-                  type="checkbox"
-                  checked={formData.rememberMe}
-                  onChange={handleChange}
-                  className="text-[#10B981] bg-[#1A1A1A] border-gray-600 rounded focus:ring-[#10B981]"
-                />
-                <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-300">
-                  ログイン状態を保持(8時間)
-                </label>
-              </div>
-              
+            {/* ... forgot password ... */}
+            <div className="text-right">
               <a href="#" className="text-sm text-[#10B981] hover:text-[#0F9F6E] underline">
                 パスワードをお忘れですか？
               </a>

@@ -8,6 +8,7 @@ export default function MfaVerifyPage() {
   const [totpCode, setTotpCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [verifyAttempts, setVerifyAttempts] = useState(0);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,8 +48,19 @@ export default function MfaVerifyPage() {
         router.push(`/dashboard?${params.toString()}`);
       }
     } catch (err) {
+      setVerifyAttempts(prev => prev + 1);
       const errorMessage = err instanceof Error ? err.message : 'MFA検証に失敗しました。';
-      setError(errorMessage);
+      let fullErrorMessage = errorMessage;
+
+      // エラーヒントを追加
+      if (verifyAttempts >= 1) {
+        fullErrorMessage += '\n\nヒント: 認証アプリで最新のコード（30秒ごとに更新）を確認してください。';
+      }
+      if (verifyAttempts >= 2) {
+        fullErrorMessage += '\n複数回失敗している場合は、前のページに戻ってから再度アクセスしてください。';
+      }
+
+      setError(fullErrorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -70,7 +82,16 @@ export default function MfaVerifyPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm">
-                {error}
+                <p className="whitespace-pre-wrap">{error}</p>
+                {verifyAttempts >= 3 && (
+                  <button
+                    type="button"
+                    onClick={() => router.push('/auth/login')}
+                    className="mt-3 w-full px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    ログイン画面に戻る
+                  </button>
+                )}
               </div>
             )}
 

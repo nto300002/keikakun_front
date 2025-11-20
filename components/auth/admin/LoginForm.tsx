@@ -125,19 +125,8 @@ export default function AdminLoginForm() {
               )}
             </div>
 
-            {/* ... remember me and forgot password ... */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember"
-                  type="checkbox"
-                  className="text-[#10B981] bg-[#1A1A1A] border-gray-600 rounded focus:ring-[#10B981]"
-                />
-                <label htmlFor="remember" className="ml-2 text-sm text-gray-300">
-                  ログイン状態を保持する
-                </label>
-              </div>
-              
+            {/* ... forgot password ... */}
+            <div className="text-right">
               <a href="#" className="text-sm text-[#10B981] hover:text-[#0F9F6E] underline">
                 パスワードをお忘れですか？
               </a>

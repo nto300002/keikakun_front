@@ -1,20 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { MdEdit } from 'react-icons/md';
+import { AiOutlineQuestionCircle } from 'react-icons/ai';
+import { QRCodeCanvas } from 'qrcode.react';
 import { StaffResponse } from '@/types/staff';
 import { OfficeResponse } from '@/types/office';
 import { calendarApi } from '@/lib/calendar';
 import { OfficeCalendarAccount, CalendarConnectionStatus } from '@/types/calendar';
+import { authApi, officeApi } from '@/lib/auth';
 
 interface AdminMenuProps {
-  staff: StaffResponse | null;
   office: OfficeResponse | null;
 }
 
-type TabType = 'staff' | 'office' | 'integration' | 'plan';
+type TabType = 'office' | 'integration' | 'plan';
 
-export default function AdminMenu({ staff, office }: AdminMenuProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('staff');
+export default function AdminMenu({ office }: AdminMenuProps) {
+  const [activeTab, setActiveTab] = useState<TabType>('office');
   const [calendarFile, setCalendarFile] = useState<File | null>(null);
   const [calendarId, setCalendarId] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -27,6 +30,44 @@ export default function AdminMenu({ staff, office }: AdminMenuProps) {
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
+
+  // MFA management state
+  const [mfaError, setMfaError] = useState<string | null>(null);
+  const [mfaSuccess, setMfaSuccess] = useState<string | null>(null);
+  const [mfaSetupData, setMfaSetupData] = useState<{
+    qr_code_uri: string;
+    secret_key: string;
+    recovery_codes: string[];
+  } | null>(null);
+  const [showMfaSetupModal, setShowMfaSetupModal] = useState<boolean>(false);
+
+  // Office staffs management state
+  const [officeStaffs, setOfficeStaffs] = useState<StaffResponse[]>([]);
+  const [isLoadingStaffs, setIsLoadingStaffs] = useState<boolean>(false);
+  const [loadStaffsError, setLoadStaffsError] = useState<string | null>(null);
+  const [staffMfaTogglingId, setStaffMfaTogglingId] = useState<string | null>(null);
+
+  // Bulk MFA operations state
+  const [isBulkMfaProcessing, setIsBulkMfaProcessing] = useState<boolean>(false);
+  const [bulkMfaError, setBulkMfaError] = useState<string | null>(null);
+  const [bulkMfaSuccess, setBulkMfaSuccess] = useState<string | null>(null);
+  const [showBulkMfaResultModal, setShowBulkMfaResultModal] = useState<boolean>(false);
+  const [bulkMfaResultData, setBulkMfaResultData] = useState<{
+    enabled_count?: number;
+    disabled_count?: number;
+    staff_mfa_data?: Array<{
+      staff_id: string;
+      staff_name: string;
+      qr_code_uri: string;
+      secret_key: string;
+      recovery_codes: string[];
+    }>;
+  } | null>(null);
+
+  // Office edit modal state
+  const [showOfficeEditModal, setShowOfficeEditModal] = useState<boolean>(false);
+  const [officeName, setOfficeName] = useState<string>('');
+  const [officeType, setOfficeType] = useState<string>('');
 
   // 既存のカレンダー設定を取得
   useEffect(() => {
@@ -60,6 +101,29 @@ export default function AdminMenu({ staff, office }: AdminMenuProps) {
 
     fetchExistingCalendar();
   }, [office?.id, activeTab]);
+
+  // 事務所スタッフ一覧を取得
+  useEffect(() => {
+    const fetchOfficeStaffs = async () => {
+      if (activeTab !== 'office') return;
+
+      setIsLoadingStaffs(true);
+      setLoadStaffsError(null);
+
+      try {
+        const staffs = await officeApi.getOfficeStaffs();
+        setOfficeStaffs(staffs);
+      } catch (error: unknown) {
+        const err = error as { response?: { status?: number; data?: { detail?: string } }; message?: string };
+        const errorMessage = err?.response?.data?.detail || err?.message || 'スタッフ一覧の取得に失敗しました。';
+        setLoadStaffsError(errorMessage);
+      } finally {
+        setIsLoadingStaffs(false);
+      }
+    };
+
+    fetchOfficeStaffs();
+  }, [activeTab]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -203,6 +267,145 @@ export default function AdminMenu({ staff, office }: AdminMenuProps) {
     }
   };
 
+  // 事務所スタッフのMFA有効化
+  const handleStaffMfaEnable = async (targetStaff: StaffResponse) => {
+    setStaffMfaTogglingId(targetStaff.id);
+    setMfaError(null);
+    setMfaSuccess(null);
+
+    try {
+      const response = await authApi.enableStaffMfa(targetStaff.id);
+      setMfaSuccess(`${targetStaff.full_name}さんのMFAを有効化しました。`);
+
+      // MFA設定データを保存してモーダル表示
+      setMfaSetupData({
+        qr_code_uri: response.qr_code_uri,
+        secret_key: response.secret_key,
+        recovery_codes: response.recovery_codes,
+      });
+      setShowMfaSetupModal(true);
+
+      // スタッフ一覧を再取得
+      const staffs = await officeApi.getOfficeStaffs();
+      setOfficeStaffs(staffs);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } }; message?: string };
+      const errorMessage =
+        err?.response?.data?.detail ||
+        err?.message ||
+        'MFA有効化に失敗しました。';
+      setMfaError(errorMessage);
+    } finally {
+      setStaffMfaTogglingId(null);
+    }
+  };
+
+  // 事務所スタッフのMFA無効化
+  const handleStaffMfaDisable = async (targetStaff: StaffResponse) => {
+    if (!window.confirm(`本当に${targetStaff.full_name}さんのMFAを無効化しますか？セキュリティが低下します。`)) {
+      return;
+    }
+
+    setStaffMfaTogglingId(targetStaff.id);
+    setMfaError(null);
+    setMfaSuccess(null);
+
+    try {
+      await authApi.disableStaffMfa(targetStaff.id);
+      setMfaSuccess(`${targetStaff.full_name}さんのMFAを無効化しました。`);
+
+      // スタッフ一覧を再取得
+      const staffs = await officeApi.getOfficeStaffs();
+      setOfficeStaffs(staffs);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } }; message?: string };
+      const errorMessage =
+        err?.response?.data?.detail ||
+        err?.message ||
+        'MFA無効化に失敗しました。';
+      setMfaError(errorMessage);
+    } finally {
+      setStaffMfaTogglingId(null);
+    }
+  };
+
+  // オフィス編集モーダルを開く
+  const handleOpenOfficeEditModal = () => {
+    if (office) {
+      setOfficeName(office.name);
+      setOfficeType(office.office_type);
+    }
+    setShowOfficeEditModal(true);
+  };
+
+  // オフィス編集を保存（モーダル用）
+  const handleSaveOfficeEdit = () => {
+    // TODO: 実際の保存処理を実装
+    console.log('Saving office edit:', { officeName, officeType });
+    setShowOfficeEditModal(false);
+  };
+
+  // 全スタッフのMFA一括有効化
+  const handleBulkEnableMfa = async () => {
+    if (!window.confirm('事務所の全スタッフのMFAを一括で有効化しますか？\n各スタッフのQRコードとリカバリーコードが生成されます。')) {
+      return;
+    }
+
+    setIsBulkMfaProcessing(true);
+    setBulkMfaError(null);
+    setBulkMfaSuccess(null);
+
+    try {
+      const response = await authApi.enableAllOfficeMfa();
+      setBulkMfaSuccess(`${response.enabled_count}名のスタッフのMFAを有効化しました。`);
+      setBulkMfaResultData(response);
+      setShowBulkMfaResultModal(true);
+
+      // スタッフ一覧を再取得
+      const staffs = await officeApi.getOfficeStaffs();
+      setOfficeStaffs(staffs);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } }; message?: string };
+      const errorMessage =
+        err?.response?.data?.detail ||
+        err?.message ||
+        'MFA一括有効化に失敗しました。';
+      setBulkMfaError(errorMessage);
+    } finally {
+      setIsBulkMfaProcessing(false);
+    }
+  };
+
+  // 全スタッフのMFA一括無効化
+  const handleBulkDisableMfa = async () => {
+    if (!window.confirm('事務所の全スタッフのMFAを一括で無効化しますか？\nセキュリティが低下します。')) {
+      return;
+    }
+
+    setIsBulkMfaProcessing(true);
+    setBulkMfaError(null);
+    setBulkMfaSuccess(null);
+
+    try {
+      const response = await authApi.disableAllOfficeMfa();
+      setBulkMfaSuccess(`${response.disabled_count}名のスタッフのMFAを無効化しました。`);
+      setBulkMfaResultData(response);
+
+      // スタッフ一覧を再取得
+      const staffs = await officeApi.getOfficeStaffs();
+      setOfficeStaffs(staffs);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } }; message?: string };
+      const errorMessage =
+        err?.response?.data?.detail ||
+        err?.message ||
+        'MFA一括無効化に失敗しました。';
+      setBulkMfaError(errorMessage);
+    } finally {
+      setIsBulkMfaProcessing(false);
+    }
+  };
+
   const getConnectionStatusLabel = (status: CalendarConnectionStatus) => {
     switch (status) {
       case CalendarConnectionStatus.CONNECTED:
@@ -235,68 +438,10 @@ export default function AdminMenu({ staff, office }: AdminMenuProps) {
 
   return (
     <div className="flex h-screen bg-gray-900 text-gray-200">
-      {/* タブ: スタッフ */}
-      <div className="w-1/4 bg-gray-800 border-r border-gray-700 overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-4">事業所設定</h2>
-            {/* オフィス: 概要 */}
-            <div className="bg-gray-800 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold mb-3">オフィス</h3>
-                <div className="bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-3">概要</h3>
-                <div className="space-y-3">
-                    <div>
-                    <p className="text-gray-400 text-sm">事業所</p>
-                    <p className="text-white font-medium">{office?.name || '未設定'}</p>
-                    </div>
-                </div>
-                </div>
-            </div>
-            <br />
-        <div className="p-4">
-          <h2 className="text-xl font-bold mb-4">スタッフ</h2>
-          <div className="space-y-2">
-            {staff ? (
-              <div className="p-3 rounded-lg bg-gray-700">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-semibold">{staff.full_name}</p>
-                    <p className="text-sm text-gray-400">{staff.email}</p>
-                  </div>
-                  <span
-                    className={`px-2 py-1 rounded text-xs font-medium ${getRoleBadgeColor(
-                      staff.role
-                    )}`}
-                  >
-                    {getRoleLabel(staff.role)}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="p-3 rounded-lg bg-gray-700">
-                <p className="text-gray-400 text-sm">ユーザー情報を読み込み中...</p>
-              </div>
-            )}
-          </div>
-          <button className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-medium">
-            + スタッフを招待
-          </button>
-        </div>
-      </div>
-
       {/* メニュー */}
       <div className="flex-1 flex flex-col">
         <div className="bg-gray-800 border-b border-gray-700">
           <div className="flex">
-            <button
-              onClick={() => setActiveTab('staff')}
-              className={`px-6 py-3 font-medium ${
-                activeTab === 'staff'
-                  ? 'bg-gray-900 text-white border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              スタッフ
-            </button>
             <button
               onClick={() => setActiveTab('office')}
               className={`px-6 py-3 font-medium ${
@@ -336,102 +481,252 @@ export default function AdminMenu({ staff, office }: AdminMenuProps) {
           </div>
         </div>
 
-        {/* スタッフ */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* スタッフ詳細 */}
-          {activeTab === 'staff' && (
-            <div>
-              <h2 className="text-2xl font-bold mb-4">スタッフ</h2>
-              {staff ? (
-                <div className="bg-gray-800 p-6 rounded-lg">
-                  <h3 className="text-xl font-semibold mb-4">スタッフ詳細</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-gray-400 text-sm">氏名</label>
-                      <p className="text-white">{staff.full_name}</p>
-                    </div>
-                    <div>
-                      <label className="text-gray-400 text-sm">メールアドレス</label>
-                      <p className="text-white">{staff.email}</p>
-                    </div>
-                    <div>
-                      <label className="text-gray-400 text-sm">役割</label>
-                      <p className="text-white">{getRoleLabel(staff.role)}</p>
-                    </div>
-                    <div>
-                      <label className="text-gray-400 text-sm">MFA</label>
-                      <p className="text-white">
-                        {staff.is_mfa_enabled ? '有効' : '無効'}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-6 flex space-x-3">
-                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-                      編集
-                    </button>
-                    <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg">
-                      削除
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-gray-400">ユーザー情報を読み込み中...</p>
-              )}
-            </div>
-          )}
-
           {/* オフィス: 内容変更 */}
           {activeTab === 'office' && (
             <div>
               <h2 className="text-2xl font-bold mb-4">事業所設定</h2>
-            {/* オフィス: 概要 */}
-            <div className="bg-gray-800 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold mb-3">オフィス新規作成</h3>
-                <div className="bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-3">概要</h3>
-                <div className="space-y-3">
-                    <div>
-                    <p className="text-gray-400 text-sm">事業所</p>
-                    <p className="text-white font-medium">{office?.name || '未設定'}</p>
-                    </div>
-                </div>
-                </div>
 
-                <div className="mt-4 bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-3">アクション</h3>
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm">
-                    新規作成
-                </button>
+              {/* MFA成功メッセージ */}
+              {mfaSuccess && (
+                <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
+                  <p className="text-green-400 text-sm">{mfaSuccess}</p>
                 </div>
-            </div>
-            <br />
-              <div className="bg-gray-800 p-6 rounded-lg">
-                <h3 className="text-lg font-semibold mb-3">オフィス編集</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-gray-400 text-sm">事業所名</label>
-                    <input
-                      type="text"
-                      defaultValue={office?.name || ''}
-                      className="w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white"
-                    />
-                  </div>
+              )}
 
-                  <div>
-                    <label className="text-gray-400 text-sm">事業所種別</label>
-                    <select
-                      defaultValue={office?.office_type || ''}
-                      className="w-full mt-1 bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white"
-                    >
-                      <option value="transition_to_employment">移行支援</option>
-                      <option value="type_A_office">就労A型</option>
-                      <option value="type_B_office">就労B型</option>
-                    </select>
-                  </div>
-                  <button className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
-                    保存
+              {/* MFAエラーメッセージ */}
+              {mfaError && (
+                <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
+                  <p className="text-red-400 text-sm font-semibold">エラー</p>
+                  <p className="text-red-400 text-sm mt-1">{mfaError}</p>
+                </div>
+              )}
+
+              {/* オフィス情報カード */}
+              <div className="bg-gray-800 p-6 rounded-lg mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold">事業所情報</h3>
+                  <button
+                    onClick={handleOpenOfficeEditModal}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <MdEdit className="w-5 h-5" />
+                    編集
                   </button>
                 </div>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-gray-400 text-sm">事業所名</p>
+                    <p className="text-white font-medium">{office?.name || '未設定'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">事業所種別</p>
+                    <p className="text-white font-medium">
+                      {office?.office_type === 'transition_to_employment' && '移行支援'}
+                      {office?.office_type === 'type_A_office' && '就労A型'}
+                      {office?.office_type === 'type_B_office' && '就労B型'}
+                      {!office?.office_type && '未設定'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* スタッフ管理セクション */}
+              <div className="bg-gray-800 p-6 rounded-lg mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <h3 className="text-xl font-semibold">事務所スタッフ管理</h3>
+                    <span className="text-gray-400 text-sm">
+                      {officeStaffs.length}名
+                    </span>
+
+                    {/* QRコード紛失時のヘルプツールチップ */}
+                    <div className="group relative">
+                      <button className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition-colors">
+                        <AiOutlineQuestionCircle className="h-5 w-5" />
+                        <span className="underline">QRコードを紛失した場合</span>
+                      </button>
+
+                      {/* ツールチップ */}
+                      <div className="absolute left-0 top-full mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div className="flex items-start gap-2">
+                          <AiOutlineQuestionCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                          <div>
+                            <p className="text-sm font-semibold text-white mb-2">QRコード紛失時の対処法</p>
+                            <ol className="text-sm text-gray-300 space-y-2 list-decimal list-inside">
+                              <li>対象スタッフのMFAを一度無効化する</li>
+                              <li>再度MFAを有効化する</li>
+                              <li>新しいQRコードとシークレットキーが発行される</li>
+                              <li>スタッフに新しいQRコードを共有する</li>
+                            </ol>
+                            <p className="text-xs text-gray-400 mt-3">
+                              ⚠️ 無効化すると、既存のTOTPアプリの設定は使用できなくなります。
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleBulkEnableMfa}
+                      disabled={isBulkMfaProcessing || isLoadingStaffs}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                    >
+                      {isBulkMfaProcessing ? (
+                        <>
+                          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          処理中...
+                        </>
+                      ) : (
+                        <>
+                          ✅ 全員MFA有効化
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={handleBulkDisableMfa}
+                      disabled={isBulkMfaProcessing || isLoadingStaffs}
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                    >
+                      {isBulkMfaProcessing ? (
+                        <>
+                          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          処理中...
+                        </>
+                      ) : (
+                        <>
+                          ❌ 全員MFA無効化
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* バルクMFA操作エラーメッセージ */}
+                {bulkMfaError && (
+                  <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
+                    <p className="text-red-400 text-sm font-semibold">エラー</p>
+                    <p className="text-red-400 text-sm mt-1">{bulkMfaError}</p>
+                  </div>
+                )}
+
+                {/* バルクMFA操作成功メッセージ */}
+                {bulkMfaSuccess && !showBulkMfaResultModal && (
+                  <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
+                    <p className="text-green-400 text-sm font-semibold">成功</p>
+                    <p className="text-green-400 text-sm mt-1">{bulkMfaSuccess}</p>
+                  </div>
+                )}
+
+                {/* ローディング中 */}
+                {isLoadingStaffs && (
+                  <div className="p-4 bg-gray-700 rounded-lg flex items-center">
+                    <svg className="animate-spin h-5 w-5 text-blue-400 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p className="text-gray-400 text-sm">スタッフ一覧を読み込み中...</p>
+                  </div>
+                )}
+
+                {/* エラー表示 */}
+                {loadStaffsError && !isLoadingStaffs && (
+                  <div className="p-4 bg-red-900/50 border border-red-500 rounded-lg">
+                    <p className="text-red-400 text-sm font-semibold">読み込みエラー</p>
+                    <p className="text-red-400 text-sm mt-1">{loadStaffsError}</p>
+                  </div>
+                )}
+
+
+
+                {/* スタッフ一覧テーブル */}
+                {!isLoadingStaffs && !loadStaffsError && (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-gray-700">
+                          <th className="text-left py-3 px-4 text-gray-400 font-medium">氏名</th>
+                          <th className="text-left py-3 px-4 text-gray-400 font-medium">メールアドレス</th>
+                          <th className="text-left py-3 px-4 text-gray-400 font-medium">役割</th>
+                          <th className="text-left py-3 px-4 text-gray-400 font-medium">MFA状態</th>
+                          <th className="text-left py-3 px-4 text-gray-400 font-medium">アクション</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {officeStaffs.map((s) => (
+                          <tr key={s.id} className="border-b border-gray-700 hover:bg-gray-700/50">
+                            <td className="py-3 px-4 text-white">{s.full_name}</td>
+                            <td className="py-3 px-4 text-gray-300">{s.email}</td>
+                            <td className="py-3 px-4">
+                              <span
+                                className={`px-2 py-1 rounded text-xs font-medium ${getRoleBadgeColor(s.role)}`}
+                              >
+                                {getRoleLabel(s.role)}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span
+                                className={`px-3 py-1 rounded-lg text-sm font-semibold border ${
+                                  s.is_mfa_enabled
+                                    ? 'bg-green-900/50 text-green-400 border-green-500'
+                                    : 'bg-gray-700 text-gray-400 border-gray-600'
+                                }`}
+                              >
+                                {s.is_mfa_enabled ? '✅ 有効' : '❌ 無効'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              {s.is_mfa_enabled ? (
+                                <button
+                                  onClick={() => handleStaffMfaDisable(s)}
+                                  disabled={staffMfaTogglingId === s.id}
+                                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
+                                >
+                                  {staffMfaTogglingId === s.id ? (
+                                    <>
+                                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                      </svg>
+                                      処理中...
+                                    </>
+                                  ) : (
+                                    '無効化'
+                                  )}
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleStaffMfaEnable(s)}
+                                  disabled={staffMfaTogglingId === s.id}
+                                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
+                                >
+                                  {staffMfaTogglingId === s.id ? (
+                                    <>
+                                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                      </svg>
+                                      処理中...
+                                    </>
+                                  ) : (
+                                    '有効化'
+                                  )}
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -687,7 +982,210 @@ export default function AdminMenu({ staff, office }: AdminMenuProps) {
         </div>
       </div>
 
+      {/* MFA設定情報モーダル */}
+      {showMfaSetupModal && mfaSetupData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-2xl font-bold mb-4 text-white">MFA設定情報</h3>
+            <p className="text-gray-400 mb-6">
+              以下の情報をスタッフに安全な方法で共有してください。この情報は一度しか表示されません。
+            </p>
 
+            {/* QRコード */}
+            <div className="mb-6 p-4 bg-gray-700 rounded-lg">
+              <h4 className="text-lg font-semibold mb-3 text-white">QRコード</h4>
+              <p className="text-gray-400 text-sm mb-3">
+                Google AuthenticatorなどのTOTPアプリで以下のQRコードをスキャンしてください。
+              </p>
+              <div className="bg-white p-4 rounded-lg inline-block">
+                <QRCodeCanvas
+                  value={mfaSetupData.qr_code_uri}
+                  size={192}
+                  level="H"
+                />
+              </div>
+            </div>
+
+            {/* シークレットキー */}
+            <div className="mb-6 p-4 bg-gray-700 rounded-lg">
+              <h4 className="text-lg font-semibold mb-3 text-white">シークレットキー（手動入力用）</h4>
+              <p className="text-gray-400 text-sm mb-3">
+                QRコードをスキャンできない場合は、以下のキーを手動で入力してください。
+              </p>
+              <div className="bg-gray-900 p-3 rounded font-mono text-sm text-white break-all">
+                {mfaSetupData.secret_key}
+              </div>
+            </div>
+
+            {/* リカバリーコード */}
+            <div className="mb-6 p-4 bg-gray-700 rounded-lg">
+              <h4 className="text-lg font-semibold mb-3 text-white">リカバリーコード</h4>
+              <p className="text-gray-400 text-sm mb-3">
+                デバイスを紛失した場合に使用できるバックアップコードです。安全な場所に保管してください。
+              </p>
+              <div className="bg-gray-900 p-4 rounded">
+                <div className="grid grid-cols-2 gap-2">
+                  {mfaSetupData.recovery_codes.map((code, index) => (
+                    <div key={index} className="font-mono text-sm text-white">
+                      {code}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 閉じるボタン */}
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowMfaSetupModal(false);
+                  setMfaSetupData(null);
+                  // ページをリロードしてスタッフ情報を更新
+                  window.location.reload();
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* オフィス編集モーダル */}
+      {showOfficeEditModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-2xl font-bold mb-4 text-white">事業所情報を編集</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">事業所名</label>
+                <input
+                  type="text"
+                  value={officeName}
+                  onChange={(e) => setOfficeName(e.target.value)}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                  placeholder="事業所名を入力"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">事業所種別</label>
+                <select
+                  value={officeType}
+                  onChange={(e) => setOfficeType(e.target.value)}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                >
+                  <option value="">選択してください</option>
+                  <option value="transition_to_employment">移行支援</option>
+                  <option value="type_A_office">就労A型</option>
+                  <option value="type_B_office">就労B型</option>
+                </select>
+              </div>
+            </div>
+
+            {/* ボタン */}
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowOfficeEditModal(false)}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg"
+              >
+                キャンセル
+              </button>
+              <button
+                onClick={handleSaveOfficeEdit}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+              >
+                保存
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* バルクMFA有効化結果モーダル */}
+      {showBulkMfaResultModal && bulkMfaResultData?.staff_mfa_data && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-700">
+              <h2 className="text-2xl font-bold text-white">MFA一括有効化結果</h2>
+              <p className="text-green-400 mt-2">
+                {bulkMfaResultData.enabled_count}名のスタッフのMFAを有効化しました
+              </p>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-4 p-4 bg-yellow-900/50 border border-yellow-500 rounded-lg">
+                <p className="text-yellow-400 text-sm font-semibold">重要</p>
+                <p className="text-yellow-400 text-sm mt-1">
+                  以下の情報を各スタッフに安全な方法で伝えてください。QRコードをスキャンしてTOTPアプリに登録し、リカバリーコードは安全な場所に保管してください。
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                {bulkMfaResultData.staff_mfa_data.map((staffData, index) => (
+                  <div key={staffData.staff_id} className="bg-gray-700 p-4 rounded-lg">
+                    <h3 className="text-lg font-semibold text-white mb-3">
+                      {index + 1}. {staffData.staff_name}
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* QRコード */}
+                      <div>
+                        <p className="text-gray-400 text-sm mb-2">QRコード</p>
+                        <div className="bg-white p-4 rounded-lg inline-block">
+                          <QRCodeCanvas
+                            value={staffData.qr_code_uri}
+                            size={192}
+                            level="H"
+                          />
+                        </div>
+                      </div>
+
+                      {/* シークレットキーとリカバリーコード */}
+                      <div>
+                        <div className="mb-4">
+                          <p className="text-gray-400 text-sm mb-2">シークレットキー</p>
+                          <code className="block bg-gray-900 text-green-400 p-2 rounded text-xs break-all">
+                            {staffData.secret_key}
+                          </code>
+                        </div>
+
+                        <div>
+                          <p className="text-gray-400 text-sm mb-2">リカバリーコード（10個）</p>
+                          <div className="bg-gray-900 p-3 rounded max-h-40 overflow-y-auto">
+                            <div className="grid grid-cols-2 gap-2">
+                              {staffData.recovery_codes.map((code, codeIndex) => (
+                                <code key={codeIndex} className="text-green-400 text-xs">
+                                  {code}
+                                </code>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ボタン */}
+            <div className="p-6 border-t border-gray-700 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowBulkMfaResultModal(false);
+                  setBulkMfaResultData(null);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

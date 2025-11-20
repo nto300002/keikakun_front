@@ -453,21 +453,23 @@ export default function Dashboard() {
                     <p className="text-xl font-bold text-white">{serviceRecipients.length}<span className="text-sm font-normal ml-1">名</span></p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    <button
-                      type="button"
-                      data-testid="add-recipient-stats-button"
-                      aria-label="新規利用者を追加"
-                      onClick={() => router.push('/recipients/new')}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          router.push('/recipients/new');
-                        }
-                      }}
-                      className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-2 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200 hidden md:flex items-center gap-1"
-                    >
-                      <BiUserPlus className="h-3.5 w-3.5" />
-                      <span className="lg:hidden">追加</span>
-                    </button>
+                    {staff.is_mfa_enabled && (
+                      <button
+                        type="button"
+                        data-testid="add-recipient-stats-button"
+                        aria-label="新規利用者を追加"
+                        onClick={() => router.push('/recipients/new')}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            router.push('/recipients/new');
+                          }
+                        }}
+                        className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-2 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200 hidden md:flex items-center gap-1"
+                      >
+                        <BiUserPlus className="h-3.5 w-3.5" />
+                        <span className="lg:hidden">追加</span>
+                      </button>
+                    )}
                     <div className="relative">
                       <input
                         type="text"
@@ -480,23 +482,25 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-                <div className="md:hidden mt-4">
-                  <button
-                    type="button"
-                    data-testid="add-recipient-stats-button"
-                    aria-label="新規利用者を追加"
-                    onClick={() => router.push('/recipients/new')}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        router.push('/recipients/new');
-                      }
-                    }}
-                    className="bg-[#10b981] hover:bg-[#0f9f6e] font-bold text-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full flex items-center justify-center gap-2"
-                  >
-                    <BiUserPlus className="h-4 w-4" />
-                    <span>利用者追加</span>
-                  </button>
-                </div>
+                {staff.is_mfa_enabled && (
+                  <div className="md:hidden mt-4">
+                    <button
+                      type="button"
+                      data-testid="add-recipient-stats-button"
+                      aria-label="新規利用者を追加"
+                      onClick={() => router.push('/recipients/new')}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          router.push('/recipients/new');
+                        }
+                      }}
+                      className="bg-[#10b981] hover:bg-[#0f9f6e] font-bold text-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full flex items-center justify-center gap-2"
+                    >
+                      <BiUserPlus className="h-4 w-4" />
+                      <span>利用者追加</span>
+                    </button>
+                  </div>
+                )}
               </div>
 
             </div>
@@ -507,17 +511,19 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-white">利用者一覧</h2>
                     <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        data-testid="add-recipient-table-button"
-                        aria-label="新規利用者を追加"
-                        onClick={() => router.push('/recipients/new')}
-                        className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
-                      >
-                        <BiUserPlus className="h-4 w-4" />
-                        <span className="hidden sm:inline">利用者追加</span>
-                        <span className="sm:hidden">追加</span>
-                      </button>
+                      {staff.is_mfa_enabled && (
+                        <button
+                          type="button"
+                          data-testid="add-recipient-table-button"
+                          aria-label="新規利用者を追加"
+                          onClick={() => router.push('/recipients/new')}
+                          className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+                        >
+                          <BiUserPlus className="h-4 w-4" />
+                          <span className="hidden sm:inline">利用者追加</span>
+                          <span className="sm:hidden">追加</span>
+                        </button>
+                      )}
                       <button
                         type="button"
                         data-testid="pdf-list-button"
@@ -627,7 +633,7 @@ export default function Dashboard() {
                               <div className="text-white font-bold text-base">
                                 {staff.is_mfa_enabled ? recipient.full_name : recipient.last_name}
                               </div>
-                              <div className="text-gray-200 text-xs mt-1">{recipient.furigana}</div>
+                              {staff.is_mfa_enabled && <div className="text-gray-200 text-xs mt-1">{recipient.furigana}</div>}
                             </div>
                             </Link>
                           </td>
@@ -784,7 +790,7 @@ export default function Dashboard() {
                             <div className="text-white font-bold text-base">
                               {staff.is_mfa_enabled ? recipient.full_name : recipient.last_name}さん
                             </div>
-                            <div className="text-gray-200 text-xs">{recipient.furigana}</div>
+                            {staff.is_mfa_enabled && <div className="text-gray-200 text-xs">{recipient.furigana}</div>}
                           </div>
                         </Link>
 

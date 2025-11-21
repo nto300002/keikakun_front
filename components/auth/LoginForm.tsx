@@ -183,7 +183,7 @@ export default function LoginForm() {
 
             {/* ... forgot password ... */}
             <div className="text-right">
-              <a href="#" className="text-sm text-[#10B981] hover:text-[#0F9F6E] underline">
+              <a href="/auth/forgot-password" className="text-sm text-[#10B981] hover:text-[#0F9F6E] underline">
                 パスワードをお忘れですか？
               </a>
             </div>

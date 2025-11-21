@@ -6,6 +6,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { authApi } from '@/lib/auth';
 import { StaffCreateData } from '@/types/staff';
 import TermsAgreement from '@/components/auth/TermsAgreement';
+import { validatePassword, ALLOWED_PASSWORD_SYMBOLS } from '@/lib/password-validation';
 
 export default function SignupForm() {
   const [formData, setFormData] = useState<StaffCreateData & { confirmPassword: string }> ({
@@ -36,8 +37,17 @@ export default function SignupForm() {
     setError('');
     setIsLoading(true);
 
+    // パスワード一致チェック
     if (formData.password !== formData.confirmPassword) {
       setError('パスワードが一致しません');
+      setIsLoading(false);
+      return;
+    }
+
+    // パスワードバリデーション（バックエンドと一致）
+    const passwordError = validatePassword(formData.password);
+    if (passwordError) {
+      setError(passwordError);
       setIsLoading(false);
       return;
     }
@@ -179,7 +189,7 @@ export default function SignupForm() {
                 </button>
               </div>
               <p className="text-gray-500 text-xs mt-1">
-                8文字以上で、英字大小文字・数字・記号（!@#$%^&*(),.?&quot;:{}|&lt;&gt;）を全て組み合わせてください
+                8文字以上で、英字大小文字・数字・記号（{ALLOWED_PASSWORD_SYMBOLS}）を全て組み合わせてください
               </p>
             </div>
 

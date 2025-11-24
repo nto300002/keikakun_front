@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { authApi, officeApi } from '@/lib/auth';
 import { noticesApi } from '@/lib/api/notices';
+import { messagesApi } from '@/lib/api/messages';
 import { Notice } from '@/types/notice';
 
 interface User {
@@ -37,11 +38,15 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   const [noticesLoaded, setNoticesLoaded] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
 
-  // 未読通知件数を取得
+  // 未読通知件数を取得（notices + messages）
   const fetchUnreadCount = async () => {
     try {
-      const data = await noticesApi.getUnreadCount();
-      setUnreadCount(data.unread_count);
+      const [noticesData, messagesData] = await Promise.all([
+        noticesApi.getUnreadCount(),
+        messagesApi.getUnreadCount(),
+      ]);
+      const totalUnread = noticesData.unread_count + messagesData.unread_count;
+      setUnreadCount(totalUnread);
     } catch (error) {
       console.error('未読通知件数の取得に失敗しました', error);
     }
@@ -192,7 +197,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                         <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-gray-800"></span>
                       )}
                     </div>
-                    <span className="text-xs">メッセージ通知</span>
+                    <span className="text-xs">通知/メッセージ</span>
                   </button>
 
                   {/* 通知プレビューポップオーバー */}

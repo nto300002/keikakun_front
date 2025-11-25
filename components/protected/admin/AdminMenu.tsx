@@ -5,7 +5,7 @@ import { MdEdit, MdCheckCircle, MdCancel, MdDelete } from 'react-icons/md';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 import { QRCodeCanvas } from 'qrcode.react';
 import { StaffResponse } from '@/types/staff';
-import { OfficeResponse } from '@/types/office';
+import { OfficeResponse, OfficeInfoUpdateRequest } from '@/types/office';
 import { calendarApi } from '@/lib/calendar';
 import { OfficeCalendarAccount, CalendarConnectionStatus } from '@/types/calendar';
 import { authApi, officeApi } from '@/lib/auth';
@@ -363,13 +363,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
 
     try {
       // 変更されたフィールドのみ送信
-      const updateData: {
-        name?: string;
-        type?: string;
-        address?: string;
-        phone_number?: string;
-        email?: string;
-      } = {};
+      const updateData: OfficeInfoUpdateRequest = {};
 
       if (officeName !== office?.name) {
         updateData.name = officeName;

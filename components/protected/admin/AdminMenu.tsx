@@ -5,7 +5,7 @@ import { MdEdit, MdCheckCircle, MdCancel, MdDelete } from 'react-icons/md';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 import { QRCodeCanvas } from 'qrcode.react';
 import { StaffResponse } from '@/types/staff';
-import { OfficeResponse, OfficeInfoUpdateRequest } from '@/types/office';
+import { OfficeResponse, OfficeInfoUpdateRequest, OfficeTypeValue } from '@/types/office';
 import { calendarApi } from '@/lib/calendar';
 import { OfficeCalendarAccount, CalendarConnectionStatus } from '@/types/calendar';
 import { authApi, officeApi } from '@/lib/auth';
@@ -73,7 +73,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
   // Office edit modal state
   const [showOfficeEditModal, setShowOfficeEditModal] = useState<boolean>(false);
   const [officeName, setOfficeName] = useState<string>('');
-  const [officeType, setOfficeType] = useState<string>('');
+  const [officeType, setOfficeType] = useState<OfficeTypeValue>('type_B_office');
   const [officeAddress, setOfficeAddress] = useState<string>('');
   const [officePhoneNumber, setOfficePhoneNumber] = useState<string>('');
   const [officeEmail, setOfficeEmail] = useState<string>('');
@@ -1285,11 +1285,10 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                 <label className="block text-gray-400 text-sm mb-2">事業所種別</label>
                 <select
                   value={officeType}
-                  onChange={(e) => setOfficeType(e.target.value)}
+                  onChange={(e) => setOfficeType(e.target.value as OfficeTypeValue)}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
                   disabled={isSavingOffice}
                 >
-                  <option value="">選択してください</option>
                   <option value="transition_to_employment">移行支援</option>
                   <option value="type_A_office">就労A型</option>
                   <option value="type_B_office">就労B型</option>

@@ -1,12 +1,15 @@
+// 事務所種別の型定義
+export type OfficeTypeValue = 'transition_to_employment' | 'type_A_office' | 'type_B_office';
+
 export interface OfficeCreateData {
   name: string;
-  office_type: 'transition_to_employment' | 'type_A_office' | 'type_B_office';
+  office_type: OfficeTypeValue;
 }
 
 export interface OfficeResponse {
   id: string;
   name: string;
-  office_type: 'transition_to_employment' | 'type_A_office' | 'type_B_office';
+  office_type: OfficeTypeValue;
   billing_status: string;
   address?: string | null;
   phone_number?: string | null;
@@ -17,7 +20,7 @@ export interface OfficeResponse {
 
 export interface OfficeInfoUpdateRequest {
   name?: string;
-  type?: 'transition_to_employment' | 'type_A_office' | 'type_B_office';
+  type?: OfficeTypeValue;
   address?: string;
   phone_number?: string;
   email?: string;

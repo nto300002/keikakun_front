@@ -481,7 +481,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
     setDeleteStaffSuccess(null);
 
     try {
-      const response = await authApi.deleteStaff(targetStaff.id);
+      await authApi.deleteStaff(targetStaff.id);
       setDeleteStaffSuccess(`${targetStaff.full_name}さんを削除しました。`);
 
       // スタッフ一覧を再取得

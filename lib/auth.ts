@@ -1,5 +1,6 @@
 import { http } from './http';
 import { tokenUtils } from './token';
+import { initializeCsrfToken } from './csrf';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 const API_V1_PREFIX = '/api/v1';
@@ -43,6 +44,10 @@ export const authApi = {
     // access_tokenはCookieで管理されるため、localStorageへの保存は不要
     // Cookieはサーバー側で自動的に設定される
 
+    // ログイン成功後、CSRFトークンを初期化
+    // Cookie認証を使用するため、状態変更リクエストにはCSRFトークンが必要
+    await initializeCsrfToken();
+
     return authResponse;
   },
 
@@ -58,8 +63,13 @@ export const authApi = {
     return http.post(`${API_V1_PREFIX}/auth/logout`, {});
   },
 
-  verifyMfa: (data: { temporary_token: string; totp_code: string }): Promise<AuthResponse> => {
-    return http.post(`${API_V1_PREFIX}/auth/token/verify-mfa`, data);
+  verifyMfa: async (data: { temporary_token: string; totp_code: string }): Promise<AuthResponse> => {
+    const response = await http.post<AuthResponse>(`${API_V1_PREFIX}/auth/token/verify-mfa`, data);
+
+    // MFA検証成功後もCSRFトークンを初期化
+    await initializeCsrfToken();
+
+    return response;
   },
 
   // Admin MFA management
@@ -98,6 +108,15 @@ export const authApi = {
     disabled_count: number;
   }> => {
     return http.post(`${API_V1_PREFIX}/auth/admin/office/mfa/disable-all`, {});
+  },
+
+  // Staff deletion (Owner only)
+  deleteStaff: (staffId: string): Promise<{
+    message: string;
+    staff_id: string;
+    deleted_at: string;
+  }> => {
+    return http.delete(`${API_V1_PREFIX}/staffs/${staffId}`);
   },
 };
 

@@ -1,5 +1,22 @@
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '');
 
+// CSRF トークンをメモリに保存
+let csrfToken: string | null = null;
+
+/**
+ * CSRFトークンを設定
+ * @param token - CSRFトークン
+ */
+export const setCsrfToken = (token: string) => {
+  csrfToken = token;
+};
+
+/**
+ * CSRFトークンを取得
+ * @returns 現在のCSRFトークン
+ */
+export const getCsrfToken = () => csrfToken;
+
 // FastAPIのバリデーションエラーの型定義
 interface ValidationError {
   loc: (string | number)[];
@@ -128,6 +145,14 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     'Content-Type': 'application/json',
   };
 
+  // 状態変更メソッド(POST/PUT/PATCH/DELETE)の場合、CSRFトークンを追加
+  const method = options.method?.toUpperCase();
+  const isStateMutatingMethod = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method || '');
+
+  if (isStateMutatingMethod && csrfToken) {
+    defaultHeaders['X-CSRF-Token'] = csrfToken;
+  }
+
   const config: RequestInit = {
     ...options,
     credentials: 'include', // Cookie送信のため必須
@@ -168,10 +193,17 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 async function requestWithFormData<T>(endpoint: string, formData: FormData): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
+  // POSTリクエストなので、CSRFトークンをヘッダーに追加
+  const headers: HeadersInit = {};
+  if (csrfToken) {
+    headers['X-CSRF-Token'] = csrfToken;
+  }
+
   // Cookie認証: credentials: 'include' により自動的にCookieが送信される
   const config: RequestInit = {
     method: 'POST',
     credentials: 'include', // Cookie送信のため必須
+    headers,
     body: formData,
     // Content-Typeヘッダーは指定しない（ブラウザが自動的にmultipart/form-dataを設定）
   };

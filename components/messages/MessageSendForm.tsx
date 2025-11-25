@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { messagesApi } from '@/lib/api/messages';
-import { MessageType, MessagePriority } from '@/types/message';
+import { MessagePriority } from '@/types/message';
 import { toast } from '@/lib/toast-debug';
 import { http } from '@/lib/http';
 

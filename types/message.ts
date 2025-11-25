@@ -20,6 +20,9 @@ export interface MessageSenderInfo {
   id: string;
   username: string;
   email: string;
+  // バックエンドのレスポンスで first_name / last_name が含まれるため追加
+  first_name?: string;
+  last_name?: string;
 }
 
 export interface Message {

@@ -159,7 +159,7 @@ export default function MessageCard({
               </span>
               {message.sender && (
                 <span className="text-gray-400 text-xs">
-                  送信者: {message.sender.username}
+                  送信者: {message.sender.last_name} {message.sender.first_name}
                 </span>
               )}
             </div>

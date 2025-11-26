@@ -1,7 +1,6 @@
 'use client';
 
 import { MessageInboxItem, MessageType, MessagePriority } from '@/types/message';
-import Link from 'next/link';
 
 interface MessageCardProps {
   message: MessageInboxItem;
@@ -126,12 +125,7 @@ export default function MessageCard({
           <span className={`text-3xl ${style.textColor}`}>{style.icon}</span>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <Link
-                href={`/notice/messages/${message.message_id}`}
-                className="text-white font-bold text-lg hover:text-blue-400 transition-colors cursor-pointer"
-              >
-                {message.title}
-              </Link>
+                {message.title}  
               {!message.is_read && (
                 <span className="px-2 py-1 rounded-full text-xs font-bold bg-blue-600 text-white">
                   NEW
@@ -159,7 +153,7 @@ export default function MessageCard({
               </span>
               {message.sender && (
                 <span className="text-gray-400 text-xs">
-                  送信者: {message.sender.username}
+                  送信者: {message.sender.last_name} {message.sender.first_name}
                 </span>
               )}
             </div>

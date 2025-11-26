@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { authApi, officeApi } from '@/lib/auth';
 import { noticesApi } from '@/lib/api/notices';
 import { messagesApi } from '@/lib/api/messages';
+import { initializeCsrfToken } from '@/lib/csrf';
 import { Notice } from '@/types/notice';
 
 interface User {
@@ -89,6 +90,11 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   useEffect(() => {
     // クライアント側でマウントされたことを検出
     setIsMounted(true);
+
+    // CSRFトークンを初期化（ページリフレッシュ時に必要）
+    initializeCsrfToken().catch(error => {
+      console.error('CSRFトークンの初期化に失敗しました', error);
+    });
 
     // 事業所情報が未取得の場合のみ取得
     if (!officeName) {

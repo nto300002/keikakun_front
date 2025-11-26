@@ -1,14 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MdEdit } from 'react-icons/md';
+import { MdEdit, MdCheckCircle, MdCancel, MdDelete } from 'react-icons/md';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 import { QRCodeCanvas } from 'qrcode.react';
 import { StaffResponse } from '@/types/staff';
-import { OfficeResponse } from '@/types/office';
+import { OfficeResponse, OfficeInfoUpdateRequest, OfficeTypeValue } from '@/types/office';
 import { calendarApi } from '@/lib/calendar';
 import { OfficeCalendarAccount, CalendarConnectionStatus } from '@/types/calendar';
 import { authApi, officeApi } from '@/lib/auth';
+import { officesApi } from '@/lib/api/offices';
 
 interface AdminMenuProps {
   office: OfficeResponse | null;
@@ -47,6 +48,11 @@ export default function AdminMenu({ office }: AdminMenuProps) {
   const [loadStaffsError, setLoadStaffsError] = useState<string | null>(null);
   const [staffMfaTogglingId, setStaffMfaTogglingId] = useState<string | null>(null);
 
+  // Staff deletion state
+  const [staffDeletingId, setStaffDeletingId] = useState<string | null>(null);
+  const [deleteStaffError, setDeleteStaffError] = useState<string | null>(null);
+  const [deleteStaffSuccess, setDeleteStaffSuccess] = useState<string | null>(null);
+
   // Bulk MFA operations state
   const [isBulkMfaProcessing, setIsBulkMfaProcessing] = useState<boolean>(false);
   const [bulkMfaError, setBulkMfaError] = useState<string | null>(null);
@@ -67,7 +73,13 @@ export default function AdminMenu({ office }: AdminMenuProps) {
   // Office edit modal state
   const [showOfficeEditModal, setShowOfficeEditModal] = useState<boolean>(false);
   const [officeName, setOfficeName] = useState<string>('');
-  const [officeType, setOfficeType] = useState<string>('');
+  const [officeType, setOfficeType] = useState<OfficeTypeValue>('type_B_office');
+  const [officeAddress, setOfficeAddress] = useState<string>('');
+  const [officePhoneNumber, setOfficePhoneNumber] = useState<string>('');
+  const [officeEmail, setOfficeEmail] = useState<string>('');
+  const [isSavingOffice, setIsSavingOffice] = useState<boolean>(false);
+  const [saveOfficeError, setSaveOfficeError] = useState<string | null>(null);
+  const [saveOfficeSuccess, setSaveOfficeSuccess] = useState<string | null>(null);
 
   // 既存のカレンダー設定を取得
   useEffect(() => {
@@ -334,15 +346,67 @@ export default function AdminMenu({ office }: AdminMenuProps) {
     if (office) {
       setOfficeName(office.name);
       setOfficeType(office.office_type);
+      setOfficeAddress(office.address || '');
+      setOfficePhoneNumber(office.phone_number || '');
+      setOfficeEmail(office.email || '');
     }
+    setSaveOfficeError(null);
+    setSaveOfficeSuccess(null);
     setShowOfficeEditModal(true);
   };
 
   // オフィス編集を保存（モーダル用）
-  const handleSaveOfficeEdit = () => {
-    // TODO: 実際の保存処理を実装
-    console.log('Saving office edit:', { officeName, officeType });
-    setShowOfficeEditModal(false);
+  const handleSaveOfficeEdit = async () => {
+    setIsSavingOffice(true);
+    setSaveOfficeError(null);
+    setSaveOfficeSuccess(null);
+
+    try {
+      // 変更されたフィールドのみ送信
+      const updateData: OfficeInfoUpdateRequest = {};
+
+      if (officeName !== office?.name) {
+        updateData.name = officeName;
+      }
+      if (officeType !== office?.office_type) {
+        updateData.type = officeType;
+      }
+      if (officeAddress !== (office?.address || '')) {
+        updateData.address = officeAddress;
+      }
+      if (officePhoneNumber !== (office?.phone_number || '')) {
+        updateData.phone_number = officePhoneNumber;
+      }
+      if (officeEmail !== (office?.email || '')) {
+        updateData.email = officeEmail;
+      }
+
+      // 変更がない場合
+      if (Object.keys(updateData).length === 0) {
+        setSaveOfficeSuccess('変更はありません');
+        setIsSavingOffice(false);
+        setTimeout(() => setShowOfficeEditModal(false), 1500);
+        return;
+      }
+
+      await officesApi.updateOfficeInfo(updateData);
+      setSaveOfficeSuccess('事務所情報を更新しました');
+
+      // 成功したら1.5秒後にモーダルを閉じてページをリロード
+      setTimeout(() => {
+        setShowOfficeEditModal(false);
+        window.location.reload();
+      }, 1500);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } }; message?: string };
+      const errorMessage =
+        err?.response?.data?.detail ||
+        err?.message ||
+        '事務所情報の更新に失敗しました。';
+      setSaveOfficeError(errorMessage);
+    } finally {
+      setIsSavingOffice(false);
+    }
   };
 
   // 全スタッフのMFA一括有効化
@@ -404,6 +468,51 @@ export default function AdminMenu({ office }: AdminMenuProps) {
     } finally {
       setIsBulkMfaProcessing(false);
     }
+  };
+
+  // スタッフ削除
+  const handleStaffDelete = async (targetStaff: StaffResponse) => {
+    if (!window.confirm(`本当に${targetStaff.full_name}さんを削除しますか？\nこの操作は取り消せません。`)) {
+      return;
+    }
+
+    setStaffDeletingId(targetStaff.id);
+    setDeleteStaffError(null);
+    setDeleteStaffSuccess(null);
+
+    try {
+      await authApi.deleteStaff(targetStaff.id);
+      setDeleteStaffSuccess(`${targetStaff.full_name}さんを削除しました。`);
+
+      // スタッフ一覧を再取得
+      const staffs = await officeApi.getOfficeStaffs();
+      setOfficeStaffs(staffs);
+
+      // 成功メッセージを3秒後にクリア
+      setTimeout(() => setDeleteStaffSuccess(null), 3000);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } }; message?: string };
+      const errorMessage =
+        err?.response?.data?.detail ||
+        err?.message ||
+        'スタッフの削除に失敗しました。';
+      setDeleteStaffError(errorMessage);
+    } finally {
+      setStaffDeletingId(null);
+    }
+  };
+
+  // 削除済みスタッフの残り日数を計算
+  const calculateRemainingDays = (deletedAt: string | null): number => {
+    if (!deletedAt) return 0;
+
+    const deletedDate = new Date(deletedAt);
+    const expiryDate = new Date(deletedDate.getTime() + 30 * 24 * 60 * 60 * 1000); // 30日後
+    const now = new Date();
+    const remainingMs = expiryDate.getTime() - now.getTime();
+    const remainingDays = Math.ceil(remainingMs / (24 * 60 * 60 * 1000));
+
+    return Math.max(0, remainingDays);
   };
 
   const getConnectionStatusLabel = (status: CalendarConnectionStatus) => {
@@ -502,6 +611,21 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                 </div>
               )}
 
+              {/* スタッフ削除成功メッセージ */}
+              {deleteStaffSuccess && (
+                <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
+                  <p className="text-green-400 text-sm">{deleteStaffSuccess}</p>
+                </div>
+              )}
+
+              {/* スタッフ削除エラーメッセージ */}
+              {deleteStaffError && (
+                <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
+                  <p className="text-red-400 text-sm font-semibold">エラー</p>
+                  <p className="text-red-400 text-sm mt-1">{deleteStaffError}</p>
+                </div>
+              )}
+
               {/* オフィス情報カード */}
               <div className="bg-gray-800 p-6 rounded-lg mb-6">
                 <div className="flex items-center justify-between mb-4">
@@ -527,6 +651,18 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                       {office?.office_type === 'type_B_office' && '就労B型'}
                       {!office?.office_type && '未設定'}
                     </p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">住所</p>
+                    <p className="text-white font-medium">{office?.address || '未設定'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">電話番号</p>
+                    <p className="text-white font-medium">{office?.phone_number || '未設定'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-400 text-sm">メールアドレス</p>
+                    <p className="text-white font-medium">{office?.email || '未設定'}</p>
                   </div>
                 </div>
               </div>
@@ -583,7 +719,8 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                         </>
                       ) : (
                         <>
-                          ✅ 全員MFA有効化
+                          <MdCheckCircle className="w-5 h-5" />
+                          全員MFA有効化
                         </>
                       )}
                     </button>
@@ -602,7 +739,8 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                         </>
                       ) : (
                         <>
-                          ❌ 全員MFA無効化
+                          <MdCancel className="w-5 h-5" />
+                          全員MFA無効化
                         </>
                       )}
                     </button>
@@ -655,74 +793,126 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                           <th className="text-left py-3 px-4 text-gray-400 font-medium">氏名</th>
                           <th className="text-left py-3 px-4 text-gray-400 font-medium">メールアドレス</th>
                           <th className="text-left py-3 px-4 text-gray-400 font-medium">役割</th>
-                          <th className="text-left py-3 px-4 text-gray-400 font-medium">MFA状態</th>
-                          <th className="text-left py-3 px-4 text-gray-400 font-medium">アクション</th>
+                          <th className="text-left py-3 px-4 text-gray-400 font-medium">MFA状態/変更</th>
+                          <th className="text-left py-3 px-4 text-gray-400 font-medium">スタッフ削除</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {officeStaffs.map((s) => (
-                          <tr key={s.id} className="border-b border-gray-700 hover:bg-gray-700/50">
-                            <td className="py-3 px-4 text-white">{s.full_name}</td>
-                            <td className="py-3 px-4 text-gray-300">{s.email}</td>
-                            <td className="py-3 px-4">
-                              <span
-                                className={`px-2 py-1 rounded text-xs font-medium ${getRoleBadgeColor(s.role)}`}
-                              >
-                                {getRoleLabel(s.role)}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4">
-                              <span
-                                className={`px-3 py-1 rounded-lg text-sm font-semibold border ${
-                                  s.is_mfa_enabled
-                                    ? 'bg-green-900/50 text-green-400 border-green-500'
-                                    : 'bg-gray-700 text-gray-400 border-gray-600'
-                                }`}
-                              >
-                                {s.is_mfa_enabled ? '✅ 有効' : '❌ 無効'}
-                              </span>
-                            </td>
-                            <td className="py-3 px-4">
-                              {s.is_mfa_enabled ? (
-                                <button
-                                  onClick={() => handleStaffMfaDisable(s)}
-                                  disabled={staffMfaTogglingId === s.id}
-                                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
+                        {officeStaffs.map((s) => {
+                          const isDeleted = s.is_deleted;
+                          const remainingDays = isDeleted ? calculateRemainingDays(s.deleted_at) : 0;
+
+                          return (
+                            <tr key={s.id} className={`border-b border-gray-700 hover:bg-gray-700/50 ${isDeleted ? 'opacity-50' : ''}`}>
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-2">
+                                  <span className={isDeleted ? 'text-gray-500 line-through' : 'text-white'}>
+                                    {s.full_name}
+                                  </span>
+                                  {isDeleted && (
+                                    <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-red-900/50 text-red-400 border border-red-500">
+                                      削除済み - 残り{remainingDays}日で完全削除
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className="py-3 px-4 text-gray-300">{s.email}</td>
+                              <td className="py-3 px-4">
+                                <span
+                                  className={`px-2 py-1 rounded text-xs font-medium ${getRoleBadgeColor(s.role)}`}
                                 >
-                                  {staffMfaTogglingId === s.id ? (
+                                  {getRoleLabel(s.role)}
+                                </span>
+                              </td>
+                            <td className="py-3 px-4">
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className={`px-3 py-1 rounded-lg text-sm font-semibold border flex items-center gap-1 ${
+                                    s.is_mfa_enabled
+                                      ? 'bg-green-900/50 text-green-400 border-green-500'
+                                      : 'bg-gray-700 text-gray-400 border-gray-600'
+                                  }`}
+                                >
+                                  {s.is_mfa_enabled ? (
                                     <>
-                                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                      </svg>
-                                      処理中...
+                                      <MdCheckCircle className="w-4 h-4" />
+                                      有効
                                     </>
                                   ) : (
-                                    '無効化'
-                                  )}
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => handleStaffMfaEnable(s)}
-                                  disabled={staffMfaTogglingId === s.id}
-                                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
-                                >
-                                  {staffMfaTogglingId === s.id ? (
                                     <>
-                                      <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                      </svg>
-                                      処理中...
+                                      <MdCancel className="w-4 h-4" />
+                                      無効
                                     </>
-                                  ) : (
-                                    '有効化'
                                   )}
-                                </button>
-                              )}
+                                </span>
+                                {s.is_mfa_enabled ? (
+                                  <button
+                                    onClick={() => handleStaffMfaDisable(s)}
+                                    disabled={staffMfaTogglingId === s.id || isDeleted}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
+                                  >
+                                    {staffMfaTogglingId === s.id ? (
+                                      <>
+                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        処理中...
+                                      </>
+                                    ) : (
+                                      '無効化'
+                                    )}
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleStaffMfaEnable(s)}
+                                    disabled={staffMfaTogglingId === s.id || isDeleted}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
+                                  >
+                                    {staffMfaTogglingId === s.id ? (
+                                      <>
+                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        処理中...
+                                      </>
+                                    ) : (
+                                      '有効化'
+                                    )}
+                                  </button>
+                                )}
+                              </div>
                             </td>
-                          </tr>
-                        ))}
+                              <td className="py-3 px-4">
+                                {isDeleted ? (
+                                  <span className="text-gray-500 text-sm">削除済み</span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleStaffDelete(s)}
+                                    disabled={staffDeletingId === s.id}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
+                                  >
+                                    {staffDeletingId === s.id ? (
+                                      <>
+                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        削除中...
+                                      </>
+                                    ) : (
+                                      <>
+                                        <MdDelete className="w-4 h-4" />
+                                        削除
+                                      </>
+                                    )}
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -1055,18 +1245,39 @@ export default function AdminMenu({ office }: AdminMenuProps) {
       {/* オフィス編集モーダル */}
       {showOfficeEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-md w-full">
+          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <h3 className="text-2xl font-bold mb-4 text-white">事業所情報を編集</h3>
+
+            {/* エラーメッセージ */}
+            {saveOfficeError && (
+              <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
+                <p className="text-red-400 text-sm font-semibold">エラー</p>
+                <p className="text-red-400 text-sm mt-1">{saveOfficeError}</p>
+              </div>
+            )}
+
+            {/* 成功メッセージ */}
+            {saveOfficeSuccess && (
+              <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
+                <p className="text-green-400 text-sm">{saveOfficeSuccess}</p>
+              </div>
+            )}
 
             <div className="space-y-4">
               <div>
-                <label className="block text-gray-400 text-sm mb-2">事業所名</label>
+                <label className="block text-gray-400 text-sm mb-2">
+                  事業所名 <span className="text-red-400">*</span>
+                </label>
                 <input
                   type="text"
                   value={officeName}
                   onChange={(e) => setOfficeName(e.target.value)}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
                   placeholder="事業所名を入力"
+                  required
+                  minLength={1}
+                  maxLength={255}
+                  disabled={isSavingOffice}
                 />
               </div>
 
@@ -1074,14 +1285,55 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                 <label className="block text-gray-400 text-sm mb-2">事業所種別</label>
                 <select
                   value={officeType}
-                  onChange={(e) => setOfficeType(e.target.value)}
+                  onChange={(e) => setOfficeType(e.target.value as OfficeTypeValue)}
                   className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                  disabled={isSavingOffice}
                 >
-                  <option value="">選択してください</option>
                   <option value="transition_to_employment">移行支援</option>
                   <option value="type_A_office">就労A型</option>
                   <option value="type_B_office">就労B型</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">住所</label>
+                <input
+                  type="text"
+                  value={officeAddress}
+                  onChange={(e) => setOfficeAddress(e.target.value)}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                  placeholder="例: 東京都渋谷区1-2-3"
+                  maxLength={500}
+                  disabled={isSavingOffice}
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">電話番号</label>
+                <input
+                  type="tel"
+                  value={officePhoneNumber}
+                  onChange={(e) => setOfficePhoneNumber(e.target.value)}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                  placeholder="例: 03-1234-5678"
+                  pattern="\d{2,4}-\d{2,4}-\d{4}"
+                  disabled={isSavingOffice}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  形式: 03-1234-5678（ハイフン区切り）
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-gray-400 text-sm mb-2">メールアドレス</label>
+                <input
+                  type="email"
+                  value={officeEmail}
+                  onChange={(e) => setOfficeEmail(e.target.value)}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                  placeholder="例: info@example.com"
+                  disabled={isSavingOffice}
+                />
               </div>
             </div>
 
@@ -1089,15 +1341,27 @@ export default function AdminMenu({ office }: AdminMenuProps) {
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={() => setShowOfficeEditModal(false)}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg"
+                disabled={isSavingOffice}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 キャンセル
               </button>
               <button
                 onClick={handleSaveOfficeEdit}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+                disabled={isSavingOffice}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                保存
+                {isSavingOffice ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    保存中...
+                  </>
+                ) : (
+                  '保存'
+                )}
               </button>
             </div>
           </div>

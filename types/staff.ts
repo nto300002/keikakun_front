@@ -21,6 +21,9 @@ export interface StaffResponse {
   // ふりがなフィールド（オプション）
   last_name_furigana?: string;
   first_name_furigana?: string;
+  // 論理削除フィールド
+  is_deleted: boolean;
+  deleted_at: string | null;
   // DEPRECATED: 後方互換性のため残す。新規コードではfull_nameを使用すること
   name?: string;
 }

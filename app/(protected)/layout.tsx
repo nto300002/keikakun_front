@@ -6,6 +6,9 @@ import { ReactNode } from 'react';
 /**
  * 保護されたレイアウト（サーバーコンポーネント）
  * DALパターンで認証チェックを実施
+ *
+ * app_adminロールの場合は専用レイアウトを使用するため、
+ * ProtectedLayoutClientをスキップしてchildrenのみを返す
  */
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
   // DALで認証検証（サーバーサイド）
@@ -16,7 +19,13 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
     redirect('/auth/login');
   }
 
-  // 認証済みの場合、セッション情報をクライアントコンポーネントに渡す
+  // app_adminロールの場合は専用レイアウト（app-admin/layout.tsx）に委譲
+  // ProtectedLayoutClientの事務所向けヘッダー/フッターは表示しない
+  if (session.user.role === 'app_admin') {
+    return <>{children}</>;
+  }
+
+  // 通常の認証済みユーザーはProtectedLayoutClientを使用
   return (
     <ProtectedLayoutClient user={session.user}>
       {children}

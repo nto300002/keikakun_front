@@ -9,13 +9,16 @@ export interface StaffCreateData extends AdminCreateData {
   role: 'manager' | 'employee';
 }
 
+// スタッフロールの型定義
+export type StaffRole = 'owner' | 'manager' | 'employee' | 'app_admin';
+
 export interface StaffResponse {
   id: string;
   first_name: string;
   last_name: string;
   full_name: string;
   email: string;
-  role: 'owner' | 'manager' | 'employee';
+  role: StaffRole;
   is_mfa_enabled: boolean;
   office?: { id: string; name: string; } | null;
   // ふりがなフィールド（オプション）

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MdEdit, MdCheckCircle, MdCancel, MdDelete } from 'react-icons/md';
+import { MdEdit, MdCheckCircle, MdCancel, MdDelete, MdExitToApp } from 'react-icons/md';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 import { QRCodeCanvas } from 'qrcode.react';
 import { StaffResponse } from '@/types/staff';
@@ -10,6 +10,7 @@ import { calendarApi } from '@/lib/calendar';
 import { OfficeCalendarAccount, CalendarConnectionStatus } from '@/types/calendar';
 import { authApi, officeApi } from '@/lib/auth';
 import { officesApi } from '@/lib/api/offices';
+import WithdrawalModal from './WithdrawalModal';
 
 interface AdminMenuProps {
   office: OfficeResponse | null;
@@ -80,6 +81,10 @@ export default function AdminMenu({ office }: AdminMenuProps) {
   const [isSavingOffice, setIsSavingOffice] = useState<boolean>(false);
   const [saveOfficeError, setSaveOfficeError] = useState<string | null>(null);
   const [saveOfficeSuccess, setSaveOfficeSuccess] = useState<string | null>(null);
+
+  // Withdrawal modal state
+  const [showWithdrawalModal, setShowWithdrawalModal] = useState<boolean>(false);
+  const [withdrawalSuccess, setWithdrawalSuccess] = useState<string | null>(null);
 
   // 既存のカレンダー設定を取得
   useEffect(() => {
@@ -918,6 +923,32 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                   </div>
                 )}
               </div>
+
+              {/* 退会セクション */}
+              <div className="bg-gray-800 p-6 rounded-lg mt-6 border border-red-500/30">
+                <div className="flex items-center gap-3 mb-4">
+                  <MdExitToApp className="w-6 h-6 text-red-400" />
+                  <h3 className="text-xl font-semibold text-red-400">退会</h3>
+                </div>
+
+                {withdrawalSuccess && (
+                  <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
+                    <p className="text-green-400 text-sm">{withdrawalSuccess}</p>
+                  </div>
+                )}
+
+                <p className="text-gray-400 mb-4 text-sm">
+                  事務所を退会すると、事務所データと全スタッフのアカウントが削除されます。
+                  退会申請後、アプリ管理者による承認が必要です。
+                </p>
+                <button
+                  onClick={() => setShowWithdrawalModal(true)}
+                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
+                >
+                  <MdExitToApp className="w-5 h-5" />
+                  退会を申請する
+                </button>
+              </div>
             </div>
           )}
 
@@ -1450,6 +1481,17 @@ export default function AdminMenu({ office }: AdminMenuProps) {
           </div>
         </div>
       )}
+
+      {/* 退会モーダル */}
+      <WithdrawalModal
+        isOpen={showWithdrawalModal}
+        onClose={() => setShowWithdrawalModal(false)}
+        onSuccess={() => {
+          setShowWithdrawalModal(false);
+          setWithdrawalSuccess('退会申請を送信しました。アプリ管理者による承認をお待ちください。');
+        }}
+        officeName={office?.name || ''}
+      />
     </div>
   );
 }

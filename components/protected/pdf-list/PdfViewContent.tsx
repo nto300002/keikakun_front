@@ -28,12 +28,13 @@ import { pdfDeliverablesApi } from '@/lib/pdf-deliverables';
 import { welfareRecipientsApi } from '@/lib/welfare-recipients';
 import { PlanDeliverableListItem } from '@/types/pdf-deliverable';
 import { RecipientOption } from '@/types/pdf';
+import { StaffRole } from '@/types/staff';
 
 interface PdfViewContentProps {
   initialPdfs: PlanDeliverableListItem[];
   initialTotal: number;
   currentPage: number;
-  userRole: 'owner' | 'manager' | 'employee';
+  userRole: StaffRole;
   officeId: string;
 }
 

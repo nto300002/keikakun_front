@@ -19,7 +19,7 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
   // link_urlからrequest_idを抽出
   const extractRequestId = (linkUrl: string | undefined): string | undefined => {
     if (!linkUrl) return undefined;
-    const match = linkUrl.match(/\/(role-change-requests|employee-action-requests)\/([a-f0-9-]+)/);
+    const match = linkUrl.match(/\/(role-change-requests|employee-action-requests|approval-requests)\/([a-f0-9-]+)/);
     return match ? match[2] : undefined;
   };
 

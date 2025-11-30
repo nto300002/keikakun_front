@@ -1,7 +1,6 @@
 'use client';
 
 import { ReactNode, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/auth';
 import { initializeCsrfToken } from '@/lib/csrf';
 
@@ -16,7 +15,6 @@ interface AppAdminLayoutProps {
  * アプリ管理者向けのシンプルなレイアウトを提供
  */
 export default function AppAdminLayout({ children }: AppAdminLayoutProps) {
-  const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {

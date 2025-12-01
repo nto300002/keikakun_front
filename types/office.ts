@@ -48,6 +48,10 @@ export interface OfficeListItemResponse {
   name: string;
   office_type: OfficeTypeValue;
   is_deleted: boolean;
+  // 一覧でも住所・電話・メールを表示するためオプションで追加
+  address?: string | null;
+  phone_number?: string | null;
+  email?: string | null;
   created_at: string;
 }
 

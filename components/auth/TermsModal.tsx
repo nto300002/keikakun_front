@@ -233,9 +233,24 @@ function TermsContent() {
       </ol>
 
       <h3 className="text-xl font-bold text-white mt-6 mb-3">第8条(退会)</h3>
-      <p>ユーザーは、運営者の定める退会手続により、本サービスから退会できるものとします。</p>
+      <ol className="list-decimal pl-6 space-y-2">
+        <li>ユーザーは、運営者の定める退会手続により、本サービスから退会できるものとします。</li>
+        <li>事務所オーナーは、事務所の退会申請を行うことができます。退会申請後、運営者による承認が必要となります。</li>
+        <li>退会承認後、事務所データおよび所属するすべてのスタッフアカウントは論理削除され、30日間の猶予期間を経て完全に削除されます。</li>
+      </ol>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第9条(保証の否認および免責事項)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第9条(データの保持期間)</h3>
+      <p>当サービスでは、以下のデータを所定の期間保持します：</p>
+      <ul className="list-disc pl-6 space-y-2 mt-2">
+        <li><strong>アカウント操作履歴</strong>（削除、退会、利用規約同意等）: 5年間</li>
+        <li><strong>権限変更・事務所情報変更履歴</strong>: 3年間</li>
+        <li><strong>ログイン履歴</strong>: 1年間</li>
+      </ul>
+      <p className="mt-4">
+        保持期間経過後、データは自動的に削除されます。法令に基づく開示請求があった場合、保持期間内のデータを提供することがあります。
+      </p>
+
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第10条(保証の否認および免責事項)</h3>
       <ol className="list-decimal pl-6 space-y-2">
         <li>運営者は、本サービスに事実上または法律上の瑕疵(安全性、信頼性、正確性、完全性、有効性、特定の目的への適合性、セキュリティなどに関する欠陥、エラーやバグ、権利侵害などを含みます。)がないことを明示的にも黙示的にも保証しておりません。</li>
         <li>運営者は、本サービスに起因してユーザーに生じたあらゆる損害について、運営者の故意又は重過失による場合を除き、一切の責任を負いません。ただし、本サービスに関する運営者とユーザーとの間の契約(本規約を含みます。)が消費者契約法に定める消費者契約となる場合、この免責規定は適用されません。</li>
@@ -244,13 +259,13 @@ function TermsContent() {
         <li><strong>本サービスは個人により開発・運営されているため、サポート体制や対応時間に制限があることをご了承ください。</strong></li>
       </ol>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第10条(サービス内容の変更・終了)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第11条(サービス内容の変更・終了)</h3>
       <ol className="list-decimal pl-6 space-y-2">
         <li>運営者は、ユーザーへの事前の告知をもって、本サービスの内容を変更、追加または廃止することがあり、ユーザーはこれを承諾するものとします。</li>
         <li><strong>運営者は、本サービスを予告なく終了することがあります。個人運営のため、継続的なサービス提供を保証することはできません。</strong></li>
       </ol>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第11条(利用規約の変更)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第12条(利用規約の変更)</h3>
       <ol className="list-decimal pl-6 space-y-2">
         <li>運営者は以下の場合には、ユーザーの個別の同意を要せず、本規約を変更することができるものとします。
           <ul className="list-disc pl-6 mt-2 space-y-1">
@@ -261,26 +276,26 @@ function TermsContent() {
         <li>運営者はユーザーに対し、前項による本規約の変更にあたり、事前に、本規約を変更する旨及び変更後の本規約の内容並びにその効力発生時期を本サービス上で通知します。</li>
       </ol>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第12条(個人情報の取扱い)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第13条(個人情報の取扱い)</h3>
       <p>運営者は、本サービスの利用によって取得する個人情報については、別途定める「プライバシーポリシー」に従い適切に取り扱うものとします。</p>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第13条(通知または連絡)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第14条(通知または連絡)</h3>
       <ol className="list-decimal pl-6 space-y-2">
         <li>ユーザーと運営者との間の通知または連絡は、運営者の定める方法によって行うものとします。</li>
         <li>運営者は、ユーザーから変更届け出がない限り、現在登録されている連絡先が有効なものとみなして当該連絡先へ通知または連絡を行い、これらは、発信時にユーザーへ到達したものとみなします。</li>
         <li><strong>お問い合わせへの回答は、運営者の対応可能な時間内(主に平日夜間・休日)に行います。即時の対応は保証できませんのでご了承ください。</strong></li>
       </ol>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第14条(権利義務の譲渡の禁止)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第15条(権利義務の譲渡の禁止)</h3>
       <p>ユーザーは、運営者の書面による事前の承諾なく、利用契約上の地位または本規約に基づく権利もしくは義務を第三者に譲渡し、または担保に供することはできません。</p>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第15条(準拠法・裁判管轄)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第16条(準拠法・裁判管轄)</h3>
       <ol className="list-decimal pl-6 space-y-2">
         <li>本規約の解釈にあたっては、日本法を準拠法とします。</li>
         <li>本サービスに関して紛争が生じた場合には、<strong>大阪地方裁判所</strong>を第一審の専属的合意管轄裁判所とします。</li>
       </ol>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第16条(運営者情報)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第17条(運営者情報)</h3>
       <ul className="list-disc pl-6 space-y-1">
         <li><strong>運営者氏名</strong>: 安田尚人</li>
         <li><strong>サービス名</strong>: ケイカくん</li>
@@ -290,6 +305,7 @@ function TermsContent() {
 
       <div className="mt-8 pt-6 border-t border-gray-600">
         <p className="text-sm text-gray-400"><strong>制定日</strong>: 2025年11月17日</p>
+        <p className="text-sm text-gray-400"><strong>最終更新日</strong>: 2025年11月27日</p>
       </div>
     </div>
   );
@@ -429,7 +445,34 @@ function PrivacyContent() {
         <li>前2項にかかわらず、利用停止等に多額の費用を有する場合その他利用停止等を行うことが困難な場合であって、ユーザーの権利利益を保護するために必要なこれに代わるべき措置をとれる場合は、この代替策を講じるものとします。</li>
       </ol>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第9条(安全管理措置)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第9条(データの保持期間)</h3>
+      <p>運営者は、個人情報および関連ログデータについて、以下の期間保持します：</p>
+
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【重要操作履歴（5年間）】</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>アカウント削除記録</li>
+        <li>事務所退会申請・承認・却下記録</li>
+        <li>利用規約同意記録</li>
+      </ul>
+
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【管理操作履歴（3年間）】</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>権限変更履歴</li>
+        <li>事務所情報変更履歴</li>
+        <li>スタッフ管理操作履歴</li>
+      </ul>
+
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【アクセスログ（1年間）】</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>ログイン履歴（成功・失敗）</li>
+        <li>IPアドレス、ユーザーエージェント情報</li>
+      </ul>
+
+      <p className="mt-4">
+        保持期間経過後、データは自動的に削除されます。法令に基づく開示請求があった場合、保持期間内のデータを提供することがあります。
+      </p>
+
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第10条(安全管理措置)</h3>
       <p>運営者は、個人情報の漏えい、滅失または毀損の防止その他の個人情報の安全管理のため、以下の措置を講じています。</p>
 
       <h4 className="text-lg font-semibold text-white mt-4 mb-2">【組織的安全管理措置】</h4>
@@ -458,7 +501,7 @@ function PrivacyContent() {
         <li>アクセスログの記録と監視</li>
       </ul>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第10条(Cookie等の利用)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第11条(Cookie等の利用)</h3>
       <ol className="list-decimal pl-6 space-y-2">
         <li>本サービスでは、ユーザーの利便性向上およびサービス改善のため、Cookieを使用しています。</li>
         <li>Cookieによって収集される情報には、以下が含まれます：
@@ -474,14 +517,14 @@ function PrivacyContent() {
         </li>
       </ol>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第11条(プライバシーポリシーの変更)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第12条(プライバシーポリシーの変更)</h3>
       <ol className="list-decimal pl-6 space-y-2">
         <li>本ポリシーの内容は、法令その他本ポリシーに別段の定めのある事項を除いて、ユーザーに通知することなく、変更することができるものとします。</li>
         <li>変更後のプライバシーポリシーは、本ウェブサイトに掲載したときから効力を生じるものとします。</li>
         <li>重要な変更がある場合は、サービス内での通知またはメールにて事前にお知らせします。</li>
       </ol>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第12条(お問い合わせ窓口)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第13条(お問い合わせ窓口)</h3>
       <p>本ポリシーに関するお問い合わせ、個人情報の開示・訂正・削除・利用停止等のご請求は、下記の窓口までお願いいたします。</p>
 
       <h4 className="text-lg font-semibold text-white mt-4 mb-2">運営者情報：</h4>
@@ -499,7 +542,7 @@ function PrivacyContent() {
 
       <div className="mt-8 pt-6 border-t border-gray-600">
         <p className="text-sm text-gray-400"><strong>制定日</strong>: 2025年11月17日</p>
-        <p className="text-sm text-gray-400"><strong>最終更新日</strong>: 2025年11月17日</p>
+        <p className="text-sm text-gray-400"><strong>最終更新日</strong>: 2025年11月27日</p>
       </div>
     </div>
   );

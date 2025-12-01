@@ -39,3 +39,42 @@ export interface OfficeAuditLogsResponse {
   logs: OfficeAuditLog[];
   total: number;
 }
+
+// app_admin用の型定義
+
+// 事務所一覧レスポンス（app_admin用）
+export interface OfficeListItemResponse {
+  id: string;
+  name: string;
+  office_type: OfficeTypeValue;
+  is_deleted: boolean;
+  // 一覧でも住所・電話・メールを表示するためオプションで追加
+  address?: string | null;
+  phone_number?: string | null;
+  email?: string | null;
+  created_at: string;
+}
+
+// 事務所所属スタッフ（app_admin用）
+export interface StaffInOffice {
+  id: string;
+  full_name: string;
+  email: string;
+  role: string;
+  is_mfa_enabled: boolean;
+  is_email_verified: boolean;
+}
+
+// 事務所詳細レスポンス（app_admin用）
+export interface OfficeDetailResponse {
+  id: string;
+  name: string;
+  office_type: OfficeTypeValue;
+  address: string | null;
+  phone_number: string | null;
+  email: string | null;
+  is_deleted: boolean;
+  created_at: string;
+  updated_at: string;
+  staffs: StaffInOffice[];
+}

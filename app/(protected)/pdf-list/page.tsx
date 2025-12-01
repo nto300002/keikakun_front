@@ -6,13 +6,14 @@ import PdfViewContent from '@/components/protected/pdf-list/PdfViewContent';
 import { authApi } from '@/lib/auth';
 import { pdfDeliverablesApi } from '@/lib/pdf-deliverables';
 import { PlanDeliverableListResponse } from '@/types/pdf-deliverable';
+import { StaffRole } from '@/types/staff';
 import { Loader2 } from 'lucide-react';
 
 export default function PdfViewPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
-  const [userRole, setUserRole] = useState<'owner' | 'manager' | 'employee'>('employee');
+  const [userRole, setUserRole] = useState<StaffRole>('employee');
   const [officeId, setOfficeId] = useState<string>('');
   const [pdfData, setPdfData] = useState<PlanDeliverableListResponse>({
     items: [],

@@ -22,16 +22,21 @@ export const authApi = {
   },
 
   login: async (data: LoginData): Promise<AuthResponse> => {
+    const params = new URLSearchParams({
+      username: data.username,
+      password: data.password,
+    });
+    // app_admin用合言葉がある場合は追加
+    if (data.passphrase) {
+      params.append('passphrase', data.passphrase);
+    }
     const response = await fetch(`${API_BASE_URL}${API_V1_PREFIX}/auth/token`, {
       method: 'POST',
       credentials: 'include', // Cookie送信のため追加
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        username: data.username,
-        password: data.password,
-      }),
+      body: params,
     });
 
     if (!response.ok) {

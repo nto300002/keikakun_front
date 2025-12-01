@@ -17,4 +17,5 @@ export interface AuthResponse {
 export interface LoginData {
   username: string; // email
   password: string;
+  passphrase?: string; // app_admin用合言葉（セカンドパスワード）
 }

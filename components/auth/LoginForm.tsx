@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { authApi, tokenUtils } from '@/lib/auth';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'; // アイコンをインポート
 import { toast } from '@/lib/toast-debug';
+import DeletedOfficeNotice from './DeletedOfficeNotice';
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isOfficeDeleted, setIsOfficeDeleted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const messageShownRef = useRef(false); // メッセージ表示済みフラグ
@@ -112,11 +114,22 @@ export default function LoginForm() {
 
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'ログインに失敗しました';
-      setError(errorMessage);
+
+      // 退会済み事務所のエラーを検出
+      if (errorMessage.includes('退会済み') || errorMessage.includes('削除済み')) {
+        setIsOfficeDeleted(true);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // 退会済み事務所の場合は専用の通知を表示
+  if (isOfficeDeleted) {
+    return <DeletedOfficeNotice />;
+  }
 
   return (
     <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">

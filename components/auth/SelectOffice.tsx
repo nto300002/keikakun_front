@@ -96,7 +96,7 @@ export default function SelectOffice() {
                 className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
               >
                 {offices.length === 0 ? (
-                  <option>読み込み中...</option>
+                  <option>読み込み中... </option>
                 ) : (
                   offices.map((office) => (
                     <option key={office.id} value={office.id}>
@@ -105,6 +105,24 @@ export default function SelectOffice() {
                   ))
                 )}
               </select>
+
+              {/* ヘルプメッセージ */}
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm text-gray-400">いつまでも表示されない場合</span>
+                <div className="relative group inline-flex">
+                  <span className="flex items-center justify-center w-5 h-5 text-xs font-bold text-white bg-gray-600 rounded-full cursor-help hover:bg-gray-500 transition-colors">
+                    ?
+                  </span>
+                  {/* ツールチップ */}
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 hidden group-hover:block w-64 z-10">
+                    <div className="bg-gray-800 text-white text-sm rounded-lg p-3 shadow-lg border border-gray-700">
+                      いつまでも表示されない場合、自身が所属する事務所のオーナーにお問い合わせください。
+                      {/* 吹き出しの矢印 */}
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-gray-800"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <button

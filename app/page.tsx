@@ -1,17 +1,28 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { LogoAnimation } from '@/components/LogoAnimation';
+import InquiryModal from '@/components/inquiry/InquiryModal';
 
 export default function LandingPage() {
+  const [isInquiryModalOpen, setIsInquiryModalOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-[#0C1421] text-white">
+      {/* お問い合わせモーダル */}
+      <InquiryModal
+        isOpen={isInquiryModalOpen}
+        onClose={() => setIsInquiryModalOpen(false)}
+      />
+
       {/* ヘッダーナビゲーション */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0C1421]/80 backdrop-blur-sm border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
           <div className="text-2xl font-bold">ケイカくん</div>
           <div className="flex items-center gap-4">
             <button
+              onClick={() => setIsInquiryModalOpen(true)}
               className="text-gray-300 hover:text-white transition-colors px-4 py-2"
             >
               お問い合わせ
@@ -23,7 +34,7 @@ export default function LandingPage() {
               ログイン
             </Link>
             <Link
-              href="/auth/admin/signup"
+              href="/auth/signup"
               className="bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold px-6 py-2 rounded-lg transition-colors"
             >
               新規登録
@@ -351,7 +362,14 @@ export default function LandingPage() {
             <div>
               <h4 className="font-semibold mb-4">サポート</h4>
               <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="#" className="hover:text-white transition-colors">お問い合わせ</Link></li>
+                <li>
+                  <button
+                    onClick={() => setIsInquiryModalOpen(true)}
+                    className="hover:text-white transition-colors"
+                  >
+                    お問い合わせ
+                  </button>
+                </li>
                 <li><a href="#faq" className="hover:text-white transition-colors">よくある質問</a></li>
               </ul>
             </div>

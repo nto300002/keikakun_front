@@ -798,7 +798,39 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                           <th className="text-left py-3 px-4 text-gray-400 font-medium">氏名</th>
                           <th className="text-left py-3 px-4 text-gray-400 font-medium">メールアドレス</th>
                           <th className="text-left py-3 px-4 text-gray-400 font-medium">役割</th>
-                          <th className="text-left py-3 px-4 text-gray-400 font-medium">MFA状態/変更</th>
+                          <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                            <div className="flex items-center gap-2">
+                              MFA状態/変更
+                              <div className="relative group/help">
+                                <button
+                                  type="button"
+                                  className="w-4 h-4 rounded-full bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 flex items-center justify-center text-xs font-bold transition-colors"
+                                  title="MFAについて"
+                                >
+                                  ?
+                                </button>
+                                {/* ツールチップ */}
+                                <div className="absolute left-0 top-full mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-xl opacity-0 invisible group-hover/help:opacity-100 group-hover/help:visible transition-all duration-200 z-50">
+                                  <div className="flex items-start gap-2">
+                                    <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    <div>
+                                      <p className="text-sm font-semibold text-white mb-2">MFA（多要素認証）とは</p>
+                                      <p className="text-sm text-gray-300 leading-relaxed mb-3">
+                                        MFA（Multi-Factor Authentication）は、パスワードに加えて、スマートフォンアプリで生成される6桁の認証コードを使用する2段階認証です。
+                                      </p>
+                                      <ul className="text-sm text-gray-300 space-y-1 list-disc list-inside">
+                                        <li>セキュリティが大幅に向上します</li>
+                                        <li>Google Authenticatorなどのアプリが必要です</li>
+                                        <li>ログイン時に追加の認証コード入力が必要になります</li>
+                                      </ul>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </th>
                           <th className="text-left py-3 px-4 text-gray-400 font-medium">スタッフ削除</th>
                         </tr>
                       </thead>
@@ -830,7 +862,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                                 </span>
                               </td>
                             <td className="py-3 px-4">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 group">
                                 <span
                                   className={`px-3 py-1 rounded-lg text-sm font-semibold border flex items-center gap-1 ${
                                     s.is_mfa_enabled
@@ -854,7 +886,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                                   <button
                                     onClick={() => handleStaffMfaDisable(s)}
                                     disabled={staffMfaTogglingId === s.id || isDeleted}
-                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
                                   >
                                     {staffMfaTogglingId === s.id ? (
                                       <>
@@ -872,7 +904,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                                   <button
                                     onClick={() => handleStaffMfaEnable(s)}
                                     disabled={staffMfaTogglingId === s.id || isDeleted}
-                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
                                   >
                                     {staffMfaTogglingId === s.id ? (
                                       <>
@@ -965,7 +997,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
 
                 <div className="mb-4">
                   <a
-                    href="https://www.canva.com/design/DAG1XaxL5l4/ghDvPurpO76f1kQDMmwFuA/view?utm_content=DAG1XaxL5l4&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=hcda6560690"
+                    href="https://www.youtube.com/watch?v=xAXWnT_kP2g"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-400 hover:text-blue-300 underline"
@@ -1140,7 +1172,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                 {/* 連携解除セクション */}
                 {existingCalendar && (
                   <div className="mt-8 pt-6 border-t border-gray-700">
-                    <h4 className="text-lg font-semibold mb-3 text-red-400">危険なアクション</h4>
+                    <h4 className="text-lg font-semibold mb-3 text-red-400">カレンダー連携解除</h4>
                     <p className="text-gray-400 text-sm mb-4">
                       カレンダー連携を解除すると、今後のイベント同期が停止されます。この操作は元に戻せません。
                     </p>

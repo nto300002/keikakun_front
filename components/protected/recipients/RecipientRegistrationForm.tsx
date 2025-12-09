@@ -7,6 +7,44 @@ import EmployeeActionRequestModal from '@/components/common/EmployeeActionReques
 import { useStaffRole } from '@/hooks/useStaffRole';
 import { ActionType, ResourceType } from '@/types/employeeActionRequest';
 
+// エラーフィールドの日本語マッピング
+const ERROR_FIELD_MAPPING: Record<string, string> = {
+  // 利用者情報
+  'firstNameFurigana': '利用者 名（ふりがな）',
+  'lastNameFurigana': '利用者 姓（ふりがな）',
+  'firstName': '利用者 名',
+  'lastName': '利用者 姓',
+  // 緊急連絡先情報
+  'emergency_contacts.0.firstNameFurigana': '緊急連絡先 名（ふりがな）',
+  'emergency_contacts.0.lastNameFurigana': '緊急連絡先 姓（ふりがな）',
+  'emergency_contacts.1.firstNameFurigana': '緊急連絡先 名（ふりがな）',
+  'emergency_contacts.1.lastNameFurigana': '緊急連絡先 姓（ふりがな）',
+  'emergency_contacts.2.firstNameFurigana': '緊急連絡先 名（ふりがな）',
+  'emergency_contacts.2.lastNameFurigana': '緊急連絡先 姓（ふりがな）',
+  // その他共通フィールド
+  'relationship': '続柄',
+  'birthDay': '生年月日',
+  'gender': '性別',
+  'address': '住所',
+  'tel': '電話番号',
+  'disabilityOrDiseaseName': '障害または疾患名',
+  'livelihoodProtection': '生活保護受給状況',
+  'formOfResidence': '居住形態',
+  'meansOfTransportation': '交通手段',
+  'category': 'カテゴリ',
+  'applicationStatus': '申請状況',
+  'gradeOrLevel': '等級・レベル',
+};
+
+// エラーメッセージを日本語に変換する関数
+function translateErrorMessage(error: string): string {
+  let translatedError = error;
+  for (const [key, value] of Object.entries(ERROR_FIELD_MAPPING)) {
+    translatedError = translatedError.replace(new RegExp(key, 'g'), value);
+  }
+  return translatedError;
+}
+
 // Basic Information Section
 interface BasicInfoData {
   firstName: string;
@@ -258,9 +296,11 @@ export default function UserRegistrationForm() {
         break;
       case 2: // Emergency Contact
         formData.emergencyContacts.forEach((contact, index) => {
-          if (!contact.firstName) newErrors[`emergencyContact${index}FirstName`] = '名は必須です';
-          if (!contact.lastName) newErrors[`emergencyContact${index}LastName`] = '姓は必須です';
-          if (!contact.tel) newErrors[`emergencyContact${index}Tel`] = '電話番号は必須です';
+          if (!contact.firstName) newErrors[`emergencyContact${index}FirstName`] = '緊急連絡先 名は必須です';
+          if (!contact.lastName) newErrors[`emergencyContact${index}LastName`] = '緊急連絡先 姓は必須です';
+          if (!contact.firstNameFurigana) newErrors[`emergencyContact${index}FirstNameFurigana`] = '緊急連絡先 名（ふりがな）は必須です';
+          if (!contact.lastNameFurigana) newErrors[`emergencyContact${index}LastNameFurigana`] = '緊急連絡先 姓（ふりがな）は必須です';
+          if (!contact.tel) newErrors[`emergencyContact${index}Tel`] = '緊急連絡先 電話番号は必須です';
         });
         break;
       case 3: // Disability Info
@@ -329,7 +369,8 @@ export default function UserRegistrationForm() {
     } catch (error) {
       console.error('Form submission error:', error);
       if (error instanceof Error) {
-        setErrors({ submit: error.message || '登録に失敗しました。もう一度お試しください。' });
+        const translatedMessage = translateErrorMessage(error.message);
+        setErrors({ submit: translatedMessage || '登録に失敗しました。もう一度お試しください。' });
       } else {
         setErrors({ submit: '登録に失敗しました。もう一度お試しください。' });
       }
@@ -761,25 +802,39 @@ export default function UserRegistrationForm() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">姓（ふりがな）</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        姓（ふりがな） <span className="text-red-400">*</span>
+                      </label>
                       <input
                         type="text"
                         value={contact.lastNameFurigana}
                         onChange={(e) => handleEmergencyContactChange(index, 'lastNameFurigana', e.target.value)}
-                        className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                        className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                          errors[`emergencyContact${index}LastNameFurigana`] ? 'border-red-500' : 'border-[#2a3441]'
+                        }`}
                         placeholder="たなか"
                       />
+                      {errors[`emergencyContact${index}LastNameFurigana`] && (
+                        <p className="text-red-400 text-sm mt-1">{errors[`emergencyContact${index}LastNameFurigana`]}</p>
+                      )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">名（ふりがな）</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        名（ふりがな） <span className="text-red-400">*</span>
+                      </label>
                       <input
                         type="text"
                         value={contact.firstNameFurigana}
                         onChange={(e) => handleEmergencyContactChange(index, 'firstNameFurigana', e.target.value)}
-                        className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                        className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                          errors[`emergencyContact${index}FirstNameFurigana`] ? 'border-red-500' : 'border-[#2a3441]'
+                        }`}
                         placeholder="はなこ"
                       />
+                      {errors[`emergencyContact${index}FirstNameFurigana`] && (
+                        <p className="text-red-400 text-sm mt-1">{errors[`emergencyContact${index}FirstNameFurigana`]}</p>
+                      )}
                     </div>
 
                     <div>
@@ -924,7 +979,9 @@ export default function UserRegistrationForm() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">カテゴリ</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        カテゴリ <span className="text-red-400">*</span>
+                      </label>
                       <select
                         value={detail.category}
                         onChange={(e) => handleDisabilityDetailChange(index, 'category', e.target.value)}
@@ -952,7 +1009,9 @@ export default function UserRegistrationForm() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">申請状況</label>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                        申請状況 <span className="text-red-400">*</span>
+                      </label>
                       <select
                         value={detail.applicationStatus}
                         onChange={(e) => handleDisabilityDetailChange(index, 'applicationStatus', e.target.value)}

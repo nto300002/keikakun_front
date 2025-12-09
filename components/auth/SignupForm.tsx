@@ -12,6 +12,8 @@ export default function SignupForm() {
   const [formData, setFormData] = useState<StaffCreateData & { confirmPassword: string }> ({
     first_name: '',
     last_name: '',
+    first_name_furigana: '',
+    last_name_furigana: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -57,6 +59,8 @@ export default function SignupForm() {
       const data = await authApi.registerStaff({
         first_name: formData.first_name,
         last_name: formData.last_name,
+        first_name_furigana: formData.first_name_furigana,
+        last_name_furigana: formData.last_name_furigana,
         email: formData.email,
         password: formData.password,
         role: formData.role,
@@ -133,6 +137,46 @@ export default function SignupForm() {
                   className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   placeholder="太郎"
                   title="名は日本語のみ使用可能です"
+                />
+              </div>
+            </div>
+
+            {/* 名前フィールド (ふりがな) */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="last_name_furigana" className="block text-sm font-medium text-gray-300 mb-2">
+                  姓（ふりがな） <span className="text-red-400">*</span>
+                </label>
+                <input
+                  id="last_name_furigana"
+                  name="last_name_furigana"
+                  type="text"
+                  required
+                  value={formData.last_name_furigana}
+                  onChange={handleChange}
+                  pattern="^[ぁ-んー　]+$"
+                  maxLength={50}
+                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                  placeholder="やまだ"
+                  title="ふりがなはひらがなのみ使用可能です"
+                />
+              </div>
+              <div>
+                <label htmlFor="first_name_furigana" className="block text-sm font-medium text-gray-300 mb-2">
+                  名（ふりがな） <span className="text-red-400">*</span>
+                </label>
+                <input
+                  id="first_name_furigana"
+                  name="first_name_furigana"
+                  type="text"
+                  required
+                  value={formData.first_name_furigana}
+                  onChange={handleChange}
+                  pattern="^[ぁ-んー　]+$"
+                  maxLength={50}
+                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                  placeholder="たろう"
+                  title="ふりがなはひらがなのみ使用可能です"
                 />
               </div>
             </div>

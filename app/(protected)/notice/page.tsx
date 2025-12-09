@@ -42,7 +42,7 @@ export default function NoticePage() {
               : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800/30'
           }`}
         >
-          📤 送信
+          📤 送信(事務所内)
         </button>
       </div>
 

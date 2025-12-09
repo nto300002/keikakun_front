@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { InquiryFullResponse, InquiryStatus, InquiryPriority } from '@/types/inquiry';
 import { inquiryApi } from '@/lib/api/inquiry';
 import { FaArrowLeft, FaReply, FaUser, FaEnvelope, FaGlobe, FaDesktop } from 'react-icons/fa';
@@ -17,11 +17,7 @@ export default function InquiryDetail({ inquiryId, onBack, onOpenReply }: Inquir
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  useEffect(() => {
-    fetchInquiryDetail();
-  }, [inquiryId]);
-
-  const fetchInquiryDetail = async () => {
+  const fetchInquiryDetail = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -33,7 +29,11 @@ export default function InquiryDetail({ inquiryId, onBack, onOpenReply }: Inquir
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [inquiryId]);
+
+  useEffect(() => {
+    fetchInquiryDetail();
+  }, [fetchInquiryDetail]);
 
   const handleStatusChange = async (newStatus: InquiryStatus) => {
     if (!inquiry) return;

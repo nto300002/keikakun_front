@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { LogoAnimation } from '@/components/LogoAnimation';
 import InquiryModal from '@/components/inquiry/InquiryModal';
 
@@ -173,10 +174,13 @@ export default function LandingPage() {
               </ul>
             </div>
             <div className="bg-[#1A1A1A] rounded-xl shadow-2xl">
-                <img
+                <Image
                   src="/dashboard.png"
                   alt="ダッシュボード画面のスクリーンショット"
+                  width={1200}
+                  height={700}
                   className="w-full h-auto rounded-lg"
+                  priority
                 />
             </div>
           </div>
@@ -239,9 +243,11 @@ export default function LandingPage() {
               </ul>
             </div>
             <div className="bg-[#1A1A1A] rounded-xl shadow-2xl">
-              <img
+              <Image
                   src="/support_plan.png"
                   alt="ダッシュボード画面のスクリーンショット"
+                  width={1200}
+                  height={700}
                   className="w-full h-auto rounded-lg"
                 />
             </div>

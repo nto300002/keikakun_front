@@ -78,15 +78,25 @@ export default function TermsAgreement({
           </div>
           {/* 警告メッセージ */}
           {showTermsWarning && !termsAgreed && (
-            <div className="ml-7 mt-2 text-xs text-red-400">
-              ※ <button
+            <div className="ml-7 mt-2 text-xs text-red-400 flex items-start gap-2">
+              <span className="flex-1">
+                ※ <button
+                  type="button"
+                  onClick={() => setIsTermsModalOpen(true)}
+                  className="underline hover:text-red-300"
+                >
+                  利用規約リンク
+                </button>
+                をクリックして内容を確認し、モーダル内の「同意する」ボタンを押してください
+              </span>
+              <button
                 type="button"
-                onClick={() => setIsTermsModalOpen(true)}
-                className="underline hover:text-red-300"
+                onClick={() => setShowTermsWarning(false)}
+                className="text-red-400 hover:text-red-300 text-lg leading-none"
+                aria-label="警告を閉じる"
               >
-                利用規約リンク
+                ×
               </button>
-              をクリックして内容を確認し、モーダル内の「同意する」ボタンを押してください
             </div>
           )}
         </div>
@@ -115,15 +125,25 @@ export default function TermsAgreement({
           </div>
           {/* 警告メッセージ */}
           {showPrivacyWarning && !privacyAgreed && (
-            <div className="ml-7 mt-2 text-xs text-red-400">
-              ※ <button
+            <div className="ml-7 mt-2 text-xs text-red-400 flex items-start gap-2">
+              <span className="flex-1">
+                ※ <button
+                  type="button"
+                  onClick={() => setIsPrivacyModalOpen(true)}
+                  className="underline hover:text-red-300"
+                >
+                  プライバシーポリシーリンク
+                </button>
+                をクリックして内容を確認し、モーダル内の「同意する」ボタンを押してください
+              </span>
+              <button
                 type="button"
-                onClick={() => setIsPrivacyModalOpen(true)}
-                className="underline hover:text-red-300"
+                onClick={() => setShowPrivacyWarning(false)}
+                className="text-red-400 hover:text-red-300 text-lg leading-none"
+                aria-label="警告を閉じる"
               >
-                プライバシーポリシーリンク
+                ×
               </button>
-              をクリックして内容を確認し、モーダル内の「同意する」ボタンを押してください
             </div>
           )}
         </div>

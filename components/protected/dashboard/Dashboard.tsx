@@ -26,7 +26,7 @@ export default function Dashboard() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [sortBy, setSortBy] = useState('name_phonetic');
+  const [sortBy, setSortBy] = useState('next_renewal_deadline');
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const isLoadingRef = useRef(isLoading);

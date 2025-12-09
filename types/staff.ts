@@ -1,6 +1,8 @@
 export interface AdminCreateData {
   first_name: string;
   last_name: string;
+  first_name_furigana?: string;
+  last_name_furigana?: string;
   email: string;
   password: string;
 }

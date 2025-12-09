@@ -127,8 +127,9 @@ function CalendarLinkModal({
                 </div>
               </div>
 
-              {/* エラー詳細 */}
-              {calendarAccount.last_error_message && (
+              {/* エラー詳細 - 接続エラー時のみ表示 */}
+              {calendarAccount.connection_status === CalendarConnectionStatus.ERROR &&
+               calendarAccount.last_error_message && (
                 <div className="bg-[#ef4444]/10 border border-[#ef4444] rounded-lg p-4">
                   <p className="text-xs text-[#9ca3af] mb-1">エラー詳細</p>
                   <p className="text-[#ef4444] text-sm">{calendarAccount.last_error_message}</p>
@@ -136,8 +137,8 @@ function CalendarLinkModal({
               )}
             </div>
           ) : (
-            <div className="bg-[#f59e0b]/10 border border-[#f59e0b] rounded-lg p-4">
-              <p className="text-[#f59e0b] text-sm">
+            <div className="bg-gray-500/10 border border-gray-500 rounded-lg p-4">
+              <p className="text-gray-400 text-sm">
                 カレンダーが設定されていません。管理者画面で連携を行ってください。
               </p>
             </div>
@@ -194,8 +195,21 @@ export default function CalendarLinkButton() {
           setCalendarAccount(account);
         } catch (err) {
           console.error('Failed to fetch calendar info:', err);
-          setError('カレンダー情報の取得に失敗しました。しばらくしてから再度お試しください。');
-          setCalendarAccount(null);
+
+          // 404エラー（カレンダー未設定）の場合は特別扱い
+          const errorMessage = err instanceof Error ? err.message : String(err);
+          const isNotFound = errorMessage.includes('カレンダー設定が見つかりません') ||
+                             errorMessage.includes('カレンダーが設定されていません');
+
+          if (isNotFound) {
+            // 404の場合はエラーメッセージを表示せず、未設定状態として扱う
+            setError(null);
+            setCalendarAccount(null);
+          } else {
+            // その他のエラーの場合はエラーメッセージを表示
+            setError('カレンダー情報の取得に失敗しました。しばらくしてから再度お試しください。');
+            setCalendarAccount(null);
+          }
         } finally {
           setIsLoading(false);
         }

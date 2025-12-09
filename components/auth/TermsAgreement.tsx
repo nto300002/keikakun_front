@@ -79,6 +79,14 @@ export default function TermsAgreement({
           {/* 警告メッセージ */}
           {showTermsWarning && !termsAgreed && (
             <div className="ml-7 mt-2 text-xs text-red-400 flex items-start gap-2">
+              <button
+                type="button"
+                onClick={() => setShowTermsWarning(false)}
+                className="text-red-400 hover:text-red-300 text-lg leading-none flex-shrink-0"
+                aria-label="警告を閉じる"
+              >
+                ×
+              </button>
               <span className="flex-1">
                 ※ <button
                   type="button"
@@ -89,14 +97,6 @@ export default function TermsAgreement({
                 </button>
                 をクリックして内容を確認し、モーダル内の「同意する」ボタンを押してください
               </span>
-              <button
-                type="button"
-                onClick={() => setShowTermsWarning(false)}
-                className="text-red-400 hover:text-red-300 text-lg leading-none"
-                aria-label="警告を閉じる"
-              >
-                ×
-              </button>
             </div>
           )}
         </div>
@@ -126,6 +126,14 @@ export default function TermsAgreement({
           {/* 警告メッセージ */}
           {showPrivacyWarning && !privacyAgreed && (
             <div className="ml-7 mt-2 text-xs text-red-400 flex items-start gap-2">
+              <button
+                type="button"
+                onClick={() => setShowPrivacyWarning(false)}
+                className="text-red-400 hover:text-red-300 text-lg leading-none flex-shrink-0"
+                aria-label="警告を閉じる"
+              >
+                ×
+              </button>
               <span className="flex-1">
                 ※ <button
                   type="button"
@@ -136,14 +144,6 @@ export default function TermsAgreement({
                 </button>
                 をクリックして内容を確認し、モーダル内の「同意する」ボタンを押してください
               </span>
-              <button
-                type="button"
-                onClick={() => setShowPrivacyWarning(false)}
-                className="text-red-400 hover:text-red-300 text-lg leading-none"
-                aria-label="警告を閉じる"
-              >
-                ×
-              </button>
             </div>
           )}
         </div>

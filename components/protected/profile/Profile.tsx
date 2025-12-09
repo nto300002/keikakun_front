@@ -8,6 +8,8 @@ import { profileApi } from '@/lib/profile';
 import { StaffNameUpdate, PasswordChange, EmailChangeRequest } from '@/types/profile';
 import { StaffRole } from '@/types/enums';
 import RoleChangeModal from './RoleChangeModal';
+import { inquiryApi } from '@/lib/api/inquiry';
+import type { InquiryCategory } from '@/types/inquiry';
 
 interface ProfileProps {
   staff: StaffResponse | null;
@@ -60,6 +62,8 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
 
   // フィードバック用のstate
   const [feedbackContent, setFeedbackContent] = useState<string>('');
+  const [feedbackTitle, setFeedbackTitle] = useState<string>('');
+  const [feedbackCategory, setFeedbackCategory] = useState<InquiryCategory>('その他');
 
   // UI状態
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -214,7 +218,15 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
   };
 
   // フィードバック送信ハンドラ
-  const handleFeedbackSubmit = () => {
+  const handleFeedbackSubmit = async () => {
+    // バリデーション
+    if (!feedbackTitle.trim()) {
+      console.log('⚠️ [Profile] フィードバック件名が空 - エラーtoastを表示します');
+      toast.error('件名を入力してください');
+      console.log('⚠️ [Profile] toast.error呼び出し完了');
+      return;
+    }
+
     if (!feedbackContent.trim()) {
       console.log('⚠️ [Profile] フィードバック内容が空 - エラーtoastを表示します');
       toast.error('フィードバック内容を入力してください');
@@ -222,77 +234,31 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
       return;
     }
 
-    // スタッフ情報を含めたメール本文を作成
-    const staffInfo = `
-送信者情報:
-- 名前: ${staff?.full_name || staff?.name || '未設定'}
-- メールアドレス: ${staff?.email || '未設定'}
-- 事業所: ${staff?.office?.name || '未設定'}
+    setIsLoading(true);
 
-フィードバック内容:
-${feedbackContent}
-    `.trim();
-
-    // mailtoリンクを作成（本文をURLエンコード）
-    const subject = encodeURIComponent('【計画くん】フィードバック');
-    const body = encodeURIComponent(staffInfo);
-    const mailtoLinkWithBody = `mailto:samonkntd@gmail.com?subject=${subject}&body=${body}`;
-    const mailtoLinkSimple = `mailto:samonkntd@gmail.com?subject=${subject}`;
-
-    // デバッグ用ログ
-    console.log('Mailto link length:', mailtoLinkWithBody.length);
-    console.log('Mailto link:', mailtoLinkWithBody);
-    console.log('Staff info:', staffInfo);
-
-    // URLの長さをチェック（2000文字を超える場合はシンプル版を使用）
-    const mailtoLink = mailtoLinkWithBody.length > 2000 ? mailtoLinkSimple : mailtoLinkWithBody;
-
-    if (mailtoLinkWithBody.length > 2000) {
-      console.warn('Mailto link is too long, using simple version without body');
-    }
-
-    // メールクライアントを起動（複数の方法を試行）
     try {
-      // 方法1: 動的にaタグを作成してクリック
-      const link = document.createElement('a');
-      link.href = mailtoLink;
-      link.style.display = 'none';
+      // 問い合わせAPIを使用して送信
+      const response = await inquiryApi.createInquiry({
+        title: feedbackTitle,
+        content: feedbackContent,
+        category: feedbackCategory,
+      });
 
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      // フィードバック送信後、成功メッセージを表示してテキストエリアをクリア
-      const message = mailtoLinkWithBody.length > 2000
-        ? 'メールクライアントを起動しました。本文に送信者情報とフィードバック内容を含めてお送りください。'
-        : 'メールクライアントを起動しました。フィードバックをお送りください。';
-
-      if (mailtoLinkWithBody.length > 2000) {
-        console.info('Please include the following information in your email:', staffInfo);
-      }
-
-      console.log('📬 [Profile] メールクライアント起動成功 - toastを表示します:', message);
-      toast.success(message, { duration: 5000 });
+      console.log('📬 [Profile] フィードバック送信成功 - toastを表示します:', response.message);
+      toast.success(response.message || 'フィードバックを送信しました。ご協力ありがとうございます。');
       console.log('📬 [Profile] toast.success呼び出し完了');
-      if (mailtoLinkWithBody.length <= 2000) {
-        setTimeout(() => setFeedbackContent(''), 5000);
-      }
-    } catch (error) {
-      console.error('メールクライアントの起動に失敗しました:', error);
 
-      // 方法2: window.openを試行
-      try {
-        window.open(mailtoLink);
-        console.log('📬 [Profile] フォールバックでメールクライアント起動成功 - toastを表示します');
-        toast.success('メールクライアントを起動しました。');
-        console.log('📬 [Profile] toast.success呼び出し完了');
-        setTimeout(() => setFeedbackContent(''), 3000);
-      } catch (fallbackError) {
-        console.error('フォールバック方法も失敗しました:', fallbackError);
-        console.log('❌ [Profile] メールクライアント起動失敗 - エラーtoastを表示します');
-        toast.error('メールクライアントの起動に失敗しました。直接 samonkntd@gmail.com にメールをお送りください。', { duration: 5000 });
-        console.log('❌ [Profile] toast.error呼び出し完了');
-      }
+      // フォームをクリア
+      setFeedbackTitle('');
+      setFeedbackContent('');
+      setFeedbackCategory('その他');
+    } catch (error) {
+      console.error('❌ [Profile] フィードバック送信失敗:', error);
+      const message = error instanceof Error ? error.message : String(error);
+      toast.error(message || 'フィードバックの送信に失敗しました。しばらく時間をおいてからお試しください。');
+      console.log('❌ [Profile] toast.error呼び出し完了');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -580,36 +546,85 @@ ${feedbackContent}
             <h2 className="text-2xl font-bold mb-6">フィードバック</h2>
 
             <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-6">
-              <p className="text-gray-400 mb-4">
-                ご意見・ご要望があればこちらからお送りください。
-              </p>
-
-              <a
-                href="mailto:samonkntd@gmail.com"
-                className="text-[#4a9eff] hover:underline text-lg font-medium"
-              >
-                samonkntd@gmail.com
-              </a>
-
-              <div className="mt-4">
-                <label className="text-gray-400 text-sm block mb-2">内容</label>
-                <textarea
-                  rows={6}
-                  value={feedbackContent}
-                  onChange={(e) => setFeedbackContent(e.target.value)}
-                  placeholder="フィードバックを入力してください..."
-                  className="w-full bg-[#0f1419] border border-[#2a2a3e] rounded-lg px-4 py-3 text-white placeholder-[#666] focus:outline-none focus:border-blue-500 resize-none"
-                />
-                <div className="mt-4 flex gap-3">
-                  <button
-                    onClick={handleFeedbackSubmit}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium"
-                  >
-                    送信
-                  </button>
+              {/* 説明セクション */}
+              <div className="mb-6 bg-blue-900/20 border border-blue-700/30 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <svg className="w-6 h-6 text-blue-400 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div>
+                    <h3 className="text-blue-300 font-semibold mb-2">アプリ運営者へのフィードバック</h3>
+                    <p className="text-blue-200 text-sm leading-relaxed">
+                      このフォームは、アプリの運営者に直接フィードバックを送信するためのものです。<br />
+                      ご意見・ご要望・不具合報告など、お気軽にお送りください。
+                    </p>
+                  </div>
                 </div>
               </div>
 
+              {/* フォーム */}
+              <div className="space-y-5">
+                {/* カテゴリ選択 */}
+                <div>
+                  <label className="text-gray-400 text-sm block mb-2">カテゴリ</label>
+                  <select
+                    value={feedbackCategory}
+                    onChange={(e) => setFeedbackCategory(e.target.value as InquiryCategory)}
+                    className="w-full bg-[#0f1419] border border-[#2a2a3e] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="不具合">不具合報告</option>
+                    <option value="質問">質問</option>
+                    <option value="その他">その他（ご意見・ご要望）</option>
+                  </select>
+                </div>
+
+                {/* 件名入力 */}
+                <div>
+                  <label className="text-gray-400 text-sm block mb-2">
+                    件名 <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={feedbackTitle}
+                    onChange={(e) => setFeedbackTitle(e.target.value)}
+                    placeholder="例: ログイン画面で不具合があります"
+                    maxLength={200}
+                    className="w-full bg-[#0f1419] border border-[#2a2a3e] rounded-lg px-4 py-2 text-white placeholder-[#666] focus:outline-none focus:border-blue-500"
+                  />
+                  <p className="text-gray-500 text-xs mt-1">
+                    {feedbackTitle.length} / 200文字
+                  </p>
+                </div>
+
+                {/* 内容入力 */}
+                <div>
+                  <label className="text-gray-400 text-sm block mb-2">
+                    内容 <span className="text-red-400">*</span>
+                  </label>
+                  <textarea
+                    rows={8}
+                    value={feedbackContent}
+                    onChange={(e) => setFeedbackContent(e.target.value)}
+                    placeholder="フィードバック内容を入力してください...&#10;&#10;【不具合報告の場合】&#10;・発生した状況&#10;・エラーメッセージ&#10;・再現手順&#10;などを記載いただけると助かります。"
+                    maxLength={20000}
+                    className="w-full bg-[#0f1419] border border-[#2a2a3e] rounded-lg px-4 py-3 text-white placeholder-[#666] focus:outline-none focus:border-blue-500 resize-none"
+                  />
+                  <p className="text-gray-500 text-xs mt-1">
+                    {feedbackContent.length} / 20,000文字
+                  </p>
+                </div>
+
+                {/* 送信ボタン */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleFeedbackSubmit}
+                    disabled={isLoading || !feedbackTitle.trim() || !feedbackContent.trim()}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isLoading ? '送信中...' : '運営者に送信'}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

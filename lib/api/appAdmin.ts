@@ -22,15 +22,20 @@ export interface OfficeListResponse {
 
 export interface InquiryResponse {
   id: string;
-  staff_id: string;
-  staff_name: string;
-  office_id: string;
-  office_name: string;
-  subject: string;
+  message_id: string;
+  title: string;
   content: string;
-  status: 'unread' | 'read' | 'replied';
-  reply_content?: string;
-  replied_at?: string;
+  status: 'new' | 'open' | 'in_progress' | 'answered' | 'closed' | 'spam';
+  priority: 'low' | 'normal' | 'high';
+  sender_name: string | null;
+  sender_email: string | null;
+  assigned_staff_id: string | null;
+  assigned_staff?: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  } | null;
   created_at: string;
   updated_at: string;
 }
@@ -38,8 +43,6 @@ export interface InquiryResponse {
 export interface InquiryListResponse {
   inquiries: InquiryResponse[];
   total: number;
-  skip: number;
-  limit: number;
 }
 
 export interface AnnouncementCreate {
@@ -108,20 +111,40 @@ export const appAdminApi = {
    * @param params - フィルターパラメータ
    */
   getInquiries: async (params?: {
-    status?: 'unread' | 'read' | 'replied';
+    status?: 'new' | 'open' | 'in_progress' | 'answered' | 'closed' | 'spam';
+    priority?: 'low' | 'normal' | 'high';
+    assigned?: string;
+    search?: string;
     skip?: number;
     limit?: number;
+    sort?: 'created_at' | 'updated_at' | 'priority';
+    order?: 'asc' | 'desc';
   }): Promise<InquiryListResponse> => {
     const queryParams = new URLSearchParams();
 
     if (params?.status) {
       queryParams.append('status', params.status);
     }
+    if (params?.priority) {
+      queryParams.append('priority', params.priority);
+    }
+    if (params?.assigned) {
+      queryParams.append('assigned', params.assigned);
+    }
+    if (params?.search) {
+      queryParams.append('search', params.search);
+    }
     if (params?.skip !== undefined) {
       queryParams.append('skip', params.skip.toString());
     }
     if (params?.limit !== undefined) {
       queryParams.append('limit', params.limit.toString());
+    }
+    if (params?.sort) {
+      queryParams.append('sort', params.sort);
+    }
+    if (params?.order) {
+      queryParams.append('order', params.order);
     }
 
     const queryString = queryParams.toString();

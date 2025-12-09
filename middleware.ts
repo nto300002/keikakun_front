@@ -13,6 +13,13 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get('access_token');
 
+  // 静的ファイル（画像、フォント等）を除外
+  const isStaticFile = /\.(png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|eot)$/i.test(pathname);
+
+  if (isStaticFile) {
+    return NextResponse.next();
+  }
+
   // 保護ルート
   const isProtectedPath = pathname.startsWith('/dashboard') ||
                           pathname.startsWith('/recipients') ||

@@ -6,7 +6,12 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "security-check": "npm audit --audit-level=high",
+    "audit": "npm audit",
+    "audit:fix": "npm audit fix",
+    "outdated-check": "npm outdated",
+    "postinstall": "allow-scripts"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -31,6 +36,7 @@
     "zod": "^4.1.4"
   },
   "devDependencies": {
+    "@lavamoat/allow-scripts": "^3.4.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -39,5 +45,24 @@
     "eslint-config-next": "15.5.2",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "lavamoat": {
+    "allowScripts": {
+      "@next/swc-darwin-arm64": true,
+      "@next/swc-darwin-x64": true,
+      "@next/swc-linux-arm64-gnu": true,
+      "@next/swc-linux-arm64-musl": true,
+      "@next/swc-linux-x64-gnu": true,
+      "@next/swc-linux-x64-musl": true,
+      "@next/swc-win32-arm64-msvc": true,
+      "@next/swc-win32-ia32-msvc": true,
+      "@next/swc-win32-x64-msvc": true,
+      "sharp": true,
+      "esbuild": true,
+      "$root$": false,
+      "@tailwindcss/postcss>@tailwindcss/oxide": false,
+      "eslint-config-next>eslint-import-resolver-typescript>unrs-resolver": false,
+      "next>sharp": false
+    }
   }
 }

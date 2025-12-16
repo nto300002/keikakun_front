@@ -8,6 +8,9 @@ import { noticesApi } from '@/lib/api/notices';
 import { messagesApi } from '@/lib/api/messages';
 import { initializeCsrfToken } from '@/lib/csrf';
 import { Notice } from '@/types/notice';
+import { BillingProvider } from '@/contexts/BillingContext';
+import PastDueModalWrapper from '@/components/billing/PastDueModalWrapper';
+import TrialExpiryBanner from '@/components/billing/TrialExpiryBanner';
 
 interface User {
   id: string;
@@ -135,10 +138,12 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   };
 
   return (
-    <Suspense fallback={null}> 
-      <div className="min-h-screen bg-gray-900 text-gray-200 flex flex-col">
-        {/* Header */}
-        <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
+    <BillingProvider>
+      <PastDueModalWrapper />
+      <Suspense fallback={null}>
+        <div className="min-h-screen bg-gray-900 text-gray-200 flex flex-col">
+          {/* Header */}
+          <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
           <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Left Side */}
@@ -265,6 +270,9 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
           </nav>
         </header>
 
+        {/* Trial Expiry Banner */}
+        <TrialExpiryBanner />
+
         {/* Main Content */}
         <main className="flex-grow container mx-auto p-6 md:p-8 bg-gray-800 text-gray-100 rounded-lg shadow-md my-6">
           {children}
@@ -278,7 +286,8 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
             </p>
           </div>
         </footer>
-      </div>
-    </Suspense>
+        </div>
+      </Suspense>
+    </BillingProvider>
   );
 }

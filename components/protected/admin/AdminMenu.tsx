@@ -11,6 +11,7 @@ import { OfficeCalendarAccount, CalendarConnectionStatus } from '@/types/calenda
 import { authApi, officeApi } from '@/lib/auth';
 import { officesApi } from '@/lib/api/offices';
 import WithdrawalModal from './WithdrawalModal';
+import PlanTab from './PlanTab';
 
 interface AdminMenuProps {
   office: OfficeResponse | null;
@@ -1224,14 +1225,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
           )}
 
           {/* オフィス: プラン */}
-          {activeTab === 'plan' && (
-            <div>
-              <h2 className="text-2xl font-bold mb-4">プラン</h2>
-              <div className="bg-gray-800 p-6 rounded-lg">
-                <p className="text-gray-400">プランに関する情報はまだありません。</p>
-              </div>
-            </div>
-          )}
+          {activeTab === 'plan' && <PlanTab />}
         </div>
       </div>
 

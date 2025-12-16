@@ -180,10 +180,33 @@ function TermsContent() {
         <li>ユーザーID及びパスワードが第三者によって使用されたことによって生じた損害は、運営者に故意又は重大な過失がある場合を除き、運営者は一切の責任を負わないものとします。</li>
       </ol>
 
-      <h3 className="text-xl font-bold text-white mt-6 mb-3">第4条(サービスの無償提供)</h3>
+      <h3 className="text-xl font-bold text-white mt-6 mb-3">第4条(料金とお支払い)</h3>
       <ol className="list-decimal pl-6 space-y-2">
-        <li>本サービスは現在無償で提供されています。</li>
-        <li>運営者は、将来的にサービスの一部または全部を有償化する場合があります。その場合は、事前にユーザーに通知し、同意を得るものとします。</li>
+        <li><strong>無料トライアル期間</strong>: 新規登録後、30日間の無料トライアル期間が提供されます。トライアル期間中はすべての機能を無料でご利用いただけます。</li>
+        <li><strong>有料プランへの移行</strong>: トライアル期間終了後、本サービスを継続してご利用いただくには、有料プランへの登録が必要です。
+          <ul className="list-disc pl-6 mt-2 space-y-1">
+            <li>料金: 月額6,000円（税込）</li>
+            <li>課金サイクル: 毎月自動更新</li>
+            <li>支払い方法: クレジットカード決済（Stripe経由）</li>
+          </ul>
+        </li>
+        <li><strong>決済処理</strong>: すべての決済処理はStripe社のセキュアな決済システムを通じて行われます。運営者はクレジットカード番号などの決済情報を直接保持しません。</li>
+        <li><strong>請求とサブスクリプション</strong>:
+          <ul className="list-disc pl-6 mt-2 space-y-1">
+            <li>有料プランは月次サブスクリプションとして自動更新されます</li>
+            <li>請求書はStripeから電子的に発行されます</li>
+            <li>決済失敗時は、サービスが一時停止される場合があります</li>
+          </ul>
+        </li>
+        <li><strong>キャンセルと返金</strong>:
+          <ul className="list-disc pl-6 mt-2 space-y-1">
+            <li>サブスクリプションはいつでもキャンセル可能です</li>
+            <li>キャンセル後、次回請求日までサービスをご利用いただけます</li>
+            <li>月の途中でキャンセルした場合、日割り返金は行われません</li>
+            <li>無料トライアル期間中のキャンセルには料金は発生しません</li>
+          </ul>
+        </li>
+        <li><strong>料金改定</strong>: 運営者は、30日前までの事前通知により料金を改定することがあります。改定後も継続利用する場合、新料金に同意したものとみなします。</li>
       </ol>
 
       <h3 className="text-xl font-bold text-white mt-6 mb-3">第5条(禁止事項)</h3>
@@ -241,11 +264,29 @@ function TermsContent() {
 
       <h3 className="text-xl font-bold text-white mt-6 mb-3">第9条(データの保持期間)</h3>
       <p>当サービスでは、以下のデータを所定の期間保持します：</p>
-      <ul className="list-disc pl-6 space-y-2 mt-2">
-        <li><strong>アカウント操作履歴</strong>（削除、退会、利用規約同意等）: 5年間</li>
-        <li><strong>権限変更・事務所情報変更履歴</strong>: 3年間</li>
-        <li><strong>ログイン履歴</strong>: 1年間</li>
+
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【法定保存データ（5年間）】</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>アカウント操作履歴（削除、退会、利用規約同意等）</li>
+        <li>支払い履歴・請求情報</li>
+        <li>サブスクリプション変更履歴</li>
       </ul>
+
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【管理データ（3年間）】</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>権限変更・事務所情報変更履歴</li>
+      </ul>
+
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【アクセスログ（1年間）】</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>ログイン履歴</li>
+      </ul>
+
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【システムログ（90日間）】</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>Webhook処理ログ（決済イベント等）</li>
+      </ul>
+
       <p className="mt-4">
         保持期間経過後、データは自動的に削除されます。法令に基づく開示請求があった場合、保持期間内のデータを提供することがあります。
       </p>
@@ -305,7 +346,8 @@ function TermsContent() {
 
       <div className="mt-8 pt-6 border-t border-gray-600">
         <p className="text-sm text-gray-400"><strong>制定日</strong>: 2025年11月17日</p>
-        <p className="text-sm text-gray-400"><strong>最終更新日</strong>: 2025年11月27日</p>
+        <p className="text-sm text-gray-400"><strong>最終更新日</strong>: 2025年12月12日</p>
+        <p className="text-xs text-gray-500 mt-2">【更新内容】有料プラン・Stripe決済の導入、データ保持期間の追加</p>
       </div>
     </div>
   );
@@ -336,6 +378,18 @@ function PrivacyContent() {
         <li>2段階認証に関する情報(有効化している場合)</li>
       </ul>
 
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【決済・請求に関する情報】</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>クレジットカード情報（Stripe社が安全に管理、運営者は保持しません）</li>
+        <li>請求先情報（事業所名、住所、電話番号）</li>
+        <li>支払い履歴</li>
+        <li>サブスクリプション情報</li>
+        <li>Stripe顧客ID（決済システムとの連携用）</li>
+      </ul>
+      <p className="mt-2 text-sm text-gray-400">
+        ※ クレジットカード番号などの機密決済情報は、PCI DSS準拠のStripe社が安全に保管します。運営者はこれらの情報に直接アクセスすることはありません。
+      </p>
+
       <h4 className="text-lg font-semibold text-white mt-4 mb-2">【福祉サービス利用者に関する情報】</h4>
       <p>本サービスは福祉サービス事業所向けの個別支援計画管理システムであり、以下の情報を取り扱います：</p>
       <ul className="list-disc pl-6 space-y-1">
@@ -362,17 +416,16 @@ function PrivacyContent() {
         <li>利用状況に関する情報</li>
       </ul>
 
-      <p className="mt-4">
-        <strong>注意</strong>: 運営者は、銀行口座番号、クレジットカード番号、運転免許証番号などの決済情報は収集しません。本サービスは現在無償で提供されています。
-      </p>
-
       <h3 className="text-xl font-bold text-white mt-6 mb-3">第3条(個人情報を収集・利用する目的)</h3>
       <p>運営者が個人情報を収集・利用する目的は、以下のとおりです。</p>
       <ol className="list-decimal pl-6 space-y-2">
         <li>本サービスの提供・運営のため</li>
         <li>個別支援計画の作成・管理・モニタリングのため</li>
+        <li><strong>料金の請求・決済処理のため（Stripe社を通じた決済含む）</strong></li>
+        <li><strong>請求書・領収書の発行のため</strong></li>
+        <li><strong>サブスクリプション管理・更新のため</strong></li>
         <li>ユーザー(スタッフ)からのお問い合わせに回答するため(本人確認を行うことを含む)</li>
-        <li>サービスの新機能、更新情報、重要なお知らせなど必要に応じたご連絡のため</li>
+        <li>サービスの新機能、更新情報、重要なお知らせ（料金改定含む）など必要に応じたご連絡のため</li>
         <li>利用規約に違反したユーザーや、不正・不当な目的でサービスを利用しようとするユーザーの特定をし、ご利用をお断りするため</li>
         <li>ユーザーにご自身の登録情報の閲覧や変更、削除、ご利用状況の閲覧を行っていただくため</li>
         <li>サービスの改善、新機能の開発のため(統計データとして個人を特定できない形で利用)</li>
@@ -411,6 +464,19 @@ function PrivacyContent() {
         <strong>現在の第三者提供の状況</strong>：
         本サービスは以下のサービスを利用しており、これらの事業者に情報が送信されます：
       </p>
+
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【決済サービス】</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li><strong>Stripe, Inc.</strong> - 決済処理・クレジットカード情報管理
+          <ul className="list-disc pl-6 mt-1 text-sm">
+            <li>提供情報: クレジットカード情報、請求先情報、支払い履歴</li>
+            <li>利用目的: 決済処理、不正検知</li>
+            <li>プライバシーポリシー: <a href="https://stripe.com/jp/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">https://stripe.com/jp/privacy</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【インフラサービス】</h4>
       <ul className="list-disc pl-6 space-y-1">
         <li>Amazon Web Services (AWS) - メールサーバー, 画像(PDF保存)</li>
         <li>Google Cloud Run - ホスティング</li>
@@ -448,12 +514,17 @@ function PrivacyContent() {
       <h3 className="text-xl font-bold text-white mt-6 mb-3">第9条(データの保持期間)</h3>
       <p>運営者は、個人情報および関連ログデータについて、以下の期間保持します：</p>
 
-      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【重要操作履歴（5年間）】</h4>
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【法定保存データ（5年間）】</h4>
       <ul className="list-disc pl-6 space-y-1">
         <li>アカウント削除記録</li>
         <li>事務所退会申請・承認・却下記録</li>
         <li>利用規約同意記録</li>
+        <li><strong>支払い履歴・請求情報</strong></li>
+        <li><strong>サブスクリプション変更履歴</strong></li>
       </ul>
+      <p className="mt-2 text-sm text-gray-400">
+        ※ 支払い関連データは税法上の要請により5年間保持します
+      </p>
 
       <h4 className="text-lg font-semibold text-white mt-4 mb-2">【管理操作履歴（3年間）】</h4>
       <ul className="list-disc pl-6 space-y-1">
@@ -466,6 +537,12 @@ function PrivacyContent() {
       <ul className="list-disc pl-6 space-y-1">
         <li>ログイン履歴（成功・失敗）</li>
         <li>IPアドレス、ユーザーエージェント情報</li>
+      </ul>
+
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【システムログ（90日間）】</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>Webhook処理ログ（決済イベント、サブスクリプション変更等）</li>
+        <li>決済エラーログ</li>
       </ul>
 
       <p className="mt-4">
@@ -499,6 +576,14 @@ function PrivacyContent() {
         <li>不正アクセス防止のためのファイアウォール設置</li>
         <li>定期的なセキュリティアップデート</li>
         <li>アクセスログの記録と監視</li>
+      </ul>
+
+      <h4 className="text-lg font-semibold text-white mt-4 mb-2">【決済情報の安全管理】</h4>
+      <ul className="list-disc pl-6 space-y-1">
+        <li>クレジットカード情報は<strong>PCI DSS準拠</strong>のStripe社が管理</li>
+        <li>運営者はクレジットカード番号を保持せず、安全なトークン方式を採用</li>
+        <li>すべての決済通信はStripe社の暗号化通信を使用</li>
+        <li>不正検知システム（Stripe Radar）による24時間監視</li>
       </ul>
 
       <h3 className="text-xl font-bold text-white mt-6 mb-3">第11条(Cookie等の利用)</h3>
@@ -542,7 +627,8 @@ function PrivacyContent() {
 
       <div className="mt-8 pt-6 border-t border-gray-600">
         <p className="text-sm text-gray-400"><strong>制定日</strong>: 2025年11月17日</p>
-        <p className="text-sm text-gray-400"><strong>最終更新日</strong>: 2025年11月27日</p>
+        <p className="text-sm text-gray-400"><strong>最終更新日</strong>: 2025年12月12日</p>
+        <p className="text-xs text-gray-500 mt-2">【更新内容】Stripe決済導入に伴う個人情報取扱い、第三者提供、安全管理措置の追加</p>
       </div>
     </div>
   );

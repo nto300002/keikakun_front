@@ -11,6 +11,8 @@ import { Notice } from '@/types/notice';
 import { BillingProvider } from '@/contexts/BillingContext';
 import PastDueModalWrapper from '@/components/billing/PastDueModalWrapper';
 import TrialExpiryBanner from '@/components/billing/TrialExpiryBanner';
+import { OfficeResponse } from '@/types/office';
+import { getOfficeTypeLabel } from '@/lib/office-utils';
 
 interface User {
   id: string;
@@ -35,7 +37,7 @@ interface ProtectedLayoutClientProps {
 export default function ProtectedLayoutClient({ children, user }: ProtectedLayoutClientProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [officeName, setOfficeName] = useState<string | null>(user.office?.name || null);
+  const [office, setOffice] = useState<OfficeResponse | null>(null);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isNoticeHovered, setIsNoticeHovered] = useState<boolean>(false);
   const [recentUnreadNotices, setRecentUnreadNotices] = useState<Notice[]>([]);
@@ -101,9 +103,9 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     });
 
     // 事業所情報が未取得の場合のみ取得
-    if (!officeName) {
+    if (!office) {
       officeApi.getMyOffice()
-        .then(office => setOfficeName(office.name))
+        .then(officeData => setOffice(officeData))
         .catch(error => {
           console.error('事業所情報の取得に失敗しました', error);
         });
@@ -118,7 +120,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     }, 30000); // 30秒
 
     return () => clearInterval(interval);
-  }, [officeName]);
+  }, [office]);
 
   const handleLogout = async () => {
     try {
@@ -150,7 +152,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
               {/* Left Side */}
               <div className="flex items-center">
                 <Link href="/dashboard" className="text-lg font-semibold text-white hover:text-blue-400">
-                  事務所名: {officeName ? officeName : '事務所名が登録されていません'}
+                  事務所名: {office ? `${office.name}${office.office_type ? `（${getOfficeTypeLabel(office.office_type, true)}）` : ''}` : '事務所名が登録されていません'}
                 </Link>
               </div>
 

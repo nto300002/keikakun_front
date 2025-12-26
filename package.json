@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "security-check": "npm audit --audit-level=high",
     "audit": "npm audit",
     "audit:fix": "npm audit fix",

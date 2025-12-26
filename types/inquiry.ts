@@ -85,7 +85,7 @@ export interface InquiryDetailInfo {
   priority: InquiryPriority;
   assigned_staff_id: string | null;
   admin_notes: string | null;
-  delivery_log: any[] | null;
+  delivery_log: unknown[] | null;
   created_at: string;
   updated_at: string;
 }

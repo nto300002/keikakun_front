@@ -43,5 +43,6 @@ export enum BillingStatus {
   EARLY_PAYMENT = 'early_payment',
   ACTIVE = 'active',
   PAST_DUE = 'past_due',
+  CANCELING = 'canceling',
   CANCELED = 'canceled',
 }

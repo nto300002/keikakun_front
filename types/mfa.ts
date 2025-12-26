@@ -12,9 +12,9 @@ export interface MfaResponse {
 /**
  * 管理者によるMFA有効化レスポンス
  */
-export interface MfaEnableResponse extends MfaResponse {}
+export type MfaEnableResponse = MfaResponse;
 
 /**
  * 管理者によるMFA無効化レスポンス
  */
-export interface MfaDisableResponse extends MfaResponse {}
+export type MfaDisableResponse = MfaResponse;

@@ -128,13 +128,6 @@ export default function EmploymentSection({
           <p className="text-gray-400 text-sm">データがありません</p>
         ) : (
           <div className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-gray-400 text-sm">就労状況</p>
-                <p className="text-white">{getWorkConditionsLabel(employment.work_conditions)}</p>
-              </div>
-            </div>
-
             <div className="space-y-3">
               <div>
                 <p className="text-gray-400 text-sm mb-2">過去の就労経験</p>
@@ -214,26 +207,6 @@ export default function EmploymentSection({
               <pre className="whitespace-pre-wrap text-sm">{error}</pre>
             </div>
           )}
-          {/* 就労状況 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              就労状況 <span className="text-red-400">*</span>
-            </label>
-            <select
-              value={formData.work_conditions}
-              onChange={(e) => setFormData({ ...formData, work_conditions: e.target.value as EmploymentInput['work_conditions'] })}
-              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500"
-              required
-            >
-              <option value="general_employment">一般就労</option>
-              <option value="part_time">パート、アルバイト</option>
-              <option value="transition_support">就労移行支援</option>
-              <option value="continuous_support_a">就労継続支援A</option>
-              <option value="continuous_support_b">就労継続支援B</option>
-              <option value="main_employment">本就労</option>
-              <option value="other">その他</option>
-            </select>
-          </div>
 
           {/* チェックボックス群 */}
           <div className="space-y-3">

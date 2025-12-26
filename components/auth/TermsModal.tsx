@@ -43,17 +43,22 @@ export default function TermsModal({ isOpen, onClose, onAgree, type }: TermsModa
 
   // モーダルが開かれたときにスクロール状態をリセット
   useEffect(() => {
-    if (isOpen) {
-      setScrollProgress(0);
-      setCanAgree(false);
-      if (contentRef.current) {
-        contentRef.current.scrollTop = 0;
-      }
-      // 初期表示時にコンテンツの高さをチェック
-      setTimeout(() => {
-        handleScroll();
-      }, 100);
+    if (!isOpen) return;
+
+    // モーダルが開かれた時の初期化処理（UI状態のリセット）
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setScrollProgress(0);
+     
+    setCanAgree(false);
+
+    if (contentRef.current) {
+      contentRef.current.scrollTop = 0;
     }
+
+    // 初期表示時にコンテンツの高さをチェック
+    setTimeout(() => {
+      handleScroll();
+    }, 100);
   }, [isOpen]);
 
   const handleAgree = () => {

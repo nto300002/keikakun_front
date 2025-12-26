@@ -100,7 +100,7 @@ export default function PastDueModal({ isOpen, onClose }: PastDueModalProps) {
             </li>
             <li className="flex items-start">
               <span className="mr-2">•</span>
-              <span>職員の招待・管理</span>
+              <span>個別支援計画のPDFアップロード</span>
             </li>
           </ul>
         </div>

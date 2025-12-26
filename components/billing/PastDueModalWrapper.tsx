@@ -16,11 +16,13 @@ export default function PastDueModalWrapper() {
   const { isPastDue } = useBilling();
   const [showModal, setShowModal] = useState(false);
 
+  // isPastDueが変化したときにモーダル表示状態を更新
   useEffect(() => {
-    if (isPastDue) {
+    if (isPastDue && !showModal) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowModal(true);
     }
-  }, [isPastDue]);
+  }, [isPastDue, showModal]);
 
   return <PastDueModal isOpen={showModal} onClose={() => setShowModal(false)} />;
 }

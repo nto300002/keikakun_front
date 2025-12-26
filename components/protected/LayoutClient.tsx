@@ -92,6 +92,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
 
   useEffect(() => {
     // クライアント側でマウントされたことを検出
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
 
     // CSRFトークンを初期化（ページリフレッシュ時に必要）

@@ -71,7 +71,7 @@ export default function PlanTab() {
       case BillingStatus.ACTIVE:
         return {
           color: 'bg-green-900/50 text-green-400 border-green-500',
-          label: '有効',
+          label: '課金設定済み',
           icon: '✅',
         };
       case BillingStatus.PAST_DUE:
@@ -79,6 +79,12 @@ export default function PlanTab() {
           color: 'bg-yellow-900/50 text-yellow-400 border-yellow-500',
           label: '支払い遅延',
           icon: '⚠️',
+        };
+      case BillingStatus.CANCELING:
+        return {
+          color: 'bg-orange-900/50 text-orange-400 border-orange-500',
+          label: 'キャンセル予定',
+          icon: '⏳',
         };
       case BillingStatus.CANCELED:
         return {
@@ -129,7 +135,7 @@ export default function PlanTab() {
   const statusBadge = getStatusBadge(billingStatus.billing_status);
   const trialEndDate = new Date(billingStatus.trial_end_date);
   const now = new Date();
-  const daysUntilTrialEnd = Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  const daysUntilTrialEnd = billingStatus.trial_days_remaining ?? Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
   const isTrialActive = billingStatus.billing_status === BillingStatus.FREE && daysUntilTrialEnd > 0;
   const isEarlyPayment = billingStatus.billing_status === BillingStatus.EARLY_PAYMENT && daysUntilTrialEnd > 0;
 
@@ -168,6 +174,37 @@ export default function PlanTab() {
               <span>{statusBadge.label}</span>
             </span>
           </div>
+
+          {/* 課金処理日 */}
+          {billingStatus.subscription_start_date && (
+            <div>
+              <p className="text-gray-400 text-sm mb-2">課金処理日</p>
+              <p className="text-white font-semibold">
+                {new Date(billingStatus.subscription_start_date).toLocaleDateString('ja-JP', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+            </div>
+          )}
+
+          {/* スケジュールされたキャンセル日時 */}
+          {billingStatus.scheduled_cancel_at && (
+            <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">
+              <p className="text-orange-400 text-sm font-semibold mb-2">キャンセル予定</p>
+              <p className="text-white text-lg font-bold">
+                {new Date(billingStatus.scheduled_cancel_at).toLocaleDateString('ja-JP', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+              <p className="text-gray-400 text-xs mt-2">
+                この日時にサブスクリプションが自動的にキャンセルされます
+              </p>
+            </div>
+          )}
 
           {/* トライアル期限 */}
           {isTrialActive && (
@@ -278,10 +315,11 @@ export default function PlanTab() {
             </button>
           )}
 
-          {/* 支払い方法変更・解約ボタン（early_payment, active, past_dueの場合のみ表示） */}
+          {/* 支払い方法変更・解約ボタン（early_payment, active, past_due, cancelingの場合のみ表示） */}
           {(billingStatus.billing_status === BillingStatus.EARLY_PAYMENT ||
             billingStatus.billing_status === BillingStatus.ACTIVE ||
-            billingStatus.billing_status === BillingStatus.PAST_DUE) && (
+            billingStatus.billing_status === BillingStatus.PAST_DUE ||
+            billingStatus.billing_status === BillingStatus.CANCELING) && (
             <button
               onClick={handleCreatePortal}
               disabled={isCreatingPortal}

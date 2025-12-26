@@ -250,15 +250,6 @@ export default function EmploymentSection({
                 />
                 <span className="text-gray-400">現在休職中である</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.general_employment_request}
-                  onChange={(e) => setFormData({ ...formData, general_employment_request: e.target.checked })}
-                  className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-gray-400">一般就労を希望する</span>
-              </label>
             </div>
           </div>
 
@@ -290,6 +281,19 @@ export default function EmploymentSection({
               className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
               placeholder="これまでの就労先と期間を入力"
             />
+          </div>
+
+          {/* 一般就労を希望する */}
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.general_employment_request}
+                onChange={(e) => setFormData({ ...formData, general_employment_request: e.target.checked })}
+                className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-gray-400">一般就労を希望する</span>
+            </label>
           </div>
 
           {/* 希望する仕事 */}

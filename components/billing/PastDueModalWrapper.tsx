@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useBilling } from '@/contexts/BillingContext';
 import PastDueModal from './PastDueModal';
 
@@ -21,18 +21,24 @@ const MODAL_SHOWN_KEY = 'pastDueModalShown';
 export default function PastDueModalWrapper() {
   const { isPastDue } = useBilling();
   const [showModal, setShowModal] = useState(false);
+  const hasCheckedRef = useRef(false);
 
   // isPastDueが変化したときにモーダル表示状態を更新（セッション中に一度だけ）
   useEffect(() => {
     // クライアントサイドでのみ実行
     if (typeof window === 'undefined') return;
 
+    // 既にチェック済みの場合は何もしない（無限ループ防止）
+    if (hasCheckedRef.current) return;
+
     // past_due状態で、かつこのセッションでまだモーダルを表示していない場合
     const hasShownModal = sessionStorage.getItem(MODAL_SHOWN_KEY) === 'true';
     if (isPastDue && !hasShownModal) {
-      setShowModal(true);
+      hasCheckedRef.current = true;
       // セッションストレージに記録（このセッション中は二度と表示しない）
       sessionStorage.setItem(MODAL_SHOWN_KEY, 'true');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setShowModal(true);
     }
   }, [isPastDue]);
 

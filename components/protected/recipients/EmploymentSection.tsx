@@ -78,19 +78,6 @@ export default function EmploymentSection({
     }
   };
 
-  const getWorkConditionsLabel = (condition: string) => {
-    const labels: Record<string, string> = {
-      general_employment: '一般就労',
-      part_time: 'パート、アルバイト',
-      transition_support: '就労移行支援',
-      continuous_support_a: '就労継続支援A',
-      continuous_support_b: '就労継続支援B',
-      main_employment: '本就労',
-      other: 'その他',
-    };
-    return labels[condition] || condition;
-  };
-
   const getWorkOutsideFacilityLabel = (status: string) => {
     const labels: Record<string, string> = {
       hope: '希望する',

@@ -385,6 +385,7 @@ export default function LandingPage() {
               <ul className="space-y-2 text-sm text-gray-400">
                 <li><Link href="/terms" className="hover:text-white transition-colors">利用規約</Link></li>
                 <li><Link href="/privacy" className="hover:text-white transition-colors">プライバシーポリシー</Link></li>
+                <li><Link href="/act-on-specified-commercial-transactions" className="hover:text-white transition-colors">特定商取引法に基づく表記</Link></li>
               </ul>
             </div>
           </div>

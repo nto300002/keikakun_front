@@ -40,7 +40,9 @@ export enum AssessmentSheetType {
 
 export enum BillingStatus {
   FREE = 'free',
+  EARLY_PAYMENT = 'early_payment',
   ACTIVE = 'active',
   PAST_DUE = 'past_due',
+  CANCELING = 'canceling',
   CANCELED = 'canceled',
 }

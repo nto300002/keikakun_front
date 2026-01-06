@@ -10,6 +10,9 @@ import { welfareRecipientsApi } from '@/lib/welfare-recipients';
 import { DashboardData } from '@/types/dashboard';
 import { authApi } from '@/lib/auth';
 import { StaffResponse } from '@/types/staff';
+import { billingApi } from '@/lib/api/billing';
+import { BillingStatusResponse } from '@/types/billing';
+import { BillingStatus } from '@/types/enums';
 import MfaPrompt from '@/components/auth/MfaPrompt';
 import { SmartDropdown } from '@/components/ui/smart-dropdown';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
@@ -23,6 +26,7 @@ import { toast } from '@/lib/toast-debug';
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [staff, setStaff] = useState<StaffResponse | null>(null);
+  const [billingStatus, setBillingStatus] = useState<BillingStatusResponse | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -51,8 +55,17 @@ export default function Dashboard() {
 
   const { isEmployee } = useStaffRole();
 
-    
+  // 編集可能かどうかの判定: MFA有効 かつ 課金ステータスがactive/free/early_payment
+  const canEdit = useMemo(() => {
+    if (!staff || !billingStatus) return false;
 
+    const isActiveBilling =
+      billingStatus.billing_status === BillingStatus.FREE ||
+      billingStatus.billing_status === BillingStatus.ACTIVE ||
+      billingStatus.billing_status === BillingStatus.EARLY_PAYMENT;
+
+    return staff.is_mfa_enabled && isActiveBilling;
+  }, [staff, billingStatus]);
 
   useEffect(() => {
     isLoadingRef.current = isLoading;
@@ -61,12 +74,14 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const [userData, data] = await Promise.all([
+        const [userData, data, billing] = await Promise.all([
           authApi.getCurrentUser(),
-          dashboardApi.getDashboardData()
+          dashboardApi.getDashboardData(),
+          billingApi.getBillingStatus()
         ]);
         setStaff(userData);
         setDashboardData(data);
+        setBillingStatus(billing);
       } catch (error) {
         console.error('Failed to fetch initial data:', error);
       }
@@ -397,6 +412,19 @@ export default function Dashboard() {
             <MfaPrompt />
           </div>
         )}
+        {billingStatus && billingStatus.billing_status === BillingStatus.PAST_DUE && (
+          <div className="mb-6 bg-red-900/50 border border-red-500 rounded-lg p-4">
+            <p className="text-red-400 font-semibold flex items-center gap-2">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              無料お試し期間が過ぎているため利用できません
+            </p>
+            <p className="text-red-300 text-sm mt-2">
+              新規作成・編集・削除などの操作はご利用いただけません。オーナーの方は管理者設定のプラン登録ページから課金登録を行ってください。
+            </p>
+          </div>
+        )}
         <>
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
               <div className="flex items-center gap-4">
@@ -453,7 +481,7 @@ export default function Dashboard() {
                     <p className="text-xl font-bold text-white">{serviceRecipients.length}<span className="text-sm font-normal ml-1">名</span></p>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    {staff.is_mfa_enabled && (
+                    {canEdit && (
                       <button
                         type="button"
                         data-testid="add-recipient-stats-button"
@@ -482,7 +510,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-                {staff.is_mfa_enabled && (
+                {canEdit && (
                   <div className="md:hidden mt-4">
                     <button
                       type="button"
@@ -511,7 +539,7 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-white">利用者一覧</h2>
                     <div className="flex items-center gap-3">
-                      {staff.is_mfa_enabled && (
+                      {canEdit && (
                         <button
                           type="button"
                           data-testid="add-recipient-table-button"
@@ -628,7 +656,7 @@ export default function Dashboard() {
                           </td>
 
                           <td className="px-4 py-4">
-                            {staff.is_mfa_enabled ? (
+                            {canEdit ? (
                               <Link href={`/recipients/${recipient.id}`} className="block">
                                 <div className="cursor-pointer hover:underline">
                                   <div className="text-white font-bold text-base">
@@ -675,7 +703,7 @@ export default function Dashboard() {
                           </td>
                           
                           <td className="px-4 py-4 text-right">
-                            {staff.is_mfa_enabled ? (
+                            {canEdit ? (
                               <div className="flex justify-end items-center gap-3">
                                 {/* アセスメント */}
                                 <Link href={`/recipients/${recipient.id}`}>
@@ -793,7 +821,7 @@ export default function Dashboard() {
                           </div>
                         </div>
 
-                        {staff.is_mfa_enabled ? (
+                        {canEdit ? (
                           <Link href={`/recipients/${recipient.id}`}>
                             <div>
                               <div className="text-white font-bold text-base">
@@ -820,7 +848,7 @@ export default function Dashboard() {
                           </div>
                         </div>
 
-                        {staff.is_mfa_enabled ? (
+                        {canEdit ? (
                           <div className="flex justify-center items-center gap-3">
                             {/* アセスメント */}
                             <button

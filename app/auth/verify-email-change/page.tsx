@@ -8,15 +8,15 @@ function VerifyEmailChangeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
-  const [status, setStatus] = useState('verifying'); // verifying, success, error
-  const [error, setError] = useState('');
+
+  // tokenがない場合は初期状態をerrorに設定
+  const [status, setStatus] = useState(() => token ? 'verifying' : 'error');
+  const [error, setError] = useState(() => token ? '' : '確認トークンが見つかりません。');
   const [newEmail, setNewEmail] = useState('');
 
   useEffect(() => {
     if (!token) {
       console.error('[DEBUG FRONT] No token found in URL');
-      setStatus('error');
-      setError('確認トークンが見つかりません。');
       return;
     }
 

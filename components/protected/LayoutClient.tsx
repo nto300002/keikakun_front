@@ -8,6 +8,11 @@ import { noticesApi } from '@/lib/api/notices';
 import { messagesApi } from '@/lib/api/messages';
 import { initializeCsrfToken } from '@/lib/csrf';
 import { Notice } from '@/types/notice';
+import { BillingProvider } from '@/contexts/BillingContext';
+import PastDueModalWrapper from '@/components/billing/PastDueModalWrapper';
+import TrialExpiryBanner from '@/components/billing/TrialExpiryBanner';
+import { OfficeResponse } from '@/types/office';
+import { getOfficeTypeLabel } from '@/lib/office-utils';
 
 interface User {
   id: string;
@@ -32,7 +37,7 @@ interface ProtectedLayoutClientProps {
 export default function ProtectedLayoutClient({ children, user }: ProtectedLayoutClientProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const [officeName, setOfficeName] = useState<string | null>(user.office?.name || null);
+  const [office, setOffice] = useState<OfficeResponse | null>(null);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isNoticeHovered, setIsNoticeHovered] = useState<boolean>(false);
   const [recentUnreadNotices, setRecentUnreadNotices] = useState<Notice[]>([]);
@@ -89,6 +94,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
 
   useEffect(() => {
     // クライアント側でマウントされたことを検出
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
 
     // CSRFトークンを初期化（ページリフレッシュ時に必要）
@@ -97,9 +103,9 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     });
 
     // 事業所情報が未取得の場合のみ取得
-    if (!officeName) {
+    if (!office) {
       officeApi.getMyOffice()
-        .then(office => setOfficeName(office.name))
+        .then(officeData => setOffice(officeData))
         .catch(error => {
           console.error('事業所情報の取得に失敗しました', error);
         });
@@ -114,7 +120,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     }, 30000); // 30秒
 
     return () => clearInterval(interval);
-  }, [officeName]);
+  }, [office]);
 
   const handleLogout = async () => {
     try {
@@ -135,16 +141,18 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   };
 
   return (
-    <Suspense fallback={null}> 
-      <div className="min-h-screen bg-gray-900 text-gray-200 flex flex-col">
-        {/* Header */}
-        <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
+    <BillingProvider>
+      <PastDueModalWrapper />
+      <Suspense fallback={null}>
+        <div className="min-h-screen bg-gray-900 text-gray-200 flex flex-col">
+          {/* Header */}
+          <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
           <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Left Side */}
               <div className="flex items-center">
                 <Link href="/dashboard" className="text-lg font-semibold text-white hover:text-blue-400">
-                  事務所名: {officeName ? officeName : '事務所名が登録されていません'}
+                  事務所名: {office ? `${office.name}${office.office_type ? `（${getOfficeTypeLabel(office.office_type, true)}）` : ''}` : '事務所名が登録されていません'}
                 </Link>
               </div>
 
@@ -265,6 +273,9 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
           </nav>
         </header>
 
+        {/* Trial Expiry Banner */}
+        <TrialExpiryBanner />
+
         {/* Main Content */}
         <main className="flex-grow container mx-auto p-6 md:p-8 bg-gray-800 text-gray-100 rounded-lg shadow-md my-6">
           {children}
@@ -278,7 +289,8 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
             </p>
           </div>
         </footer>
-      </div>
-    </Suspense>
+        </div>
+      </Suspense>
+    </BillingProvider>
   );
 }

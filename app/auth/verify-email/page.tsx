@@ -8,16 +8,14 @@ import Link from 'next/link';
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
-  const [status, setStatus] = useState('verifying'); // verifying, success, error
-  const [error, setError] = useState('');
+
+  // tokenがない場合は初期状態をerrorに設定
+  const [status, setStatus] = useState(() => token ? 'verifying' : 'error');
+  const [error, setError] = useState(() => token ? '' : '認証トークンが見つかりません。');
   const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
-    if (!token) {
-      setStatus('error');
-      setError('認証トークンが見つかりません。');
-      return;
-    }
+    if (!token) return;
 
     const verify = async () => {
       try {

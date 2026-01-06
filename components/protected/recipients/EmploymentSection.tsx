@@ -78,19 +78,6 @@ export default function EmploymentSection({
     }
   };
 
-  const getWorkConditionsLabel = (condition: string) => {
-    const labels: Record<string, string> = {
-      general_employment: '一般就労',
-      part_time: 'パート、アルバイト',
-      transition_support: '就労移行支援',
-      continuous_support_a: '就労継続支援A',
-      continuous_support_b: '就労継続支援B',
-      main_employment: '本就労',
-      other: 'その他',
-    };
-    return labels[condition] || condition;
-  };
-
   const getWorkOutsideFacilityLabel = (status: string) => {
     const labels: Record<string, string> = {
       hope: '希望する',
@@ -128,13 +115,6 @@ export default function EmploymentSection({
           <p className="text-gray-400 text-sm">データがありません</p>
         ) : (
           <div className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-gray-400 text-sm">就労状況</p>
-                <p className="text-white">{getWorkConditionsLabel(employment.work_conditions)}</p>
-              </div>
-            </div>
-
             <div className="space-y-3">
               <div>
                 <p className="text-gray-400 text-sm mb-2">過去の就労経験</p>
@@ -214,26 +194,6 @@ export default function EmploymentSection({
               <pre className="whitespace-pre-wrap text-sm">{error}</pre>
             </div>
           )}
-          {/* 就労状況 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              就労状況 <span className="text-red-400">*</span>
-            </label>
-            <select
-              value={formData.work_conditions}
-              onChange={(e) => setFormData({ ...formData, work_conditions: e.target.value as EmploymentInput['work_conditions'] })}
-              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500"
-              required
-            >
-              <option value="general_employment">一般就労</option>
-              <option value="part_time">パート、アルバイト</option>
-              <option value="transition_support">就労移行支援</option>
-              <option value="continuous_support_a">就労継続支援A</option>
-              <option value="continuous_support_b">就労継続支援B</option>
-              <option value="main_employment">本就労</option>
-              <option value="other">その他</option>
-            </select>
-          </div>
 
           {/* チェックボックス群 */}
           <div className="space-y-3">
@@ -277,15 +237,6 @@ export default function EmploymentSection({
                 />
                 <span className="text-gray-400">現在休職中である</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={formData.general_employment_request}
-                  onChange={(e) => setFormData({ ...formData, general_employment_request: e.target.checked })}
-                  className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
-                />
-                <span className="text-gray-400">一般就労を希望する</span>
-              </label>
             </div>
           </div>
 
@@ -317,6 +268,19 @@ export default function EmploymentSection({
               className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
               placeholder="これまでの就労先と期間を入力"
             />
+          </div>
+
+          {/* 一般就労を希望する */}
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.general_employment_request}
+                onChange={(e) => setFormData({ ...formData, general_employment_request: e.target.checked })}
+                className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-gray-400">一般就労を希望する</span>
+            </label>
           </div>
 
           {/* 希望する仕事 */}

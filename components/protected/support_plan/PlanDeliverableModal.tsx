@@ -42,6 +42,7 @@ export default function PlanDeliverableModal({
   // PDFをBlobとして読み込む
   useEffect(() => {
     if (showPdfPreview && existingPdfUrl && existingPdfUrl !== loadedPdfUrl) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingPdf(true);
 
       // CORS対応: mode: 'cors' と credentials を追加
@@ -81,13 +82,16 @@ export default function PlanDeliverableModal({
   // モーダルが閉じられたときにBlobをクリーンアップ
   useEffect(() => {
     if (!isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPdfBlobUrl((prev) => {
         if (prev) {
           URL.revokeObjectURL(prev);
         }
         return null;
       });
+       
       setLoadedPdfUrl(null);
+       
       setShowPdfPreview(false);
     }
   }, [isOpen]);

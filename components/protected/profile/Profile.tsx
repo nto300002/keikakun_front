@@ -10,6 +10,9 @@ import { StaffRole } from '@/types/enums';
 import RoleChangeModal from './RoleChangeModal';
 import { inquiryApi } from '@/lib/api/inquiry';
 import type { InquiryCategory } from '@/types/inquiry';
+import { officeApi } from '@/lib/auth';
+import { OfficeResponse } from '@/types/office';
+import { getOfficeTypeLabel } from '@/lib/office-utils';
 
 interface ProfileProps {
   staff: StaffResponse | null;
@@ -27,6 +30,7 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
       : 'staff_info'
   );
   const [staff, setStaff] = useState<StaffResponse | null>(initialStaff);
+  const [office, setOffice] = useState<OfficeResponse | null>(null);
 
   // URLのクエリパラメータが変更されたときにタブを切り替え
   useEffect(() => {
@@ -34,6 +38,19 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
+
+  // 事業所情報を取得
+  useEffect(() => {
+    const fetchOffice = async () => {
+      try {
+        const officeData = await officeApi.getMyOffice();
+        setOffice(officeData);
+      } catch (error) {
+        console.error('事業所情報の取得に失敗しました:', error);
+      }
+    };
+    fetchOffice();
+  }, []);
 
   // 名前編集用のstate
   const [isEditingName, setIsEditingName] = useState<boolean>(false);
@@ -533,7 +550,9 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
                 {/* 事業所 */}
                 <div>
                   <label className="text-gray-400 text-sm block mb-1">事業所</label>
-                  <p className="text-white font-medium">{staff?.office?.name || '未設定'}</p>
+                  <p className="text-white font-medium">
+                    {office ? `${office.name}${office.office_type ? `（${getOfficeTypeLabel(office.office_type)}）` : ''}` : staff?.office?.name || '未設定'}
+                  </p>
                 </div>
               </div>
             </div>

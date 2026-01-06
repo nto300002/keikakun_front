@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { MdEdit, MdCheckCircle, MdCancel, MdDelete, MdExitToApp } from 'react-icons/md';
 import { AiOutlineQuestionCircle } from 'react-icons/ai';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -11,6 +12,7 @@ import { OfficeCalendarAccount, CalendarConnectionStatus } from '@/types/calenda
 import { authApi, officeApi } from '@/lib/auth';
 import { officesApi } from '@/lib/api/offices';
 import WithdrawalModal from './WithdrawalModal';
+import PlanTab from './PlanTab';
 
 interface AdminMenuProps {
   office: OfficeResponse | null;
@@ -19,7 +21,9 @@ interface AdminMenuProps {
 type TabType = 'office' | 'integration' | 'plan';
 
 export default function AdminMenu({ office }: AdminMenuProps) {
-  const [activeTab, setActiveTab] = useState<TabType>('office');
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get('tab') as TabType | null;
+  const [activeTab, setActiveTab] = useState<TabType>(tabParam && ['office', 'integration', 'plan'].includes(tabParam) ? tabParam : 'office');
   const [calendarFile, setCalendarFile] = useState<File | null>(null);
   const [calendarId, setCalendarId] = useState<string>('');
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -1224,14 +1228,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
           )}
 
           {/* オフィス: プラン */}
-          {activeTab === 'plan' && (
-            <div>
-              <h2 className="text-2xl font-bold mb-4">プラン</h2>
-              <div className="bg-gray-800 p-6 rounded-lg">
-                <p className="text-gray-400">プランに関する情報はまだありません。</p>
-              </div>
-            </div>
-          )}
+          {activeTab === 'plan' && <PlanTab />}
         </div>
       </div>
 

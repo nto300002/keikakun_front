@@ -28,14 +28,6 @@ export function middleware(request: NextRequest) {
                           pathname.startsWith('/admin') ||
                           pathname.startsWith('/profile');
 
-  // 公開ルート
-  const isPublicPath = pathname.startsWith('/auth/login') ||
-                       pathname.startsWith('/auth/signup') ||
-                       pathname.startsWith('/auth/admin/login') || // 後に office_ownerに変更(admin -> office_owner)
-                       pathname.startsWith('/auth/admin/signup') ||
-                       pathname.startsWith('/auth/verify-email') || // メール確認ページ（認証不要）
-                       pathname === '/';
-
   // 保護ルートでCookieがない場合のみリダイレクト
   if (isProtectedPath && !accessToken) {
     const loginUrl = new URL('/auth/login', request.url);

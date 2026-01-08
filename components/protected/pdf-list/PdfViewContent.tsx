@@ -288,7 +288,7 @@ export default function PdfViewContent({
             <Card
               key={pdf.id}
               role="listitem"
-              aria-label={`${pdf.original_filename}, ${pdf.welfare_recipient?.full_name || ''}さん, ${DELIVERABLE_TYPE_LABELS[pdf.deliverable_type] || pdf.deliverable_type}`}
+              aria-label={`${pdf.original_filename}, ${pdf.welfare_recipient?.full_name || ''}, ${DELIVERABLE_TYPE_LABELS[pdf.deliverable_type] || pdf.deliverable_type}`}
               className="p-4 hover:bg-accent/50 transition-colors cursor-pointer"
               onClick={() => handleOpenPreview(pdf)}
               onKeyDown={(e) => {
@@ -306,7 +306,7 @@ export default function PdfViewContent({
 
                   <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                     <span>
-                      {pdf.welfare_recipient?.full_name || ''} さん
+                      {pdf.welfare_recipient?.full_name || ''}
                     </span>
                     <span>|</span>
                     <span>{pdf.uploaded_by?.name}</span>
@@ -387,7 +387,7 @@ export default function PdfViewContent({
             <DialogDescription>
               {selectedPdf && (
                 <>
-                  {selectedPdf.welfare_recipient?.full_name || ''} さん | {' '}
+                  {selectedPdf.welfare_recipient?.full_name || ''} | {' '}
                   {DELIVERABLE_TYPE_LABELS[selectedPdf.deliverable_type] || selectedPdf.deliverable_type}
                 </>
               )}

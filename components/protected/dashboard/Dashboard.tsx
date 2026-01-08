@@ -241,7 +241,7 @@ export default function Dashboard() {
     }
 
     // Manager/Ownerの場合は従来通り削除確認
-    if (window.confirm(`${recipientName}さんを本当に削除しますか？この操作は元に戻せません。`)) {
+    if (window.confirm(`${recipientName}を本当に削除しますか？この操作は元に戻せません。`)) {
       try {
         setIsLoading(true);
 
@@ -258,7 +258,7 @@ export default function Dashboard() {
         });
 
         // 削除成功をtoastで通知
-        toast.success(`${recipientName}さんを削除しました`);
+        toast.success(`${recipientName}を削除しました`);
 
       } catch (error) {
         console.error('Failed to delete recipient:', error);
@@ -406,7 +406,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] text-white animate-in fade-in-0 slide-in-from-bottom-5 duration-300">
       {/* モニタリング期限設定ボタン:いらない */}
-      <main className="pt-20 pb-8 px-4 md:px-6 max-w-[1400px] mx-auto">
+      <main className="pt-20 pb-8 px-4 md:px-6 max-w-[1400px] mr-auto">
         {!staff.is_mfa_enabled && (
           <div className="mb-6">
             <MfaPrompt />
@@ -660,7 +660,7 @@ export default function Dashboard() {
                               <Link href={`/recipients/${recipient.id}`} className="block">
                                 <div className="cursor-pointer hover:underline">
                                   <div className="text-white font-bold text-base">
-                                    {recipient.full_name} さん
+                                    {recipient.full_name}
                                   </div>
                                   <div className="text-gray-200 text-xs mt-1">{recipient.furigana}</div>
                                 </div>
@@ -668,7 +668,7 @@ export default function Dashboard() {
                             ) : (
                               <div>
                                 <div className="text-white font-bold text-base">
-                                  {recipient.last_name} さん
+                                  {recipient.last_name}
                                 </div>
                               </div>
                             )}
@@ -825,7 +825,7 @@ export default function Dashboard() {
                           <Link href={`/recipients/${recipient.id}`}>
                             <div>
                               <div className="text-white font-bold text-base">
-                                {recipient.full_name}さん
+                                {recipient.full_name}
                               </div>
                               <div className="text-gray-200 text-xs">{recipient.furigana}</div>
                             </div>
@@ -833,7 +833,7 @@ export default function Dashboard() {
                         ) : (
                           <div>
                             <div className="text-white font-bold text-base">
-                              {recipient.last_name}さん
+                              {recipient.last_name}
                             </div>
                           </div>
                         )}

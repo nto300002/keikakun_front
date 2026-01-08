@@ -62,12 +62,12 @@ export default function SupportPlan() {
     fetchData();
   }, [recipientId]);
 
-  const getStepLabel = (stepType: string, cycleNumber: number) => {
-    if (stepType === 'assessment' && cycleNumber === 1) return 'アセスメント';
-    if (stepType === 'assessment' && cycleNumber > 1) return 'モニタリング';
+  const getStepLabel = (stepType: string) => {
+    if (stepType === 'assessment') return 'アセスメント';
     if (stepType === 'draft_plan') return '個別支援計画書作成';
     if (stepType === 'staff_meeting') return '担当者会議';
     if (stepType === 'final_plan_signed') return '個別支援計画書完成';
+    if (stepType === 'monitoring') return 'モニタリング';
     return stepType;
   };
 
@@ -345,34 +345,30 @@ export default function SupportPlan() {
 
                       {/* アセスメント列 */}
                       <td
-                        className={`px-4 py-6 text-center border-r border-[#2a3441] ${cycle.cycle_number === 1 ? 'cursor-pointer hover:bg-[#4f46e5]/20' : ''}`}
-                        onClick={cycle.cycle_number === 1 ? () => handleCellClick(cycle, 'assessment') : undefined}
+                        className="px-4 py-6 text-center border-r border-[#2a3441] cursor-pointer hover:bg-[#4f46e5]/20"
+                        onClick={() => handleCellClick(cycle, 'assessment')}
                       >
-                        {cycle.cycle_number === 1 ? (
-                          <div className="flex flex-col items-center gap-2">
-                            <div className="flex justify-center items-center">
-                              {getStepIcon(assessmentStatus?.completed || false, daysRemaining || undefined)}
-                            </div>
-                            <span className="text-xs text-[#9ca3af]">
-                              {assessmentStatus?.completed_at
-                                ? new Date(assessmentStatus.completed_at).toLocaleDateString('ja-JP')
-                                : '未完了'}
-                            </span>
-                            {assessmentStatus?.pdf_url && (
-                              <a
-                                href={assessmentStatus.pdf_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-[#00bcd4] hover:underline"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                📄 PDF
-                              </a>
-                            )}
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="flex justify-center items-center">
+                            {getStepIcon(assessmentStatus?.completed || false, daysRemaining || undefined)}
                           </div>
-                        ) : (
-                          <span className="text-xs text-[#6b7280]">-</span>
-                        )}
+                          <span className="text-xs text-[#9ca3af]">
+                            {assessmentStatus?.completed_at
+                              ? new Date(assessmentStatus.completed_at).toLocaleDateString('ja-JP')
+                              : '未完了'}
+                          </span>
+                          {assessmentStatus?.pdf_url && (
+                            <a
+                              href={assessmentStatus.pdf_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-[#00bcd4] hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              📄 PDF
+                            </a>
+                          )}
+                        </div>
                       </td>
 
                       <td
@@ -458,34 +454,30 @@ export default function SupportPlan() {
 
                       {/* モニタリング列 */}
                       <td
-                        className={`px-4 py-6 text-center ${cycle.cycle_number > 1 ? 'cursor-pointer hover:bg-[#4f46e5]/20' : ''}`}
-                        onClick={cycle.cycle_number > 1 ? () => handleCellClick(cycle, 'monitoring') : undefined}
+                        className="px-4 py-6 text-center cursor-pointer hover:bg-[#4f46e5]/20"
+                        onClick={() => handleCellClick(cycle, 'monitoring')}
                       >
-                        {cycle.cycle_number > 1 ? (
-                          <div className="flex flex-col items-center gap-2">
-                            <div className="flex justify-center items-center">
-                              {getStepIcon(monitoringStatus?.completed || false)}
-                            </div>
-                            <span className="text-xs text-[#9ca3af]">
-                              {monitoringStatus?.completed_at
-                                ? new Date(monitoringStatus.completed_at).toLocaleDateString('ja-JP')
-                                : '未完了'}
-                            </span>
-                            {monitoringStatus?.pdf_url && (
-                              <a
-                                href={monitoringStatus.pdf_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-xs text-[#00bcd4] hover:underline"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                📄 PDF
-                              </a>
-                            )}
+                        <div className="flex flex-col items-center gap-2">
+                          <div className="flex justify-center items-center">
+                            {getStepIcon(monitoringStatus?.completed || false)}
                           </div>
-                        ) : (
-                          <span className="text-xs text-[#6b7280]">-</span>
-                        )}
+                          <span className="text-xs text-[#9ca3af]">
+                            {monitoringStatus?.completed_at
+                              ? new Date(monitoringStatus.completed_at).toLocaleDateString('ja-JP')
+                              : '未完了'}
+                          </span>
+                          {monitoringStatus?.pdf_url && (
+                            <a
+                              href={monitoringStatus.pdf_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-[#00bcd4] hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              📄 PDF
+                            </a>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
@@ -498,7 +490,6 @@ export default function SupportPlan() {
         {/* モバイル表示 */}
         <div className="md:hidden space-y-4">
           {cycles.map((cycle) => {
-            // アセスメントは1回目のみ、モニタリングは2回目以降
             const assessmentStatus = cycle.statuses.find(s => s.step_type === 'assessment');
             const monitoringStatus = cycle.statuses.find(s => s.step_type === 'monitoring');
             const draftStatus = cycle.statuses.find(s => s.step_type === 'draft_plan');
@@ -512,43 +503,34 @@ export default function SupportPlan() {
                 </div>
 
                 <div className="space-y-3">
-                  {/* アセスメント（1回目のみ） */}
-                  {cycle.cycle_number === 1 ? (
-                    <div
-                      className="bg-[#1a1f2e] rounded-lg p-3 cursor-pointer hover:bg-[#2a3f5f40]"
-                      onClick={() => handleCellClick(cycle, 'assessment')}
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-[#9ca3af]">アセスメント</span>
-                        <div className="flex items-center">
-                          {getStepIcon(assessmentStatus?.completed || false)}
-                        </div>
-                      </div>
-                      <div className="text-xs text-[#6b7280] mt-1">
-                        {assessmentStatus?.completed_at
-                          ? new Date(assessmentStatus.completed_at).toLocaleDateString('ja-JP')
-                          : '未完了'}
-                      </div>
-                      {assessmentStatus?.pdf_url && (
-                        <a
-                          href={assessmentStatus.pdf_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-[#00bcd4] hover:underline mt-1 inline-block"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          📄 PDF
-                        </a>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="bg-[#1a1f2e] rounded-lg p-3 opacity-50">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-[#6b7280]">アセスメント</span>
-                        <span className="text-xs text-[#6b7280]">-</span>
+                  {/* アセスメント */}
+                  <div
+                    className="bg-[#1a1f2e] rounded-lg p-3 cursor-pointer hover:bg-[#2a3f5f40]"
+                    onClick={() => handleCellClick(cycle, 'assessment')}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#9ca3af]">アセスメント</span>
+                      <div className="flex items-center">
+                        {getStepIcon(assessmentStatus?.completed || false)}
                       </div>
                     </div>
-                  )}
+                    <div className="text-xs text-[#6b7280] mt-1">
+                      {assessmentStatus?.completed_at
+                        ? new Date(assessmentStatus.completed_at).toLocaleDateString('ja-JP')
+                        : '未完了'}
+                    </div>
+                    {assessmentStatus?.pdf_url && (
+                      <a
+                        href={assessmentStatus.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-[#00bcd4] hover:underline mt-1 inline-block"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        📄 PDF
+                      </a>
+                    )}
+                  </div>
 
                   {/* 個別支援計画書作成 */}
                   <div
@@ -637,43 +619,34 @@ export default function SupportPlan() {
                     )}
                   </div>
 
-                  {/* モニタリング（2回目以降） */}
-                  {cycle.cycle_number > 1 ? (
-                    <div
-                      className="bg-[#1a1f2e] rounded-lg p-3 cursor-pointer hover:bg-[#2a3f5f40]"
-                      onClick={() => handleCellClick(cycle, 'monitoring')}
-                    >
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-[#9ca3af]">モニタリング</span>
-                        <div className="flex items-center">
-                          {getStepIcon(monitoringStatus?.completed || false)}
-                        </div>
-                      </div>
-                      <div className="text-xs text-[#6b7280] mt-1">
-                        {monitoringStatus?.completed_at
-                          ? new Date(monitoringStatus.completed_at).toLocaleDateString('ja-JP')
-                          : '未完了'}
-                      </div>
-                      {monitoringStatus?.pdf_url && (
-                        <a
-                          href={monitoringStatus.pdf_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-[#00bcd4] hover:underline mt-1 inline-block"
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          📄 PDF
-                        </a>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="bg-[#1a1f2e] rounded-lg p-3 opacity-50">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-[#6b7280]">モニタリング</span>
-                        <span className="text-xs text-[#6b7280]">-</span>
+                  {/* モニタリング */}
+                  <div
+                    className="bg-[#1a1f2e] rounded-lg p-3 cursor-pointer hover:bg-[#2a3f5f40]"
+                    onClick={() => handleCellClick(cycle, 'monitoring')}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-[#9ca3af]">モニタリング</span>
+                      <div className="flex items-center">
+                        {getStepIcon(monitoringStatus?.completed || false)}
                       </div>
                     </div>
-                  )}
+                    <div className="text-xs text-[#6b7280] mt-1">
+                      {monitoringStatus?.completed_at
+                        ? new Date(monitoringStatus.completed_at).toLocaleDateString('ja-JP')
+                        : '未完了'}
+                    </div>
+                    {monitoringStatus?.pdf_url && (
+                      <a
+                        href={monitoringStatus.pdf_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-[#00bcd4] hover:underline mt-1 inline-block"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        📄 PDF
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             );

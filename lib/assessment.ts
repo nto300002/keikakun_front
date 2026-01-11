@@ -113,6 +113,12 @@ export interface Employment {
   special_remarks?: string;
   work_outside_the_facility: 'hope' | 'not_hope' | 'undecided';
   special_note_about_working_outside_the_facility?: string;
+  desired_tasks_on_asobe?: string;
+  no_employment_experience: boolean;
+  attended_job_selection_office: boolean;
+  received_employment_assessment: boolean;
+  employment_other_experience: boolean;
+  employment_other_text?: string;
 }
 
 export interface EmploymentInput {
@@ -128,6 +134,12 @@ export interface EmploymentInput {
   special_remarks?: string;
   work_outside_the_facility: 'hope' | 'not_hope' | 'undecided';
   special_note_about_working_outside_the_facility?: string;
+  desired_tasks_on_asobe?: string;
+  no_employment_experience: boolean;
+  attended_job_selection_office: boolean;
+  received_employment_assessment: boolean;
+  employment_other_experience: boolean;
+  employment_other_text?: string;
 }
 
 // 課題分析

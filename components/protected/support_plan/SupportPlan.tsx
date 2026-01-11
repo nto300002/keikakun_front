@@ -326,7 +326,6 @@ export default function SupportPlan() {
               </thead>
               <tbody>
                 {cycles.map((cycle) => {
-                  // アセスメントは1回目のみ、モニタリングは2回目以降
                   const assessmentStatus = cycle.statuses.find(s => s.step_type === 'assessment');
                   const monitoringStatus = cycle.statuses.find(s => s.step_type === 'monitoring');
                   const draftStatus = cycle.statuses.find(s => s.step_type === 'draft_plan');

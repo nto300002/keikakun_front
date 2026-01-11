@@ -140,6 +140,13 @@ export default function Dashboard() {
     applyFilters({ sortBy: 'next_renewal_deadline', sortOrder: newSortOrder });
   };
 
+  const handleNameSortClick = () => {
+    const newSortOrder = sortBy === 'name_phonetic' && sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortBy('name_phonetic');
+    setSortOrder(newSortOrder);
+    applyFilters({ sortBy: 'name_phonetic', sortOrder: newSortOrder });
+  };
+
   const handleSearch = useCallback(async (term: string) => {
     setSearchTerm(term);
     // デバウンス処理に委譲するため、ここでは即座にAPIは呼ばない
@@ -276,38 +283,31 @@ export default function Dashboard() {
     setPendingDeleteRequest(null);
   };
 
-  const getStepBadgeStyle = (step: string | null, cycleNumber: number) => {
+  const getStepBadgeStyle = (step: string | null) => {
     const baseStyle = 'inline-block px-2 py-1 rounded text-xs font-medium';
     let colorStyle = 'bg-gray-600 text-white';
 
-    if (cycleNumber >= 2 && step === 'assessment') {
-      colorStyle = 'bg-orange-600 text-white';
-    } else {
-      switch (step) {
-        case 'assessment': 
-          colorStyle = 'bg-sky-600 text-white'; 
-          break;
-        case 'draft_plan': 
-          colorStyle = 'bg-blue-600 text-white'; 
-          break;
-        case 'staff_meeting': 
-          colorStyle = 'bg-indigo-600 text-white'; 
-          break;
-        case 'final_plan_signed': 
-          colorStyle = 'bg-red-600 text-white'; 
-          break;
-        case 'monitoring': 
-          colorStyle = 'bg-orange-600 text-white'; 
-          break;
-      }
+    switch (step) {
+      case 'assessment':
+        colorStyle = 'bg-sky-600 text-white';
+        break;
+      case 'draft_plan':
+        colorStyle = 'bg-blue-600 text-white';
+        break;
+      case 'staff_meeting':
+        colorStyle = 'bg-indigo-600 text-white';
+        break;
+      case 'final_plan_signed':
+        colorStyle = 'bg-red-600 text-white';
+        break;
+      case 'monitoring':
+        colorStyle = 'bg-orange-600 text-white';
+        break;
     }
     return `${baseStyle} ${colorStyle}`;
   };
 
-  const getStepText = (step: string | null, cycleNumber: number) => {
-    if (cycleNumber >= 2 && step === 'assessment') {
-      return 'モニタリング';
-    }
+  const getStepText = (step: string | null) => {
     switch (step) {
       case 'assessment': return 'アセスメント';
       case 'draft_plan': return '個別原案';
@@ -591,6 +591,11 @@ export default function Dashboard() {
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/4">
                           <div className="flex items-center gap-2">
                             氏名
+                            <BiSort
+                              className="text-gray-100 hover:text-gray-300 cursor-pointer"
+                              size={16}
+                              onClick={handleNameSortClick}
+                            />
                           </div>
                         </th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/4">
@@ -606,19 +611,19 @@ export default function Dashboard() {
                             }
                           >
                             <DropdownMenuItem onClick={() => handleStatusFilter('assessment')}>
-                              <span className={getStepBadgeStyle('assessment', 1)}>アセスメント</span>
+                              <span className={getStepBadgeStyle('assessment')}>アセスメント</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('draft_plan')}>
-                              <span className={getStepBadgeStyle('draft_plan', 1)}>個別原案</span>
+                              <span className={getStepBadgeStyle('draft_plan')}>個別原案</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('staff_meeting')}>
-                              <span className={getStepBadgeStyle('staff_meeting', 1)}>担当者会議</span>
+                              <span className={getStepBadgeStyle('staff_meeting')}>担当者会議</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('monitoring')}>
-                              <span className={getStepBadgeStyle('monitoring', 1)}>モニタリング</span>
+                              <span className={getStepBadgeStyle('monitoring')}>モニタリング</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('final_plan_signed')}>
-                              <span className={getStepBadgeStyle('final_plan_signed', 1)}>個別本署名済</span>
+                              <span className={getStepBadgeStyle('final_plan_signed')}>個別本署名済</span>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => handleStatusFilter(null)}>
@@ -627,7 +632,7 @@ export default function Dashboard() {
                           </SmartDropdown>
                         </th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-[15%]">
-                          モニタリング期限
+                          次の個別支援:開始期限
                         </th>
                         <th className="px-4 py-3 text-right text-sm font-medium text-gray-300 w-1/5">
                           詳細なアクション
@@ -678,8 +683,8 @@ export default function Dashboard() {
                             <div className="flex flex-col items-start gap-1">
                               <div className="text-gray-300 text-sm">第{recipient.current_cycle_number}回</div>
                               <div className="text-xs text-gray-300">next</div>
-                              <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
-                                {getStepText(recipient.latest_step, recipient.current_cycle_number)}
+                              <span className={getStepBadgeStyle(recipient.latest_step)}>
+                                {getStepText(recipient.latest_step)}
                               </span>
                             </div>
                           </td>
@@ -842,8 +847,8 @@ export default function Dashboard() {
                           <span className="text-gray-300 text-sm">第{recipient.current_cycle_number}回</span>
                           <div className="text-right">
                             <div className="text-xs text-gray-3000">next</div>
-                            <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
-                              {getStepText(recipient.latest_step, recipient.current_cycle_number)}
+                            <span className={getStepBadgeStyle(recipient.latest_step)}>
+                              {getStepText(recipient.latest_step)}
                             </span>
                           </div>
                         </div>

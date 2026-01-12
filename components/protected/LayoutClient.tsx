@@ -50,11 +50,11 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   const [deadlineAlerts, setDeadlineAlerts] = useState<DeadlineAlert[]>([]);
   const [deadlineAlertsLoaded, setDeadlineAlertsLoaded] = useState<boolean>(false);
   const [totalDeadlineAlerts, setTotalDeadlineAlerts] = useState<number>(0);
-  const [deadlineAlertsShown, setDeadlineAlertsShown] = useState<boolean>(false);
   const [deadlineAlertsOffset, setDeadlineAlertsOffset] = useState<number>(0);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [showOfficeTooltip, setShowOfficeTooltip] = useState<boolean>(false);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const deadlineAlertsShownRef = useRef<boolean>(false);
 
   // 未読通知件数を取得（notices + messages）
   const fetchUnreadCount = async () => {
@@ -160,9 +160,10 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     }
   };
 
+  // 初回マウント時のみ実行: CSRF初期化、事業所情報取得、トースト表示、未読件数更新
+  // 依存配列を空にすることで、トーストの重複表示を防止
   useEffect(() => {
     // クライアント側でマウントされたことを検出
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsMounted(true);
 
     // CSRFトークンを初期化（ページリフレッシュ時に必要）
@@ -183,7 +184,8 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     fetchUnreadCount();
 
     // 期限アラート取得とトースト表示（ログイン時のみ、1回だけ）
-    if (!deadlineAlertsShown) {
+    if (!deadlineAlertsShownRef.current) {
+      deadlineAlertsShownRef.current = true;
       console.log('[DEADLINE_ALERTS_DEBUG] Starting deadline alerts fetch for toast display...');
       fetchDeadlineAlertsAll().then(alerts => {
         console.log('[DEADLINE_ALERTS_DEBUG] Displaying toasts for', alerts.length, 'alerts');
@@ -199,8 +201,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
             duration: 5000,
           });
         });
-        setDeadlineAlertsShown(true);
-        console.log('[DEADLINE_ALERTS_DEBUG] All toasts displayed, deadlineAlertsShown set to true');
+        console.log('[DEADLINE_ALERTS_DEBUG] All toasts displayed, deadlineAlertsShownRef set to true');
       });
     }
 
@@ -209,7 +210,14 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
       fetchUnreadCount();
     }, 30000); // 30秒
 
-    // クリックアウェイでツールチップを閉じる
+    return () => {
+      clearInterval(interval);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // イベントリスナー管理: ツールチップのクリックアウトサイド処理
+  useEffect(() => {
     const handleClickOutside = () => {
       if (showOfficeTooltip) {
         setShowOfficeTooltip(false);
@@ -220,11 +228,10 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     document.addEventListener('touchstart', handleClickOutside);
 
     return () => {
-      clearInterval(interval);
       document.removeEventListener('click', handleClickOutside);
       document.removeEventListener('touchstart', handleClickOutside);
     };
-  }, [office, deadlineAlertsShown, showOfficeTooltip]);
+  }, [showOfficeTooltip]);
 
   const handleLogout = async () => {
     try {

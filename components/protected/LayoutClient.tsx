@@ -185,7 +185,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     }, 30000); // 30秒
 
     // クリックアウェイでツールチップを閉じる
-    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+    const handleClickOutside = () => {
       if (showOfficeTooltip) {
         setShowOfficeTooltip(false);
       }

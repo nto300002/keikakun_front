@@ -62,15 +62,6 @@ export default function SupportPlan() {
     fetchData();
   }, [recipientId]);
 
-  const getStepLabel = (stepType: string) => {
-    if (stepType === 'assessment') return 'アセスメント';
-    if (stepType === 'draft_plan') return '個別支援計画書作成';
-    if (stepType === 'staff_meeting') return '担当者会議';
-    if (stepType === 'final_plan_signed') return '個別支援計画書完成';
-    if (stepType === 'monitoring') return 'モニタリング';
-    return stepType;
-  };
-
   const getStepIcon = (completed: boolean, daysRemaining?: number | null) => {
     // 完了している場合はチェック済みアイコン
     if (completed) {

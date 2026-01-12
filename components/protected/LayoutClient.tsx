@@ -99,7 +99,22 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   // 期限アラート取得（全件）- ログイン時のトースト用
   const fetchDeadlineAlertsAll = async () => {
     try {
+      console.log('[DEADLINE_ALERTS_DEBUG] Fetching deadline alerts from API...');
       const data = await deadlineApi.getAlerts({ threshold_days: 30 });
+      console.log('[DEADLINE_ALERTS_DEBUG] API Response:', {
+        total: data.total,
+        alertsCount: data.alerts.length,
+        alerts: data.alerts
+      });
+
+      // アセスメント未完了アラートのみログ出力
+      const assessmentAlerts = data.alerts.filter((a: DeadlineAlert) => a.alert_type === 'assessment_incomplete');
+      console.log('[DEADLINE_ALERTS_DEBUG] Assessment incomplete alerts:', assessmentAlerts.map((a: DeadlineAlert) => ({
+        name: a.full_name,
+        cycle: a.current_cycle_number,
+        message: a.message
+      })));
+
       return data.alerts;
     } catch (error) {
       console.error('期限アラートの取得に失敗しました', error);
@@ -169,13 +184,23 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
 
     // 期限アラート取得とトースト表示（ログイン時のみ、1回だけ）
     if (!deadlineAlertsShown) {
+      console.log('[DEADLINE_ALERTS_DEBUG] Starting deadline alerts fetch for toast display...');
       fetchDeadlineAlertsAll().then(alerts => {
-        alerts.forEach(alert => {
-          toast.warning(`${alert.full_name} 更新期限まで残り${alert.days_remaining}日`, {
+        console.log('[DEADLINE_ALERTS_DEBUG] Displaying toasts for', alerts.length, 'alerts');
+        alerts.forEach((alert, index) => {
+          // alert_typeに応じてメッセージを変更
+          const message = alert.alert_type === 'assessment_incomplete'
+            ? alert.message
+            : `${alert.full_name} 更新期限まで残り${alert.days_remaining}日`;
+
+          console.log(`[DEADLINE_ALERTS_DEBUG] Toast ${index}: type=${alert.alert_type}, name=${alert.full_name}, cycle=${alert.current_cycle_number}, message="${message}"`);
+
+          toast.warning(message, {
             duration: 5000,
           });
         });
         setDeadlineAlertsShown(true);
+        console.log('[DEADLINE_ALERTS_DEBUG] All toasts displayed, deadlineAlertsShown set to true');
       });
     }
 
@@ -399,9 +424,9 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                               <span className="text-xs text-gray-400">{totalDeadlineAlerts}件</span>
                             </div>
                             <div className="space-y-2">
-                              {deadlineAlerts.map((alert) => (
+                              {deadlineAlerts.map((alert, index) => (
                                 <div
-                                  key={alert.id}
+                                  key={`${alert.id}-${alert.alert_type || 'renewal'}-${index}`}
                                   className="p-3 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer border border-gray-700/50 flex items-center justify-between"
                                   onClick={() => router.push(`/support_plan/${alert.id}`)}
                                 >
@@ -410,13 +435,19 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                                     <span className="text-white text-sm">{alert.full_name}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <span className={`text-sm ${
-                                      alert.days_remaining <= 15 ? 'text-red-400' :
-                                      alert.days_remaining <= 25 ? 'text-orange-400' :
-                                      'text-yellow-400'
-                                    }`}>
-                                      残り{alert.days_remaining}日
-                                    </span>
+                                    {alert.alert_type === 'assessment_incomplete' ? (
+                                      <span className="text-sm text-red-400">
+                                        アセスメント未完了
+                                      </span>
+                                    ) : (
+                                      <span className={`text-sm ${
+                                        (alert.days_remaining ?? 0) <= 15 ? 'text-red-400' :
+                                        (alert.days_remaining ?? 0) <= 25 ? 'text-orange-400' :
+                                        'text-yellow-400'
+                                      }`}>
+                                        残り{alert.days_remaining}日
+                                      </span>
+                                    )}
                                     <span className="text-gray-500">→</span>
                                   </div>
                                 </div>

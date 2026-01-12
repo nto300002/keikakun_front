@@ -645,7 +645,7 @@ export default function Dashboard() {
                           </SmartDropdown>
                         </th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-[15%]">
-                          次回開始期限
+                          アセスメント開始期限
                         </th>
                         <th className="px-4 py-3 text-right text-sm font-medium text-gray-300 w-1/5">
                           詳細なアクション
@@ -820,7 +820,7 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div>
-                            <div className="text-gray-300 text-xs mb-1">次回開始期限</div>
+                            <div className="text-gray-300 text-xs mb-1">アセスメント開始期限</div>
                             {recipient.next_plan_start_days_remaining !== null && recipient.next_plan_start_days_remaining !== undefined ? (
                               <div className={`text-sm ${
                                 recipient.next_plan_start_days_remaining < 0

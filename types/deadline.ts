@@ -5,8 +5,10 @@
 export interface DeadlineAlert {
   id: string; // 利用者ID（recipient.id）
   full_name: string; // 利用者フルネーム
-  next_renewal_deadline: string; // 次回更新期限（ISO 8601形式）
-  days_remaining: number; // 残り日数
+  alert_type: 'renewal_deadline' | 'assessment_incomplete'; // アラートタイプ
+  message: string; // アラートメッセージ
+  next_renewal_deadline?: string | null; // 次回更新期限（ISO 8601形式、renewal_deadlineの場合）
+  days_remaining?: number | null; // 残り日数（renewal_deadlineの場合）
   current_cycle_number: number; // 現在のサイクル番号
 }
 

@@ -10,7 +10,8 @@ export interface DashboardRecipient {
   latest_step: SupportPlanStep | null;
   next_renewal_deadline: string | null; // Date is serialized as string
   monitoring_due_date: string | null; // Date is serialized as string
-  monitoring_deadline: number | null; // モニタリング期限（日数）
+  next_plan_start_date: number | null; // 次回計画開始期限（日数）
+  next_plan_start_days_remaining: number | null; // 次回計画開始までの残り日数
 }
 
 export interface DashboardData {

@@ -1,18 +1,22 @@
 'use client';
 
-import { useState, useEffect, ReactNode, Suspense } from 'react';
+import { useState, useEffect, ReactNode, Suspense, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { authApi, officeApi } from '@/lib/auth';
 import { noticesApi } from '@/lib/api/notices';
 import { messagesApi } from '@/lib/api/messages';
+import { deadlineApi } from '@/lib/api/deadline';
 import { initializeCsrfToken } from '@/lib/csrf';
 import { Notice } from '@/types/notice';
+import { DeadlineAlert } from '@/types/deadline';
 import { BillingProvider } from '@/contexts/BillingContext';
 import PastDueModalWrapper from '@/components/billing/PastDueModalWrapper';
 import TrialExpiryBanner from '@/components/billing/TrialExpiryBanner';
 import { OfficeResponse } from '@/types/office';
 import { getOfficeTypeLabel } from '@/lib/office-utils';
+import { toast } from 'sonner';
+import { FaHome, FaBars, FaTimes } from 'react-icons/fa';
 
 interface User {
   id: string;
@@ -43,6 +47,14 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   const [recentUnreadNotices, setRecentUnreadNotices] = useState<Notice[]>([]);
   const [noticesLoaded, setNoticesLoaded] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
+  const [deadlineAlerts, setDeadlineAlerts] = useState<DeadlineAlert[]>([]);
+  const [deadlineAlertsLoaded, setDeadlineAlertsLoaded] = useState<boolean>(false);
+  const [totalDeadlineAlerts, setTotalDeadlineAlerts] = useState<number>(0);
+  const [deadlineAlertsShown, setDeadlineAlertsShown] = useState<boolean>(false);
+  const [deadlineAlertsOffset, setDeadlineAlertsOffset] = useState<number>(0);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [showOfficeTooltip, setShowOfficeTooltip] = useState<boolean>(false);
+  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // 未読通知件数を取得（notices + messages）
   const fetchUnreadCount = async () => {
@@ -84,11 +96,52 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     }
   };
 
+  // 期限アラート取得（全件）- ログイン時のトースト用
+  const fetchDeadlineAlertsAll = async () => {
+    try {
+      const data = await deadlineApi.getAlerts({ threshold_days: 30 });
+      return data.alerts;
+    } catch (error) {
+      console.error('期限アラートの取得に失敗しました', error);
+      return [];
+    }
+  };
+
+  // 期限アラート取得（最大10件）- ホバー時のポップオーバー用
+  const fetchDeadlineAlerts = async (offset: number = 0) => {
+    try {
+      const data = await deadlineApi.getAlerts({ threshold_days: 30, limit: 10, offset });
+
+      if (offset === 0) {
+        // 初回取得時は上書き
+        setDeadlineAlerts(data.alerts);
+        setDeadlineAlertsLoaded(true);
+      } else {
+        // 追加取得時は既存データに追加
+        setDeadlineAlerts(prev => [...prev, ...data.alerts]);
+      }
+
+      setTotalDeadlineAlerts(data.total);
+      setDeadlineAlertsOffset(offset + data.alerts.length);
+    } catch (error) {
+      console.error('期限アラートの取得に失敗しました', error);
+    }
+  };
+
+  // さらに表示ボタンのクリックハンドラー
+  const handleLoadMoreDeadlineAlerts = () => {
+    fetchDeadlineAlerts(deadlineAlertsOffset);
+  };
+
   // ホバー時の処理
   const handleNoticeHover = () => {
     setIsNoticeHovered(true);
     if (unreadCount > 0) {
       fetchRecentUnreadNotices();
+    }
+    // 期限アラートも取得（初回のみ）
+    if (!deadlineAlertsLoaded) {
+      fetchDeadlineAlerts(0);
     }
   };
 
@@ -114,13 +167,39 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     // 初回の未読件数取得
     fetchUnreadCount();
 
+    // 期限アラート取得とトースト表示（ログイン時のみ、1回だけ）
+    if (!deadlineAlertsShown) {
+      fetchDeadlineAlertsAll().then(alerts => {
+        alerts.forEach(alert => {
+          toast.warning(`${alert.full_name} 更新期限まで残り${alert.days_remaining}日`, {
+            duration: 5000,
+          });
+        });
+        setDeadlineAlertsShown(true);
+      });
+    }
+
     // 30秒ごとに未読件数を更新
     const interval = setInterval(() => {
       fetchUnreadCount();
     }, 30000); // 30秒
 
-    return () => clearInterval(interval);
-  }, [office]);
+    // クリックアウェイでツールチップを閉じる
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (showOfficeTooltip) {
+        setShowOfficeTooltip(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [office, deadlineAlertsShown, showOfficeTooltip]);
 
   const handleLogout = async () => {
     try {
@@ -140,6 +219,28 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     }
   };
 
+  // 長押し開始
+  const handleLongPressStart = () => {
+    longPressTimerRef.current = setTimeout(() => {
+      setShowOfficeTooltip(true);
+    }, 500); // 500ms長押しでツールチップ表示
+  };
+
+  // 長押し終了
+  const handleLongPressEnd = () => {
+    if (longPressTimerRef.current) {
+      clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  };
+
+  // タップで遷移
+  const handleOfficeTap = () => {
+    handleLongPressEnd();
+    setShowOfficeTooltip(false);
+    router.push('/dashboard');
+  };
+
   return (
     <BillingProvider>
       <PastDueModalWrapper />
@@ -149,15 +250,40 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
           <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
           <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
-              {/* Left Side */}
-              <div className="flex items-center">
-                <Link href="/dashboard" className="text-lg font-semibold text-white hover:text-blue-400">
+              {/* Left Side - Office Name / Icon */}
+              <div className="flex items-center relative">
+                {/* PC: テキスト表示 */}
+                <Link href="/dashboard" className="hidden md:block text-lg font-semibold text-white hover:text-blue-400">
                   事務所名: {office ? `${office.name}${office.office_type ? `（${getOfficeTypeLabel(office.office_type, true)}）` : ''}` : '事務所名が登録されていません'}
                 </Link>
+
+                {/* Mobile: 家アイコンのみ */}
+                <button
+                  onClick={handleOfficeTap}
+                  onTouchStart={handleLongPressStart}
+                  onTouchEnd={handleLongPressEnd}
+                  onMouseDown={handleLongPressStart}
+                  onMouseUp={handleLongPressEnd}
+                  onMouseLeave={handleLongPressEnd}
+                  className="md:hidden text-2xl text-white hover:text-blue-400 transition-colors p-2 rounded-md hover:bg-gray-700"
+                  aria-label="ホームに戻る"
+                >
+                  <FaHome />
+                </button>
+
+                {/* ツールチップ（モバイルのみ） */}
+                {showOfficeTooltip && office && (
+                  <div
+                    className="md:hidden absolute top-full left-0 mt-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-md shadow-lg whitespace-nowrap z-50 border border-gray-700"
+                    onClick={() => setShowOfficeTooltip(false)}
+                  >
+                    {office.name}{office.office_type ? `（${getOfficeTypeLabel(office.office_type, true)}）` : ''}
+                  </div>
+                )}
               </div>
 
-              {/* Right Side */}
-              <div className="flex items-center space-x-4" suppressHydrationWarning>
+              {/* Right Side - Desktop Menu */}
+              <div className="hidden md:flex items-center space-x-4" suppressHydrationWarning>
                 {user?.role === 'owner' && (
                   <Link
                     href="/admin"
@@ -215,48 +341,100 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                   </button>
 
                   {/* 通知プレビューポップオーバー */}
-                  {isMounted && isNoticeHovered && unreadCount > 0 && recentUnreadNotices.length > 0 && (
+                  {isMounted && isNoticeHovered && ((unreadCount > 0 && recentUnreadNotices.length > 0) || deadlineAlerts.length > 0) && (
                     <div
                       className="absolute right-0 top-full mt-2 w-80 bg-[#0f1419] border border-[#2a2a3e] rounded-lg shadow-xl z-50 p-4"
                       onMouseEnter={() => setIsNoticeHovered(true)}
                       onMouseLeave={() => setIsNoticeHovered(false)}
                     >
-                      <div className="flex items-center justify-between mb-3">
-                        <h4 className="text-white font-semibold text-sm">最新の未読通知</h4>
-                        <span className="text-xs text-gray-400">{unreadCount}件</span>
-                      </div>
-                      <div className="space-y-2">
-                        {recentUnreadNotices.map((notice) => (
-                          <div
-                            key={notice.id}
-                            className="p-3 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer border border-gray-700/50"
-                            onClick={() => router.push('/notice')}
-                          >
-                            <div className="flex items-start justify-between gap-2 mb-1">
-                              <h5 className="text-white text-sm font-medium line-clamp-1">{notice.title}</h5>
-                              <span className="inline-block w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5"></span>
-                            </div>
-                            <p className="text-gray-400 text-xs line-clamp-2 mb-2">{notice.content}</p>
-                            <time className="text-gray-500 text-xs">
-                              {new Date(notice.created_at).toLocaleString('ja-JP', {
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </time>
+                      {/* 未読通知セクション */}
+                      {unreadCount > 0 && recentUnreadNotices.length > 0 && (
+                        <>
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-white font-semibold text-sm">最新の未読通知</h4>
+                            <span className="text-xs text-gray-400">{unreadCount}件</span>
                           </div>
-                        ))}
-                      </div>
-                      {unreadCount > 2 && (
-                        <div className="mt-3 pt-3 border-t border-gray-700">
-                          <button
-                            onClick={() => router.push('/notice')}
-                            className="w-full text-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
-                          >
-                            すべての通知を見る
-                          </button>
-                        </div>
+                          <div className="space-y-2">
+                            {recentUnreadNotices.map((notice) => (
+                              <div
+                                key={notice.id}
+                                className="p-3 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer border border-gray-700/50"
+                                onClick={() => router.push('/notice')}
+                              >
+                                <div className="flex items-start justify-between gap-2 mb-1">
+                                  <h5 className="text-white text-sm font-medium line-clamp-1">{notice.title}</h5>
+                                  <span className="inline-block w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5"></span>
+                                </div>
+                                <p className="text-gray-400 text-xs line-clamp-2 mb-2">{notice.content}</p>
+                                <time className="text-gray-500 text-xs">
+                                  {new Date(notice.created_at).toLocaleString('ja-JP', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </time>
+                              </div>
+                            ))}
+                          </div>
+                          {unreadCount > 2 && (
+                            <div className="mt-3 pt-3 border-t border-gray-700">
+                              <button
+                                onClick={() => router.push('/notice')}
+                                className="w-full text-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                              >
+                                すべての通知を見る
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      )}
+
+                      {/* 期限アラートセクション */}
+                      {deadlineAlerts.length > 0 && (
+                        <>
+                          <div className={`${unreadCount > 0 && recentUnreadNotices.length > 0 ? 'mt-3 pt-3 border-t border-gray-700' : ''}`}>
+                            <div className="flex items-center justify-between mb-3">
+                              <h4 className="text-white font-semibold text-sm">更新期限が近い利用者</h4>
+                              <span className="text-xs text-gray-400">{totalDeadlineAlerts}件</span>
+                            </div>
+                            <div className="space-y-2">
+                              {deadlineAlerts.map((alert) => (
+                                <div
+                                  key={alert.id}
+                                  className="p-3 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer border border-gray-700/50 flex items-center justify-between"
+                                  onClick={() => router.push(`/support_plan/${alert.id}`)}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-orange-400">⚠️</span>
+                                    <span className="text-white text-sm">{alert.full_name}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <span className={`text-sm ${
+                                      alert.days_remaining <= 15 ? 'text-red-400' :
+                                      alert.days_remaining <= 25 ? 'text-orange-400' :
+                                      'text-yellow-400'
+                                    }`}>
+                                      残り{alert.days_remaining}日
+                                    </span>
+                                    <span className="text-gray-500">→</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          {/* さらに表示ボタン（まだ表示していないデータがある場合） */}
+                          {deadlineAlertsOffset < totalDeadlineAlerts && (
+                            <div className="mt-3 pt-3 border-t border-gray-700">
+                              <button
+                                onClick={handleLoadMoreDeadlineAlerts}
+                                className="w-full text-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                              >
+                                さらに表示
+                              </button>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   )}
@@ -269,7 +447,84 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                   ログアウト
                 </button>
               </div>
+
+              {/* Mobile Hamburger Button */}
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="md:hidden text-white p-2 rounded-md hover:bg-gray-700 transition-colors"
+                aria-label="メニューを開く"
+              >
+                {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+              </button>
             </div>
+
+            {/* Mobile Menu */}
+            {isMenuOpen && (
+              <div className="md:hidden py-4 border-t border-gray-700">
+                {user?.role === 'owner' && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                      pathname === '/admin'
+                        ? 'bg-gray-700 text-white'
+                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                    }`}
+                  >
+                    管理者設定
+                  </Link>
+                )}
+                <Link
+                  href="/dashboard"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    pathname === '/dashboard'
+                      ? 'bg-gray-700 text-white'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  }`}
+                >
+                  利用者ダッシュボード
+                </Link>
+                <Link
+                  href="/profile"
+                  onClick={() => setIsMenuOpen(false)}
+                  className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    pathname === '/profile'
+                      ? 'bg-gray-700 text-white'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  }`}
+                >
+                  プロフィール
+                </Link>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    router.push('/notice');
+                  }}
+                  className={`w-full text-left px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                    pathname === '/notice'
+                      ? 'bg-gray-700 text-white'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                  }`}
+                >
+                  <span>通知/メッセージ</span>
+                  {unreadCount > 0 && (
+                    <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full text-left px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
+                >
+                  ログアウト
+                </button>
+              </div>
+            )}
           </nav>
         </header>
 

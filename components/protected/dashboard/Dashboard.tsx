@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { BiSort, BiFilterAlt, BiUserPlus, BiFile } from 'react-icons/bi';
 import { FaClipboardList, FaFileAlt, FaEdit, FaTrash } from 'react-icons/fa';
+import { MdRefresh } from 'react-icons/md';
 import { dashboardApi, DashboardParams } from '@/lib/dashboard';
 import { welfareRecipientsApi } from '@/lib/welfare-recipients';
 import { DashboardData } from '@/types/dashboard';
@@ -89,6 +90,19 @@ export default function Dashboard() {
 
     fetchInitialData();
   }, []);
+
+  // クエリパラメータのfilterを読み取ってフィルターを設定
+  useEffect(() => {
+    const filter = searchParams.get('filter');
+    if (filter === 'deadline_alert') {
+      // 期限が近い利用者のみを表示するフィルター
+      setActiveFilters({
+        isOverdue: false,
+        isUpcoming: true,
+        status: null,
+      });
+    }
+  }, [searchParams]);
 
   // クエリパラメータからメッセージを読み取ってtoastを表示
   useEffect(() => {
@@ -538,37 +552,36 @@ export default function Dashboard() {
                 <div className="px-6 py-4 border-b border-[#2a3441]">
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-white">利用者一覧</h2>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       {canEdit && (
                         <button
                           type="button"
                           data-testid="add-recipient-table-button"
                           aria-label="新規利用者を追加"
+                          title="利用者追加"
                           onClick={() => router.push('/recipients/new')}
-                          className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+                          className="bg-[#10b981] hover:bg-[#0f9f6e] text-white p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center"
                         >
-                          <BiUserPlus className="h-4 w-4" />
-                          <span className="hidden sm:inline">利用者追加</span>
-                          <span className="sm:hidden">追加</span>
+                          <BiUserPlus className="h-5 w-5" />
                         </button>
                       )}
                       <button
                         type="button"
                         data-testid="pdf-list-button"
                         aria-label="PDF一覧を表示"
+                        title="PDF一覧"
                         onClick={() => router.push('/pdf-list')}
-                        className="bg-[#6366f1] hover:bg-[#4f46e5] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+                        className="bg-[#6366f1] hover:bg-[#4f46e5] text-white p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center"
                       >
-                        <BiFile className="h-4 w-4" />
-                        <span className="hidden sm:inline">PDF一覧</span>
-                        <span className="sm:hidden">PDF</span>
+                        <BiFile className="h-5 w-5" />
                       </button>
                       <button
                         onClick={handleResetDisplay}
-                        className="bg-gray-500 hover:bg-[#4b5563] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full md:w-auto flex items-center gap-2"
+                        aria-label="表示リセット"
+                        title="表示リセット"
+                        className="bg-gray-500 hover:bg-[#4b5563] text-white p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center"
                       >
-                        <span>🔄</span>
-                        <span>表示リセット</span>
+                        <MdRefresh className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
@@ -632,7 +645,7 @@ export default function Dashboard() {
                           </SmartDropdown>
                         </th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-[15%]">
-                          次の個別支援:開始期限
+                          次回開始期限
                         </th>
                         <th className="px-4 py-3 text-right text-sm font-medium text-gray-300 w-1/5">
                           詳細なアクション
@@ -690,20 +703,21 @@ export default function Dashboard() {
                           </td>
 
                           <td className="px-4 py-4">
-                            {recipient.latest_step === 'monitoring' ? (
-                              <>
-                                <div className="text-white text-sm">
-                                  {recipient.monitoring_due_date ? new Date(recipient.monitoring_due_date).toLocaleDateString('ja-JP', {year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '/') : '-'}
-                                </div>
-                                <div className={`text-xs mt-1 ${getDaysRemainingColor(getDaysRemaining(recipient.monitoring_due_date))}`}>
-                                  {getDaysRemaining(recipient.monitoring_due_date) < 0
-                                    ? `期限切れ ${Math.abs(getDaysRemaining(recipient.monitoring_due_date))}日`
-                                    : `残り${getDaysRemaining(recipient.monitoring_due_date)}日`
-                                  }
-                                </div>   
-                              </>
+                            {recipient.next_plan_start_days_remaining !== null && recipient.next_plan_start_days_remaining !== undefined ? (
+                              <div className={`text-sm ${
+                                recipient.next_plan_start_days_remaining < 0
+                                  ? 'text-red-400'
+                                  : recipient.next_plan_start_days_remaining <= 3
+                                    ? 'text-orange-400'
+                                    : 'text-gray-300'
+                              }`}>
+                                {recipient.next_plan_start_days_remaining < 0
+                                  ? `期限切れ ${Math.abs(recipient.next_plan_start_days_remaining)}日`
+                                  : `残り${recipient.next_plan_start_days_remaining}日`
+                                }
+                              </div>
                             ) : (
-                              <div className="text-white text-sm">-</div>
+                              <div className="text-gray-500 text-sm">-</div>
                             )}
                           </td>
                           
@@ -806,22 +820,22 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div>
-                            <div className="text-gray-300 text-xs mb-1">モニタリング期限</div>
-                            {recipient.latest_step === 'monitoring' ? (
-                              <>
-                                <div className="text-white">
-                                  {recipient.monitoring_due_date ? new Date(recipient.monitoring_due_date).toLocaleDateString('ja-JP', {month: '2-digit', day: '2-digit'}) : '-'}
-                                </div>
-                                <div className={`text-xs ${getDaysRemainingColor(getDaysRemaining(recipient.monitoring_due_date))}`}>
-                                  {getDaysRemaining(recipient.monitoring_due_date) < 0
-                                    ? `期限切れ ${Math.abs(getDaysRemaining(recipient.monitoring_due_date))}日`
-                                    : `残り${getDaysRemaining(recipient.monitoring_due_date)}日`
-                                  }
-                                </div>
-                                
-                              </>
+                            <div className="text-gray-300 text-xs mb-1">次回開始期限</div>
+                            {recipient.next_plan_start_days_remaining !== null && recipient.next_plan_start_days_remaining !== undefined ? (
+                              <div className={`text-sm ${
+                                recipient.next_plan_start_days_remaining < 0
+                                  ? 'text-red-400'
+                                  : recipient.next_plan_start_days_remaining <= 3
+                                    ? 'text-orange-400'
+                                    : 'text-white'
+                              }`}>
+                                {recipient.next_plan_start_days_remaining < 0
+                                  ? `期限切れ ${Math.abs(recipient.next_plan_start_days_remaining)}日`
+                                  : `残り${recipient.next_plan_start_days_remaining}日`
+                                }
+                              </div>
                             ) : (
-                              <div className="text-white text-sm">-</div>
+                              <div className="text-gray-500 text-sm">-</div>
                             )}
                           </div>
                         </div>

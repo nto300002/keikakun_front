@@ -5,6 +5,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { BiSort, BiFilterAlt, BiUserPlus, BiFile } from 'react-icons/bi';
 import { FaClipboardList, FaFileAlt, FaEdit, FaTrash } from 'react-icons/fa';
+import { MdRefresh } from 'react-icons/md';
 import { dashboardApi, DashboardParams } from '@/lib/dashboard';
 import { welfareRecipientsApi } from '@/lib/welfare-recipients';
 import { DashboardData } from '@/types/dashboard';
@@ -90,6 +91,19 @@ export default function Dashboard() {
     fetchInitialData();
   }, []);
 
+  // クエリパラメータのfilterを読み取ってフィルターを設定
+  useEffect(() => {
+    const filter = searchParams.get('filter');
+    if (filter === 'deadline_alert') {
+      // 期限が近い利用者のみを表示するフィルター
+      setActiveFilters({
+        isOverdue: false,
+        isUpcoming: true,
+        status: null,
+      });
+    }
+  }, [searchParams]);
+
   // クエリパラメータからメッセージを読み取ってtoastを表示
   useEffect(() => {
     const message = searchParams.get('message');
@@ -138,6 +152,13 @@ export default function Dashboard() {
     setSortBy('next_renewal_deadline');
     setSortOrder(newSortOrder);
     applyFilters({ sortBy: 'next_renewal_deadline', sortOrder: newSortOrder });
+  };
+
+  const handleNameSortClick = () => {
+    const newSortOrder = sortBy === 'name_phonetic' && sortOrder === 'asc' ? 'desc' : 'asc';
+    setSortBy('name_phonetic');
+    setSortOrder(newSortOrder);
+    applyFilters({ sortBy: 'name_phonetic', sortOrder: newSortOrder });
   };
 
   const handleSearch = useCallback(async (term: string) => {
@@ -241,7 +262,7 @@ export default function Dashboard() {
     }
 
     // Manager/Ownerの場合は従来通り削除確認
-    if (window.confirm(`${recipientName}さんを本当に削除しますか？この操作は元に戻せません。`)) {
+    if (window.confirm(`${recipientName}を本当に削除しますか？この操作は元に戻せません。`)) {
       try {
         setIsLoading(true);
 
@@ -258,7 +279,7 @@ export default function Dashboard() {
         });
 
         // 削除成功をtoastで通知
-        toast.success(`${recipientName}さんを削除しました`);
+        toast.success(`${recipientName}を削除しました`);
 
       } catch (error) {
         console.error('Failed to delete recipient:', error);
@@ -276,38 +297,31 @@ export default function Dashboard() {
     setPendingDeleteRequest(null);
   };
 
-  const getStepBadgeStyle = (step: string | null, cycleNumber: number) => {
+  const getStepBadgeStyle = (step: string | null) => {
     const baseStyle = 'inline-block px-2 py-1 rounded text-xs font-medium';
     let colorStyle = 'bg-gray-600 text-white';
 
-    if (cycleNumber >= 2 && step === 'assessment') {
-      colorStyle = 'bg-orange-600 text-white';
-    } else {
-      switch (step) {
-        case 'assessment': 
-          colorStyle = 'bg-sky-600 text-white'; 
-          break;
-        case 'draft_plan': 
-          colorStyle = 'bg-blue-600 text-white'; 
-          break;
-        case 'staff_meeting': 
-          colorStyle = 'bg-indigo-600 text-white'; 
-          break;
-        case 'final_plan_signed': 
-          colorStyle = 'bg-red-600 text-white'; 
-          break;
-        case 'monitoring': 
-          colorStyle = 'bg-orange-600 text-white'; 
-          break;
-      }
+    switch (step) {
+      case 'assessment':
+        colorStyle = 'bg-sky-600 text-white';
+        break;
+      case 'draft_plan':
+        colorStyle = 'bg-blue-600 text-white';
+        break;
+      case 'staff_meeting':
+        colorStyle = 'bg-indigo-600 text-white';
+        break;
+      case 'final_plan_signed':
+        colorStyle = 'bg-red-600 text-white';
+        break;
+      case 'monitoring':
+        colorStyle = 'bg-orange-600 text-white';
+        break;
     }
     return `${baseStyle} ${colorStyle}`;
   };
 
-  const getStepText = (step: string | null, cycleNumber: number) => {
-    if (cycleNumber >= 2 && step === 'assessment') {
-      return 'モニタリング';
-    }
+  const getStepText = (step: string | null) => {
     switch (step) {
       case 'assessment': return 'アセスメント';
       case 'draft_plan': return '個別原案';
@@ -406,7 +420,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] text-white animate-in fade-in-0 slide-in-from-bottom-5 duration-300">
       {/* モニタリング期限設定ボタン:いらない */}
-      <main className="pt-20 pb-8 px-4 md:px-6 max-w-[1400px] mx-auto">
+      <main className="pt-20 pb-8 px-4 md:px-6 max-w-[1400px] mr-auto">
         {!staff.is_mfa_enabled && (
           <div className="mb-6">
             <MfaPrompt />
@@ -538,37 +552,36 @@ export default function Dashboard() {
                 <div className="px-6 py-4 border-b border-[#2a3441]">
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-white">利用者一覧</h2>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       {canEdit && (
                         <button
                           type="button"
                           data-testid="add-recipient-table-button"
                           aria-label="新規利用者を追加"
+                          title="利用者追加"
                           onClick={() => router.push('/recipients/new')}
-                          className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+                          className="bg-[#10b981] hover:bg-[#0f9f6e] text-white p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center"
                         >
-                          <BiUserPlus className="h-4 w-4" />
-                          <span className="hidden sm:inline">利用者追加</span>
-                          <span className="sm:hidden">追加</span>
+                          <BiUserPlus className="h-5 w-5" />
                         </button>
                       )}
                       <button
                         type="button"
                         data-testid="pdf-list-button"
                         aria-label="PDF一覧を表示"
+                        title="PDF一覧"
                         onClick={() => router.push('/pdf-list')}
-                        className="bg-[#6366f1] hover:bg-[#4f46e5] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2"
+                        className="bg-[#6366f1] hover:bg-[#4f46e5] text-white p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center"
                       >
-                        <BiFile className="h-4 w-4" />
-                        <span className="hidden sm:inline">PDF一覧</span>
-                        <span className="sm:hidden">PDF</span>
+                        <BiFile className="h-5 w-5" />
                       </button>
                       <button
                         onClick={handleResetDisplay}
-                        className="bg-gray-500 hover:bg-[#4b5563] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full md:w-auto flex items-center gap-2"
+                        aria-label="表示リセット"
+                        title="表示リセット"
+                        className="bg-gray-500 hover:bg-[#4b5563] text-white p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center"
                       >
-                        <span>🔄</span>
-                        <span>表示リセット</span>
+                        <MdRefresh className="h-5 w-5" />
                       </button>
                     </div>
                   </div>
@@ -591,6 +604,11 @@ export default function Dashboard() {
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/4">
                           <div className="flex items-center gap-2">
                             氏名
+                            <BiSort
+                              className="text-gray-100 hover:text-gray-300 cursor-pointer"
+                              size={16}
+                              onClick={handleNameSortClick}
+                            />
                           </div>
                         </th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/4">
@@ -606,19 +624,19 @@ export default function Dashboard() {
                             }
                           >
                             <DropdownMenuItem onClick={() => handleStatusFilter('assessment')}>
-                              <span className={getStepBadgeStyle('assessment', 1)}>アセスメント</span>
+                              <span className={getStepBadgeStyle('assessment')}>アセスメント</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('draft_plan')}>
-                              <span className={getStepBadgeStyle('draft_plan', 1)}>個別原案</span>
+                              <span className={getStepBadgeStyle('draft_plan')}>個別原案</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('staff_meeting')}>
-                              <span className={getStepBadgeStyle('staff_meeting', 1)}>担当者会議</span>
+                              <span className={getStepBadgeStyle('staff_meeting')}>担当者会議</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('monitoring')}>
-                              <span className={getStepBadgeStyle('monitoring', 1)}>モニタリング</span>
+                              <span className={getStepBadgeStyle('monitoring')}>モニタリング</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => handleStatusFilter('final_plan_signed')}>
-                              <span className={getStepBadgeStyle('final_plan_signed', 1)}>個別本署名済</span>
+                              <span className={getStepBadgeStyle('final_plan_signed')}>個別本署名済</span>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => handleStatusFilter(null)}>
@@ -627,7 +645,7 @@ export default function Dashboard() {
                           </SmartDropdown>
                         </th>
                         <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-[15%]">
-                          モニタリング期限
+                          アセスメント開始期限
                         </th>
                         <th className="px-4 py-3 text-right text-sm font-medium text-gray-300 w-1/5">
                           詳細なアクション
@@ -660,7 +678,7 @@ export default function Dashboard() {
                               <Link href={`/recipients/${recipient.id}`} className="block">
                                 <div className="cursor-pointer hover:underline">
                                   <div className="text-white font-bold text-base">
-                                    {recipient.full_name} さん
+                                    {recipient.full_name}
                                   </div>
                                   <div className="text-gray-200 text-xs mt-1">{recipient.furigana}</div>
                                 </div>
@@ -668,7 +686,7 @@ export default function Dashboard() {
                             ) : (
                               <div>
                                 <div className="text-white font-bold text-base">
-                                  {recipient.last_name} さん
+                                  {recipient.last_name}
                                 </div>
                               </div>
                             )}
@@ -678,27 +696,28 @@ export default function Dashboard() {
                             <div className="flex flex-col items-start gap-1">
                               <div className="text-gray-300 text-sm">第{recipient.current_cycle_number}回</div>
                               <div className="text-xs text-gray-300">next</div>
-                              <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
-                                {getStepText(recipient.latest_step, recipient.current_cycle_number)}
+                              <span className={getStepBadgeStyle(recipient.latest_step)}>
+                                {getStepText(recipient.latest_step)}
                               </span>
                             </div>
                           </td>
 
                           <td className="px-4 py-4">
-                            {recipient.latest_step === 'monitoring' ? (
-                              <>
-                                <div className="text-white text-sm">
-                                  {recipient.monitoring_due_date ? new Date(recipient.monitoring_due_date).toLocaleDateString('ja-JP', {year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '/') : '-'}
-                                </div>
-                                <div className={`text-xs mt-1 ${getDaysRemainingColor(getDaysRemaining(recipient.monitoring_due_date))}`}>
-                                  {getDaysRemaining(recipient.monitoring_due_date) < 0
-                                    ? `期限切れ ${Math.abs(getDaysRemaining(recipient.monitoring_due_date))}日`
-                                    : `残り${getDaysRemaining(recipient.monitoring_due_date)}日`
-                                  }
-                                </div>   
-                              </>
+                            {recipient.next_plan_start_days_remaining !== null && recipient.next_plan_start_days_remaining !== undefined ? (
+                              <div className={`text-sm ${
+                                recipient.next_plan_start_days_remaining < 0
+                                  ? 'text-red-400'
+                                  : recipient.next_plan_start_days_remaining <= 3
+                                    ? 'text-orange-400'
+                                    : 'text-gray-300'
+                              }`}>
+                                {recipient.next_plan_start_days_remaining < 0
+                                  ? `期限切れ ${Math.abs(recipient.next_plan_start_days_remaining)}日`
+                                  : `残り${recipient.next_plan_start_days_remaining}日`
+                                }
+                              </div>
                             ) : (
-                              <div className="text-white text-sm">-</div>
+                              <div className="text-gray-500 text-sm">-</div>
                             )}
                           </td>
                           
@@ -801,22 +820,22 @@ export default function Dashboard() {
                             </div>
                           </div>
                           <div>
-                            <div className="text-gray-300 text-xs mb-1">モニタリング期限</div>
-                            {recipient.latest_step === 'monitoring' ? (
-                              <>
-                                <div className="text-white">
-                                  {recipient.monitoring_due_date ? new Date(recipient.monitoring_due_date).toLocaleDateString('ja-JP', {month: '2-digit', day: '2-digit'}) : '-'}
-                                </div>
-                                <div className={`text-xs ${getDaysRemainingColor(getDaysRemaining(recipient.monitoring_due_date))}`}>
-                                  {getDaysRemaining(recipient.monitoring_due_date) < 0
-                                    ? `期限切れ ${Math.abs(getDaysRemaining(recipient.monitoring_due_date))}日`
-                                    : `残り${getDaysRemaining(recipient.monitoring_due_date)}日`
-                                  }
-                                </div>
-                                
-                              </>
+                            <div className="text-gray-300 text-xs mb-1">アセスメント開始期限</div>
+                            {recipient.next_plan_start_days_remaining !== null && recipient.next_plan_start_days_remaining !== undefined ? (
+                              <div className={`text-sm ${
+                                recipient.next_plan_start_days_remaining < 0
+                                  ? 'text-red-400'
+                                  : recipient.next_plan_start_days_remaining <= 3
+                                    ? 'text-orange-400'
+                                    : 'text-white'
+                              }`}>
+                                {recipient.next_plan_start_days_remaining < 0
+                                  ? `期限切れ ${Math.abs(recipient.next_plan_start_days_remaining)}日`
+                                  : `残り${recipient.next_plan_start_days_remaining}日`
+                                }
+                              </div>
                             ) : (
-                              <div className="text-white text-sm">-</div>
+                              <div className="text-gray-500 text-sm">-</div>
                             )}
                           </div>
                         </div>
@@ -825,7 +844,7 @@ export default function Dashboard() {
                           <Link href={`/recipients/${recipient.id}`}>
                             <div>
                               <div className="text-white font-bold text-base">
-                                {recipient.full_name}さん
+                                {recipient.full_name}
                               </div>
                               <div className="text-gray-200 text-xs">{recipient.furigana}</div>
                             </div>
@@ -833,7 +852,7 @@ export default function Dashboard() {
                         ) : (
                           <div>
                             <div className="text-white font-bold text-base">
-                              {recipient.last_name}さん
+                              {recipient.last_name}
                             </div>
                           </div>
                         )}
@@ -842,8 +861,8 @@ export default function Dashboard() {
                           <span className="text-gray-300 text-sm">第{recipient.current_cycle_number}回</span>
                           <div className="text-right">
                             <div className="text-xs text-gray-3000">next</div>
-                            <span className={getStepBadgeStyle(recipient.latest_step, recipient.current_cycle_number)}>
-                              {getStepText(recipient.latest_step, recipient.current_cycle_number)}
+                            <span className={getStepBadgeStyle(recipient.latest_step)}>
+                              {getStepText(recipient.latest_step)}
                             </span>
                           </div>
                         </div>

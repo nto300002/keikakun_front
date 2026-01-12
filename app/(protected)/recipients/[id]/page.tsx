@@ -12,7 +12,6 @@ import Breadcrumb from '@/components/ui/Breadcrumb';
 import Tabs from '@/components/ui/Tabs';
 import BasicInfoSection from '@/components/protected/recipients/BasicInfoSection';
 import EmploymentSection from '@/components/protected/recipients/EmploymentSection';
-import IssueAnalysisSection from '@/components/protected/recipients/IssueAnalysisSection';
 
 export default function RecipientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -265,18 +264,7 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
                       onRefresh={handleRefreshAssessment}
                     />
                   ),
-                },
-                {
-                  id: 'issue_analysis',
-                  label: '課題分析',
-                  content: (
-                    <IssueAnalysisSection
-                      recipientId={resolvedParams.id}
-                      issueAnalysis={assessmentData.issue_analysis}
-                      onRefresh={handleRefreshAssessment}
-                    />
-                  ),
-                },
+                }
               ]}
               activeTab={activeTab}
               onTabChange={setActiveTab}

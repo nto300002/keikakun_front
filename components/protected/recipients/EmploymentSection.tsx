@@ -34,6 +34,12 @@ export default function EmploymentSection({
     special_remarks: employment?.special_remarks || '',
     work_outside_the_facility: employment?.work_outside_the_facility || 'not_hope',
     special_note_about_working_outside_the_facility: employment?.special_note_about_working_outside_the_facility || '',
+    desired_tasks_on_asobe: employment?.desired_tasks_on_asobe || '',
+    no_employment_experience: employment?.no_employment_experience || false,
+    attended_job_selection_office: employment?.attended_job_selection_office || false,
+    received_employment_assessment: employment?.received_employment_assessment || false,
+    employment_other_experience: employment?.employment_other_experience || false,
+    employment_other_text: employment?.employment_other_text || '',
   });
 
   const handleOpenModal = () => {
@@ -52,6 +58,12 @@ export default function EmploymentSection({
         special_remarks: employment.special_remarks || '',
         work_outside_the_facility: employment.work_outside_the_facility,
         special_note_about_working_outside_the_facility: employment.special_note_about_working_outside_the_facility || '',
+        desired_tasks_on_asobe: employment.desired_tasks_on_asobe || '',
+        no_employment_experience: employment.no_employment_experience,
+        attended_job_selection_office: employment.attended_job_selection_office,
+        received_employment_assessment: employment.received_employment_assessment,
+        employment_other_experience: employment.employment_other_experience,
+        employment_other_text: employment.employment_other_text || '',
       });
     }
     setShowModal(true);
@@ -155,6 +167,36 @@ export default function EmploymentSection({
                       <ExpandableText text={employment.special_remarks} maxLength={50} className="inline text-white" />
                     </div>
                   )}
+                  {employment.no_employment_experience && (
+                    <div>
+                      <span className="text-gray-400">就労経験なし: </span>
+                      <span className="text-white">はい</span>
+                      <div className="pl-6 mt-2 space-y-1 border-l-2 border-[#2a3441] ml-2">
+                        {employment.attended_job_selection_office && (
+                          <div className="text-white text-sm">• 就労選択事業所に通所した</div>
+                        )}
+                        {employment.received_employment_assessment && (
+                          <div className="text-white text-sm">• 就労アセスメント受けた</div>
+                        )}
+                        {employment.employment_other_experience && (
+                          <div>
+                            <div className="text-white text-sm">• その他</div>
+                            {employment.employment_other_text && (
+                              <div className="pl-4 mt-1">
+                                <ExpandableText text={employment.employment_other_text} maxLength={50} className="text-white text-sm" />
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  {employment.desired_tasks_on_asobe && (
+                    <div>
+                      <span className="text-gray-400">asoBeで希望する作業: </span>
+                      <ExpandableText text={employment.desired_tasks_on_asobe} maxLength={50} className="inline text-white" />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -237,6 +279,81 @@ export default function EmploymentSection({
                 />
                 <span className="text-gray-400">現在休職中である</span>
               </label>
+
+              {/* Task 1: 就労経験なし（親チェックボックス） */}
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.no_employment_experience}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setFormData({
+                      ...formData,
+                      no_employment_experience: checked,
+                      attended_job_selection_office: checked ? formData.attended_job_selection_office : false,
+                      received_employment_assessment: checked ? formData.received_employment_assessment : false,
+                      employment_other_experience: checked ? formData.employment_other_experience : false,
+                      employment_other_text: checked ? formData.employment_other_text : '',
+                    });
+                  }}
+                  className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-gray-400">就労経験なし</span>
+              </label>
+
+              {/* 子チェックボックス（親がtrueの時のみ表示） */}
+              {formData.no_employment_experience && (
+                <div className="pl-6 space-y-2 border-l-2 border-[#2a3441] ml-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.attended_job_selection_office}
+                      onChange={(e) => setFormData({ ...formData, attended_job_selection_office: e.target.checked })}
+                      className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-400">就労選択事業所に通所した</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.received_employment_assessment}
+                      onChange={(e) => setFormData({ ...formData, received_employment_assessment: e.target.checked })}
+                      className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-400">就労アセスメント受けた</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.employment_other_experience}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setFormData({
+                          ...formData,
+                          employment_other_experience: checked,
+                          employment_other_text: checked ? formData.employment_other_text : '',
+                        });
+                      }}
+                      className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-gray-400">その他</span>
+                  </label>
+
+                  {/* その他のテキスト入力（employment_other_experienceがtrueの時のみ表示） */}
+                  {formData.employment_other_experience && (
+                    <div className="pl-6">
+                      <textarea
+                        value={formData.employment_other_text}
+                        onChange={(e) => setFormData({ ...formData, employment_other_text: e.target.value })}
+                        rows={2}
+                        maxLength={1000}
+                        className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none text-sm"
+                        placeholder="その他の詳細を入力（1000文字以内）"
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -310,6 +427,21 @@ export default function EmploymentSection({
               maxLength={1000}
               className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
               placeholder="その他特記事項を入力"
+            />
+          </div>
+
+          {/* Task 2: asoBeで希望する作業 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              asoBeで希望する作業
+            </label>
+            <textarea
+              value={formData.desired_tasks_on_asobe}
+              onChange={(e) => setFormData({ ...formData, desired_tasks_on_asobe: e.target.value })}
+              rows={3}
+              maxLength={1000}
+              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
+              placeholder="asoBeで希望する作業内容を入力（1000文字以内）"
             />
           </div>
 

@@ -13,19 +13,20 @@ import type { InquiryCategory } from '@/types/inquiry';
 import { officeApi } from '@/lib/auth';
 import { OfficeResponse } from '@/types/office';
 import { getOfficeTypeLabel } from '@/lib/office-utils';
+import NotificationSettings from './NotificationSettings';
 
 interface ProfileProps {
   staff: StaffResponse | null;
 }
 
-type TabType = 'staff_info' | 'feedback';
+type TabType = 'staff_info' | 'feedback' | 'notifications';
 
 export default function Profile({ staff: initialStaff }: ProfileProps) {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get('tab') as TabType | null;
 
   const [activeTab, setActiveTab] = useState<TabType>(
-    tabParam === 'feedback' || tabParam === 'staff_info'
+    tabParam === 'feedback' || tabParam === 'staff_info' || tabParam === 'notifications'
       ? tabParam
       : 'staff_info'
   );
@@ -34,7 +35,7 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
 
   // URLのクエリパラメータが変更されたときにタブを切り替え
   useEffect(() => {
-    if (tabParam === 'feedback' || tabParam === 'staff_info') {
+    if (tabParam === 'feedback' || tabParam === 'staff_info' || tabParam === 'notifications') {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
@@ -303,6 +304,16 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
             }`}
           >
             フィードバック
+          </button>
+          <button
+            onClick={() => setActiveTab('notifications')}
+            className={`px-6 py-3 font-medium ${
+              activeTab === 'notifications'
+                ? 'bg-gray-900 text-white border-b-2 border-blue-500'
+                : 'text-gray-400 hover:text-white'
+            }`}
+          >
+            通知設定
           </button>
         </div>
       </div>
@@ -645,6 +656,13 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* 通知設定タブ */}
+        {activeTab === 'notifications' && (
+          <div className="max-w-4xl mx-auto">
+            <NotificationSettings />
           </div>
         )}
       </div>

@@ -9,6 +9,8 @@ interface NotificationPreferences {
   in_app_notification: boolean;
   email_notification: boolean;
   system_notification: boolean;
+  email_threshold_days: number;
+  push_threshold_days: number;
 }
 
 export default function NotificationSettings() {
@@ -26,7 +28,9 @@ export default function NotificationSettings() {
   const [preferences, setPreferences] = useState<NotificationPreferences>({
     in_app_notification: true,
     email_notification: true,
-    system_notification: false
+    system_notification: false,
+    email_threshold_days: 30,
+    push_threshold_days: 10
   });
 
   const [isLoading, setIsLoading] = useState(true);
@@ -67,6 +71,25 @@ export default function NotificationSettings() {
     }
   };
 
+  const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      const message = error.message;
+
+      // エラーコードに基づいてユーザーフレンドリーなメッセージを返す
+      if (message === 'PERMISSION_DENIED') {
+        return 'ブラウザの通知許可が拒否されています。ブラウザの設定から通知を許可してください';
+      } else if (message === 'VAPID_KEY_MISSING') {
+        return 'システム設定エラーが発生しました。管理者にお問い合わせください';
+      } else if (message.includes('Subscription not found')) {
+        return '購読データが見つかりません。再度システム通知を有効にしてください';
+      } else if (message.includes('Service Worker')) {
+        return 'Service Workerの登録に失敗しました。ページを再読み込みしてもう一度お試しください';
+      }
+    }
+
+    return 'システム通知の設定に失敗しました。ページを再読み込みしてもう一度お試しください';
+  };
+
   const handleToggle = async (key: keyof NotificationPreferences) => {
     const newValue = !preferences[key];
 
@@ -87,22 +110,32 @@ export default function NotificationSettings() {
         try {
           await subscribe();
           await savePreferences(newPreferences);
+          toast.success('システム通知を有効にしました');
         } catch (error) {
           console.error('Failed to subscribe:', error);
-          toast.error('システム通知の有効化に失敗しました');
+          toast.error(getErrorMessage(error));
         }
       } else {
         try {
           await unsubscribe();
           await savePreferences(newPreferences);
+          toast.success('システム通知を無効にしました');
         } catch (error) {
           console.error('Failed to unsubscribe:', error);
-          toast.error('システム通知の無効化に失敗しました');
+          toast.error(getErrorMessage(error));
         }
       }
     } else {
       await savePreferences(newPreferences);
     }
+  };
+
+  const handleThresholdChange = async (key: 'email_threshold_days' | 'push_threshold_days', value: number) => {
+    const newPreferences = {
+      ...preferences,
+      [key]: value
+    };
+    await savePreferences(newPreferences);
   };
 
   if (isLoading) {
@@ -141,66 +174,114 @@ export default function NotificationSettings() {
           </label>
         </div>
 
-        <div className="flex items-center justify-between p-4 border rounded-lg">
-          <div>
-            <h3 className="font-medium">メール通知</h3>
-            <p className="text-sm text-gray-400">
-              期限アラートをメールで受け取る（毎日9:00）
-            </p>
+        <div className="p-4 border rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="font-medium">メール通知</h3>
+              <p className="text-sm text-gray-400">
+                期限アラートをメールで受け取る（毎日9:00）
+              </p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={preferences.email_notification}
+                onChange={() => handleToggle('email_notification')}
+                disabled={isSaving}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            </label>
           </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={preferences.email_notification}
-              onChange={() => handleToggle('email_notification')}
-              disabled={isSaving}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
+
+          {preferences.email_notification && (
+            <div className="mt-3 pt-3 border-t border-gray-700">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                通知開始日数
+              </label>
+              <select
+                value={preferences.email_threshold_days}
+                onChange={(e) => handleThresholdChange('email_threshold_days', parseInt(e.target.value))}
+                disabled={isSaving}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                <option value={5}>5日前</option>
+                <option value={10}>10日前</option>
+                <option value={20}>20日前</option>
+                <option value={30}>30日前</option>
+              </select>
+              <p className="text-xs text-gray-400 mt-1">
+                更新期限の何日前からメール通知を送るか設定できます
+              </p>
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center justify-between p-4 border rounded-lg">
-          <div>
-            <h3 className="font-medium">システム通知（Web Push）</h3>
-            <p className="text-sm text-gray-400">
-              デバイスのシステム通知で受け取る
-            </p>
-
-            {!isSupported && (
-              <p className="text-sm text-red-500 mt-2">
-                お使いのブラウザはシステム通知をサポートしていません
+        <div className="p-4 border rounded-lg">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="font-medium">システム通知（Web Push）</h3>
+              <p className="text-sm text-gray-400">
+                デバイスのシステム通知で受け取る
               </p>
-            )}
 
-            {isSupported && isIOS && !isPWA && (
-              <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                <p className="text-sm text-yellow-800 font-medium">iOSでの設定方法:</p>
-                <ol className="text-sm text-yellow-700 mt-1 list-decimal list-inside">
-                  <li>Safariで「共有」ボタンをタップ</li>
-                  <li>「ホーム画面に追加」を選択</li>
-                  <li>追加したアイコンからアプリを開く</li>
-                  <li>この設定画面でシステム通知を有効化</li>
-                </ol>
-              </div>
-            )}
+              {!isSupported && (
+                <p className="text-sm text-red-500 mt-2">
+                  お使いのブラウザはシステム通知をサポートしていません
+                </p>
+              )}
 
-            {pushError && (
-              <p className="text-sm text-red-500 mt-2">
-                エラー: {pushError}
-              </p>
-            )}
+              {isSupported && isIOS && !isPWA && (
+                <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded">
+                  <p className="text-sm text-yellow-800 font-medium">iOSでの設定方法:</p>
+                  <ol className="text-sm text-yellow-700 mt-1 list-decimal list-inside">
+                    <li>Safariで「共有」ボタンをタップ</li>
+                    <li>「ホーム画面に追加」を選択</li>
+                    <li>追加したアイコンからアプリを開く</li>
+                    <li>この設定画面でシステム通知を有効化</li>
+                  </ol>
+                </div>
+              )}
+
+              {pushError && (
+                <p className="text-sm text-red-500 mt-2">
+                  エラー: {pushError}
+                </p>
+              )}
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={preferences.system_notification && isSubscribed}
+                onChange={() => handleToggle('system_notification')}
+                disabled={isSaving || isPushLoading || !isSupported || (isIOS && !isPWA)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
+            </label>
           </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={preferences.system_notification && isSubscribed}
-              onChange={() => handleToggle('system_notification')}
-              disabled={isSaving || isPushLoading || !isSupported || (isIOS && !isPWA)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-gray-400 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
-          </label>
+
+          {preferences.system_notification && isSupported && (
+            <div className="mt-3 pt-3 border-t border-gray-700">
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                通知開始日数
+              </label>
+              <select
+                value={preferences.push_threshold_days}
+                onChange={(e) => handleThresholdChange('push_threshold_days', parseInt(e.target.value))}
+                disabled={isSaving}
+                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              >
+                <option value={5}>5日前</option>
+                <option value={10}>10日前</option>
+                <option value={20}>20日前</option>
+                <option value={30}>30日前</option>
+              </select>
+              <p className="text-xs text-gray-400 mt-1">
+                更新期限の何日前からWeb Push通知を送るか設定できます
+              </p>
+            </div>
+          )}
         </div>
       </div>
 

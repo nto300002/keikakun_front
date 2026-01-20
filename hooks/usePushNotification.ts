@@ -39,9 +39,14 @@ function detectIOS(): boolean {
 function detectPWA(): boolean {
   if (typeof window === 'undefined') return false;
 
+  // iOS SafariのstandaloneモードをチェックするためにNavigatorを拡張
+  interface NavigatorStandalone extends Navigator {
+    standalone?: boolean;
+  }
+
   return (
     window.matchMedia('(display-mode: standalone)').matches ||
-    (window.navigator as any).standalone === true
+    (window.navigator as NavigatorStandalone).standalone === true
   );
 }
 
@@ -113,19 +118,40 @@ export function usePushNotification(): UsePushNotificationReturn {
       const permission = await requestPermission();
 
       if (permission !== 'granted') {
-        throw new Error('Notification permission denied');
+        throw new Error('PERMISSION_DENIED');
       }
 
+      // Service Workerを登録（既に登録済みの場合は既存のものを返す）
       const registration = await navigator.serviceWorker.register('/sw.js', {
         scope: '/'
       });
+
+      // Service Workerがアクティブになるまで待機
+      if (registration.installing || registration.waiting) {
+        await new Promise<void>((resolve) => {
+          const worker = registration.installing || registration.waiting;
+          if (worker) {
+            worker.addEventListener('statechange', function onStateChange() {
+              if (worker.state === 'activated') {
+                worker.removeEventListener('statechange', onStateChange);
+                resolve();
+              }
+            });
+          } else {
+            resolve();
+          }
+        });
+      }
+
+      // 念のためService Workerの準備完了を待機
+      await navigator.serviceWorker.ready;
 
       await registration.update();
 
       const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
       if (!vapidPublicKey) {
-        throw new Error('VAPID public key is not configured');
+        throw new Error('VAPID_KEY_MISSING');
       }
 
       const subscription = await registration.pushManager.subscribe({
@@ -133,7 +159,7 @@ export function usePushNotification(): UsePushNotificationReturn {
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
       });
 
-      await http.post<any>(
+      await http.post<void>(
         '/api/v1/push-subscriptions/subscribe',
         subscription.toJSON()
       );
@@ -142,7 +168,8 @@ export function usePushNotification(): UsePushNotificationReturn {
       console.log('[usePushNotification] Successfully subscribed');
     } catch (err) {
       console.error('[usePushNotification] Subscribe error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to subscribe');
+      const errorMessage = err instanceof Error ? err.message : 'UNKNOWN_ERROR';
+      setError(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);
@@ -157,28 +184,42 @@ export function usePushNotification(): UsePushNotificationReturn {
       const registration = await navigator.serviceWorker.getRegistration('/sw.js');
 
       if (!registration) {
-        throw new Error('Service Worker not registered');
+        // Service Workerが登録されていない場合は、既に購読解除済みとみなす
+        console.log('[usePushNotification] Service Worker not registered, assuming already unsubscribed');
+        setIsSubscribed(false);
+        return;
       }
 
       const subscription = await registration.pushManager.getSubscription();
 
       if (!subscription) {
+        // 購読が存在しない場合は、既に購読解除済みとみなす
+        console.log('[usePushNotification] No subscription found, assuming already unsubscribed');
         setIsSubscribed(false);
         return;
       }
 
       const endpoint = subscription.endpoint;
+
+      // ブラウザ側の購読を解除
       await subscription.unsubscribe();
 
-      await http.delete(
-        `/api/v1/push-subscriptions/unsubscribe?endpoint=${encodeURIComponent(endpoint)}`
-      );
+      // サーバー側の購読データを削除
+      try {
+        await http.delete(
+          `/api/v1/push-subscriptions/unsubscribe?endpoint=${encodeURIComponent(endpoint)}`
+        );
+      } catch (apiErr) {
+        // サーバー側で購読が見つからない場合は警告のみ出して続行
+        console.warn('[usePushNotification] Failed to delete subscription from server:', apiErr);
+      }
 
       setIsSubscribed(false);
       console.log('[usePushNotification] Successfully unsubscribed');
     } catch (err) {
       console.error('[usePushNotification] Unsubscribe error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to unsubscribe');
+      const errorMessage = err instanceof Error ? err.message : 'UNKNOWN_ERROR';
+      setError(errorMessage);
       throw err;
     } finally {
       setIsLoading(false);

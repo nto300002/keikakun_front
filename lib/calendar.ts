@@ -18,21 +18,21 @@ export const calendarApi = {
    * 事業所のカレンダー設定を取得
    */
   getOfficeCalendar: (officeId: string): Promise<OfficeCalendarAccount> => {
-    return http.get(`${API_V1_PREFIX}/calendar/office/${officeId}`);
+    return http.get<OfficeCalendarAccount>(`${API_V1_PREFIX}/calendar/office/${officeId}`);
   },
 
   /**
    * カレンダー設定を作成
    */
   setupCalendar: (data: CalendarSetupRequest): Promise<CalendarSetupResponse> => {
-    return http.post(`${API_V1_PREFIX}/calendar/setup`, data);
+    return http.post<CalendarSetupResponse>(`${API_V1_PREFIX}/calendar/setup`, data);
   },
 
   /**
    * カレンダーアカウントIDで設定を取得
    */
   getCalendarById: (accountId: string): Promise<OfficeCalendarAccount> => {
-    return http.get(`${API_V1_PREFIX}/calendar/${accountId}`);
+    return http.get<OfficeCalendarAccount>(`${API_V1_PREFIX}/calendar/${accountId}`);
   },
 
   /**
@@ -41,7 +41,7 @@ export const calendarApi = {
   uploadServiceAccountKey: (
     request: ServiceAccountUploadRequest
   ): Promise<CalendarSetupResponse> => {
-    return http.post(`${API_V1_PREFIX}/calendar/setup`, request);
+    return http.post<CalendarSetupResponse>(`${API_V1_PREFIX}/calendar/setup`, request);
   },
 
   /**
@@ -51,13 +51,13 @@ export const calendarApi = {
     accountId: string,
     request: CalendarUpdateRequest
   ): Promise<CalendarSetupResponse> => {
-    return http.put(`${API_V1_PREFIX}/calendar/${accountId}`, request);
+    return http.put<CalendarSetupResponse>(`${API_V1_PREFIX}/calendar/${accountId}`, request);
   },
 
   /**
    * カレンダー連携を解除
    */
   deleteCalendar: (accountId: string): Promise<CalendarDeleteResponse> => {
-    return http.delete(`${API_V1_PREFIX}/calendar/${accountId}`);
+    return http.delete<CalendarDeleteResponse>(`${API_V1_PREFIX}/calendar/${accountId}`);
   },
 };

@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import { toast } from '@/lib/toast-debug';
 import { http } from '@/lib/http';
 
+interface ForgotPasswordResponse {
+  message: string;
+}
+
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -17,7 +21,7 @@ export default function ForgotPasswordForm() {
 
     try {
       // CSRF保護付きでリクエスト送信
-      const data = await http.post('/api/v1/auth/forgot-password', { email });
+      const data = await http.post<ForgotPasswordResponse>('/api/v1/auth/forgot-password', { email });
 
       // 成功時
       setIsSubmitted(true);

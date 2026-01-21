@@ -7,6 +7,15 @@ import { toast } from '@/lib/toast-debug';
 import { validatePassword, ALLOWED_PASSWORD_SYMBOLS } from '@/lib/password-validation';
 import { http } from '@/lib/http';
 
+interface VerifyTokenResponse {
+  valid: boolean;
+  message?: string;
+}
+
+interface ResetPasswordResponse {
+  message: string;
+}
+
 export default function ResetPasswordForm() {
   const [token, setToken] = useState('');
   const [password, setPassword] = useState('');
@@ -40,7 +49,7 @@ export default function ResetPasswordForm() {
   const verifyToken = async (tokenToVerify: string) => {
     try {
       // 統一されたHTTPクライアントでリクエスト送信
-      const data = await http.get(`/api/v1/auth/verify-reset-token?token=${encodeURIComponent(tokenToVerify)}`);
+      const data = await http.get<VerifyTokenResponse>(`/api/v1/auth/verify-reset-token?token=${encodeURIComponent(tokenToVerify)}`);
 
       if (!data.valid) {
         throw new Error(data.message || 'トークンが無効または期限切れです');
@@ -78,7 +87,7 @@ export default function ResetPasswordForm() {
 
     try {
       // CSRF保護付きでリクエスト送信
-      const data = await http.post('/api/v1/auth/reset-password', {
+      const data = await http.post<ResetPasswordResponse>('/api/v1/auth/reset-password', {
         token,
         new_password: password,
       });

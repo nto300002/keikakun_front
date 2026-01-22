@@ -191,12 +191,6 @@ export default function EmploymentSection({
                       </div>
                     </div>
                   )}
-                  {employment.desired_tasks_on_asobe && (
-                    <div>
-                      <span className="text-gray-400">asoBeで希望する作業: </span>
-                      <ExpandableText text={employment.desired_tasks_on_asobe} maxLength={50} className="inline text-white" />
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -213,6 +207,12 @@ export default function EmploymentSection({
               <p className="text-gray-400 text-sm">希望</p>
               <p className="text-white">{getWorkOutsideFacilityLabel(employment.work_outside_the_facility)}</p>
             </div>
+              {employment.desired_tasks_on_asobe && (
+                  <div>
+                    <span className="text-gray-400">asoBeで希望する作業: </span>
+                    <ExpandableText text={employment.desired_tasks_on_asobe} maxLength={50} className="inline text-white" />
+                  </div>
+              )}
             {employment.special_note_about_working_outside_the_facility && (
               <div>
                 <p className="text-gray-400 text-sm">特記事項</p>
@@ -336,7 +336,7 @@ export default function EmploymentSection({
                       }}
                       className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-gray-400">その他</span>
+                    <span className="text-gray-400">その他<span className="text-red-200">*(チェックを入れた場合、詳細を入力してください)</span></span>
                   </label>
 
                   {/* その他のテキスト入力（employment_other_experienceがtrueの時のみ表示） */}
@@ -430,20 +430,6 @@ export default function EmploymentSection({
             />
           </div>
 
-          {/* Task 2: asoBeで希望する作業 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              asoBeで希望する作業
-            </label>
-            <textarea
-              value={formData.desired_tasks_on_asobe}
-              onChange={(e) => setFormData({ ...formData, desired_tasks_on_asobe: e.target.value })}
-              rows={3}
-              maxLength={1000}
-              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
-              placeholder="asoBeで希望する作業内容を入力（1000文字以内）"
-            />
-          </div>
 
           {/* 施設外就労の希望 */}
           <div>
@@ -460,6 +446,21 @@ export default function EmploymentSection({
               <option value="not_hope">希望しない</option>
               <option value="undecided">未定</option>
             </select>
+          </div>
+
+          {/* asoBeで希望する作業 */}
+          <div>
+            <label className="block text-sm font-medium text-gray-400 mb-2">
+              asoBeで希望する作業
+            </label>
+            <textarea
+              value={formData.desired_tasks_on_asobe}
+              onChange={(e) => setFormData({ ...formData, desired_tasks_on_asobe: e.target.value })}
+              rows={3}
+              maxLength={1000}
+              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
+              placeholder="asoBeで希望する作業内容を入力（1000文字以内）"
+            />
           </div>
 
           {/* 施設外就労の特記事項 */}

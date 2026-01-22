@@ -14,11 +14,11 @@ export { tokenUtils };
 // Authentication API calls
 export const authApi = {
   registerAdmin: (data: AdminCreateData): Promise<StaffResponse> => {
-    return http.post(`${API_V1_PREFIX}/auth/register-admin`, data);
+    return http.post<StaffResponse>(`${API_V1_PREFIX}/auth/register-admin`, data);
   },
 
   registerStaff: (data: StaffCreateData): Promise<StaffResponse> => {
-    return http.post(`${API_V1_PREFIX}/auth/register`, data);
+    return http.post<StaffResponse>(`${API_V1_PREFIX}/auth/register`, data);
   },
 
   login: async (data: LoginData): Promise<AuthResponse> => {
@@ -57,15 +57,15 @@ export const authApi = {
   },
 
   getCurrentUser: (): Promise<StaffResponse> => {
-    return http.get(`${API_V1_PREFIX}/staffs/me`);
+    return http.get<StaffResponse>(`${API_V1_PREFIX}/staffs/me`);
   },
 
   verifyEmail: (token: string): Promise<{ message: string; role: string }> => {
-    return http.get(`${API_V1_PREFIX}/auth/verify-email?token=${token}`);
+    return http.get<{ message: string; role: string }>(`${API_V1_PREFIX}/auth/verify-email?token=${token}`);
   },
 
   logout: (): Promise<{ message: string }> => {
-    return http.post(`${API_V1_PREFIX}/auth/logout`, {});
+    return http.post<{ message: string }>(`${API_V1_PREFIX}/auth/logout`, {});
   },
 
   verifyMfa: async (data: { temporary_token: string; totp_code: string }): Promise<AuthResponse> => {
@@ -86,11 +86,18 @@ export const authApi = {
     secret_key: string;
     recovery_codes: string[];
   }> => {
-    return http.post(`${API_V1_PREFIX}/auth/admin/staff/${staffId}/mfa/enable`, {});
+    return http.post<{
+      message: string;
+      staff_id: string;
+      staff_name: string;
+      qr_code_uri: string;
+      secret_key: string;
+      recovery_codes: string[];
+    }>(`${API_V1_PREFIX}/auth/admin/staff/${staffId}/mfa/enable`, {});
   },
 
   disableStaffMfa: (staffId: string): Promise<{ message: string }> => {
-    return http.post(`${API_V1_PREFIX}/auth/admin/staff/${staffId}/mfa/disable`, {});
+    return http.post<{ message: string }>(`${API_V1_PREFIX}/auth/admin/staff/${staffId}/mfa/disable`, {});
   },
 
   // Bulk MFA operations
@@ -105,14 +112,27 @@ export const authApi = {
       recovery_codes: string[];
     }>;
   }> => {
-    return http.post(`${API_V1_PREFIX}/auth/admin/office/mfa/enable-all`, {});
+    return http.post<{
+      message: string;
+      enabled_count: number;
+      staff_mfa_data: Array<{
+        staff_id: string;
+        staff_name: string;
+        qr_code_uri: string;
+        secret_key: string;
+        recovery_codes: string[];
+      }>;
+    }>(`${API_V1_PREFIX}/auth/admin/office/mfa/enable-all`, {});
   },
 
   disableAllOfficeMfa: (): Promise<{
     message: string;
     disabled_count: number;
   }> => {
-    return http.post(`${API_V1_PREFIX}/auth/admin/office/mfa/disable-all`, {});
+    return http.post<{
+      message: string;
+      disabled_count: number;
+    }>(`${API_V1_PREFIX}/auth/admin/office/mfa/disable-all`, {});
   },
 
   // Staff deletion (Owner only)
@@ -121,30 +141,34 @@ export const authApi = {
     staff_id: string;
     deleted_at: string;
   }> => {
-    return http.delete(`${API_V1_PREFIX}/staffs/${staffId}`);
+    return http.delete<{
+      message: string;
+      staff_id: string;
+      deleted_at: string;
+    }>(`${API_V1_PREFIX}/staffs/${staffId}`);
   },
 };
 
 // Office API calls
 export const officeApi = {
   getMyOffice: (): Promise<OfficeResponse> => {
-    return http.get(`${API_V1_PREFIX}/offices/me`);
+    return http.get<OfficeResponse>(`${API_V1_PREFIX}/offices/me`);
   },
 
   getAllOffices: (): Promise<OfficeResponse[]> => {
-    return http.get(`${API_V1_PREFIX}/offices/`);
+    return http.get<OfficeResponse[]>(`${API_V1_PREFIX}/offices/`);
   },
 
   setupOffice: (data: OfficeCreateData): Promise<OfficeResponse> => {
-    return http.post(`${API_V1_PREFIX}/offices/setup`, data);
+    return http.post<OfficeResponse>(`${API_V1_PREFIX}/offices/setup`, data);
   },
 
   associateToOffice: (office_id: string): Promise<{ message: string }> => {
-    return http.post(`${API_V1_PREFIX}/staff/associate-office`, { office_id });
+    return http.post<{ message: string }>(`${API_V1_PREFIX}/staff/associate-office`, { office_id });
   },
 
   // 事務所に所属する全スタッフを取得（Manager/Owner専用）
   getOfficeStaffs: (): Promise<StaffResponse[]> => {
-    return http.get(`${API_V1_PREFIX}/offices/me/staffs`);
+    return http.get<StaffResponse[]>(`${API_V1_PREFIX}/offices/me/staffs`);
   },
 };

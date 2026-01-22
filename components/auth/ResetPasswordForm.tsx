@@ -5,6 +5,16 @@ import { useRouter } from 'next/navigation';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { toast } from '@/lib/toast-debug';
 import { validatePassword, ALLOWED_PASSWORD_SYMBOLS } from '@/lib/password-validation';
+import { http } from '@/lib/http';
+
+interface VerifyTokenResponse {
+  valid: boolean;
+  message?: string;
+}
+
+interface ResetPasswordResponse {
+  message: string;
+}
 
 export default function ResetPasswordForm() {
   const [token, setToken] = useState('');
@@ -38,19 +48,10 @@ export default function ResetPasswordForm() {
 
   const verifyToken = async (tokenToVerify: string) => {
     try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/verify-reset-token?token=${encodeURIComponent(tokenToVerify)}`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      // 統一されたHTTPクライアントでリクエスト送信
+      const data = await http.get<VerifyTokenResponse>(`/api/v1/auth/verify-reset-token?token=${encodeURIComponent(tokenToVerify)}`);
 
-      const data = await response.json();
-
-      if (!response.ok || !data.valid) {
+      if (!data.valid) {
         throw new Error(data.message || 'トークンが無効または期限切れです');
       }
 
@@ -85,22 +86,11 @@ export default function ResetPasswordForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/reset-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token,
-          new_password: password,
-        }),
+      // CSRF保護付きでリクエスト送信
+      const data = await http.post<ResetPasswordResponse>('/api/v1/auth/reset-password', {
+        token,
+        new_password: password,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'パスワードのリセットに失敗しました');
-      }
 
       // 成功時
       toast.success(data.message || 'パスワードが正常にリセットされました');

@@ -17,6 +17,8 @@ import { OfficeResponse } from '@/types/office';
 import { getOfficeTypeLabel } from '@/lib/office-utils';
 import { toast } from 'sonner';
 import { FaHome, FaBars, FaTimes } from 'react-icons/fa';
+import { usePushNotification } from '@/hooks/usePushNotification';
+import { http } from '@/lib/http';
 
 interface User {
   id: string;
@@ -55,6 +57,9 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   const [showOfficeTooltip, setShowOfficeTooltip] = useState<boolean>(false);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const deadlineAlertsShownRef = useRef<boolean>(false);
+
+  // Push通知の自動購読機能
+  const { isSupported, isSubscribed, subscribe, isPWA, isIOS } = usePushNotification();
 
   // 未読通知件数を取得（notices + messages）
   const fetchUnreadCount = async () => {
@@ -168,22 +173,64 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     // 初回の未読件数取得
     fetchUnreadCount();
 
-    // 期限アラート取得とトースト表示（ログイン時のみ、1回だけ）
-    if (!deadlineAlertsShownRef.current) {
-      deadlineAlertsShownRef.current = true;
-      fetchDeadlineAlertsAll().then(alerts => {
-        alerts.forEach((alert) => {
-          // alert_typeに応じてメッセージを変更
-          const message = alert.alert_type === 'assessment_incomplete'
-            ? alert.message
-            : `${alert.full_name} 更新期限まで残り${alert.days_remaining}日`;
+    // 通知設定を取得し、トースト表示とPush購読を実行（ログイン時のみ、1回だけ）
+    const initializeNotifications = async () => {
+      try {
+        // 通知設定を取得
+        const preferences = await http.get<{
+          in_app_notification: boolean;
+          email_notification: boolean;
+          system_notification: boolean;
+          email_threshold_days: number;
+          push_threshold_days: number;
+        }>('/api/v1/staffs/me/notification-preferences');
 
-          toast.warning(message, {
-            duration: 5000,
+        // アプリ内通知がONの場合のみ期限アラートのトーストを表示
+        if (preferences.in_app_notification && !deadlineAlertsShownRef.current) {
+          deadlineAlertsShownRef.current = true;
+          const alerts = await fetchDeadlineAlertsAll();
+          alerts.forEach((alert) => {
+            // alert_typeに応じてメッセージとトースト種類を変更
+            let message: string;
+            let toastType: 'warning' | 'error' = 'warning';
+
+            if (alert.alert_type === 'assessment_incomplete') {
+              message = alert.message;
+            } else if (alert.alert_type === 'renewal_overdue') {
+              // 期限切れの場合は赤色のエラートースト
+              message = alert.message; // "!<利用者名>の更新期限が過ぎています!"
+              toastType = 'error';
+            } else {
+              // renewal_deadline: 通常の期限アラート
+              message = `${alert.full_name} 更新期限まで残り${alert.days_remaining}日`;
+            }
+
+            if (toastType === 'error') {
+              toast.error(message, { duration: 5000 });
+            } else {
+              toast.warning(message, { duration: 5000 });
+            }
           });
-        });
-      });
-    }
+        }
+
+        // system_notification=trueかつ未購読の場合のみPush通知を購読
+        // iOS Safari（PWAモードでない）の場合はスキップ
+        if (
+          preferences.system_notification &&
+          !isSubscribed &&
+          isSupported &&
+          !(isIOS && !isPWA)
+        ) {
+          await subscribe();
+          console.log('[Auto-subscribe] Push notification subscribed on login');
+        }
+      } catch (error) {
+        console.error('[Notifications] Failed to initialize notifications:', error);
+        // エラー時も処理を継続（ユーザー体験に影響を与えない）
+      }
+    };
+
+    initializeNotifications();
 
     // 30秒ごとに未読件数を更新
     const interval = setInterval(() => {
@@ -425,6 +472,10 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                                     {alert.alert_type === 'assessment_incomplete' ? (
                                       <span className="text-sm text-red-400">
                                         アセスメント未完了
+                                      </span>
+                                    ) : alert.alert_type === 'renewal_overdue' ? (
+                                      <span className="text-sm text-red-400 font-semibold">
+                                        期限切れ
                                       </span>
                                     ) : (
                                       <span className={`text-sm ${

@@ -86,7 +86,7 @@ function MfaSetupFormComponent() {
 
         // Cookie認証: httpOnly Cookieから自動的に認証
         try {
-            await http.post(`/api/v1/auth/mfa/verify`,
+            await http.post<void>(`/api/v1/auth/mfa/verify`,
                 { totp_code: totpCode }
             )
 

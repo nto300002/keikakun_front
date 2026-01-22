@@ -3,6 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/lib/toast-debug';
+import { http } from '@/lib/http';
+
+interface ForgotPasswordResponse {
+  message: string;
+}
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
@@ -15,19 +20,8 @@ export default function ForgotPasswordForm() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/forgot-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.detail || 'パスワードリセットメールの送信に失敗しました');
-      }
+      // CSRF保護付きでリクエスト送信
+      const data = await http.post<ForgotPasswordResponse>('/api/v1/auth/forgot-password', { email });
 
       // 成功時
       setIsSubmitted(true);

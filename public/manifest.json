@@ -1,0 +1,32 @@
+{
+  "name": "個別支援計画くん",
+  "short_name": "計画くん",
+  "description": "福祉サービス事業所向けの個別支援計画管理システム",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png"
+    }
+  ]
+}

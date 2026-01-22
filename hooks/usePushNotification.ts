@@ -15,12 +15,19 @@ interface UsePushNotificationReturn {
   requestPermission: () => Promise<NotificationPermission>;
 }
 
-function urlBase64ToUint8Array(base64String: string): Uint8Array {
+/**
+ * Base64エンコードされたVAPID公開鍵をUint8Arrayに変換
+ * TypeScript 5.9以降: 明示的にArrayBufferを使用してBufferSource互換性を確保
+ * @see https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-9.html
+ */
+function urlBase64ToUint8Array(base64String: string): Uint8Array<ArrayBuffer> {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
 
   const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
+  // 明示的にArrayBufferを作成してTypeScript 5.9の厳格な型チェックに対応
+  const buffer = new ArrayBuffer(rawData.length);
+  const outputArray = new Uint8Array(buffer);
 
   for (let i = 0; i < rawData.length; ++i) {
     outputArray[i] = rawData.charCodeAt(i);

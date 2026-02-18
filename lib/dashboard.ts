@@ -12,6 +12,7 @@ export interface DashboardParams {
   searchTerm?: string;
   is_overdue?: boolean;
   is_upcoming?: boolean;
+  has_assessment_due?: boolean;  // 未完了のアセスメント開始期限が設定されている利用者
   status?: string;
   cycle_number?: number;
   skip?: number;

@@ -18,11 +18,11 @@ import MfaPrompt from '@/components/auth/MfaPrompt';
 import { SmartDropdown } from '@/components/ui/smart-dropdown';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { TableLoadingOverlay } from '@/components/ui/table-loading-overlay';
-import CalendarLinkButton from '@/components/ui/google/CalendarLinkButton';
 import EmployeeActionRequestModal from '@/components/common/EmployeeActionRequestModal';
 import { useStaffRole } from '@/hooks/useStaffRole';
 import { ActionType, ResourceType } from '@/types/employeeActionRequest';
 import { toast } from '@/lib/toast-debug';
+import { ActiveFilters } from './ActiveFilters';
 
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
@@ -40,10 +40,12 @@ export default function Dashboard() {
   const [activeFilters, setActiveFilters] = useState<{
     isOverdue: boolean;
     isUpcoming: boolean;
+    hasAssessmentDue: boolean;
     status: string | null;
   }>({
     isOverdue: false,
     isUpcoming: false,
+    hasAssessmentDue: false,
     status: null,
   });
 
@@ -99,6 +101,7 @@ export default function Dashboard() {
       setActiveFilters({
         isOverdue: false,
         isUpcoming: true,
+        hasAssessmentDue: false,
         status: null,
       });
     }
@@ -151,14 +154,28 @@ export default function Dashboard() {
     const newSortOrder = sortBy === 'next_renewal_deadline' && sortOrder === 'asc' ? 'desc' : 'asc';
     setSortBy('next_renewal_deadline');
     setSortOrder(newSortOrder);
-    applyFilters({ sortBy: 'next_renewal_deadline', sortOrder: newSortOrder });
+    applyFilters({
+      sortBy: 'next_renewal_deadline',
+      sortOrder: newSortOrder,
+      is_overdue: activeFilters.isOverdue,
+      is_upcoming: activeFilters.isUpcoming,
+      has_assessment_due: activeFilters.hasAssessmentDue,
+      status: activeFilters.status || undefined,
+    });
   };
 
   const handleNameSortClick = () => {
     const newSortOrder = sortBy === 'name_phonetic' && sortOrder === 'asc' ? 'desc' : 'asc';
     setSortBy('name_phonetic');
     setSortOrder(newSortOrder);
-    applyFilters({ sortBy: 'name_phonetic', sortOrder: newSortOrder });
+    applyFilters({
+      sortBy: 'name_phonetic',
+      sortOrder: newSortOrder,
+      is_overdue: activeFilters.isOverdue,
+      is_upcoming: activeFilters.isUpcoming,
+      has_assessment_due: activeFilters.hasAssessmentDue,
+      status: activeFilters.status || undefined,
+    });
   };
 
   const handleSearch = useCallback(async (term: string) => {
@@ -197,16 +214,17 @@ export default function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm, sortOrder, sortBy]);
+  }, [searchTerm, sortOrder, sortBy, activeFilters]);
 
   // フィルタ切替ハンドラ（applyFilters を先に宣言していることが前提）
-  const handleFilterToggle = useCallback((filterType: 'isOverdue' | 'isUpcoming', value: boolean) => {
+  const handleFilterToggle = useCallback((filterType: 'isOverdue' | 'isUpcoming' | 'hasAssessmentDue', value: boolean) => {
     setActiveFilters((prev) => {
       const newFilters = { ...prev, [filterType]: value };
       // 非同期呼び出しだが UI 側の状態更新は即時に行う -> エラー無視で発火
       void applyFilters({
         is_overdue: newFilters.isOverdue,
         is_upcoming: newFilters.isUpcoming,
+        has_assessment_due: newFilters.hasAssessmentDue,
         status: newFilters.status || undefined,
       });
       return newFilters;
@@ -219,9 +237,53 @@ export default function Dashboard() {
       void applyFilters({
         is_overdue: newFilters.isOverdue,
         is_upcoming: newFilters.isUpcoming,
+        has_assessment_due: newFilters.hasAssessmentDue,
         status: status || undefined,
       });
       return newFilters;
+    });
+  }, [applyFilters]);
+
+  // フィルターを個別に解除
+  const handleFilterRemove = useCallback((filterKey: string) => {
+    if (filterKey === 'search') {
+      setSearchTerm('');
+      setDebouncedSearchTerm('');
+    } else {
+      setActiveFilters((prev) => {
+        const newFilters = { ...prev };
+        if (filterKey === 'status') {
+          newFilters.status = null;
+        } else {
+          // isOverdue, isUpcoming, hasAssessmentDue
+          (newFilters as Record<string, unknown>)[filterKey] = false;
+        }
+        void applyFilters({
+          is_overdue: newFilters.isOverdue,
+          is_upcoming: newFilters.isUpcoming,
+          has_assessment_due: newFilters.hasAssessmentDue,
+          status: newFilters.status || undefined,
+        });
+        return newFilters;
+      });
+    }
+  }, [applyFilters]);
+
+  // すべてのフィルターをクリア
+  const handleClearAllFilters = useCallback(() => {
+    setSearchTerm('');
+    setDebouncedSearchTerm('');
+    setActiveFilters({
+      isOverdue: false,
+      isUpcoming: false,
+      hasAssessmentDue: false,
+      status: null,
+    });
+    void applyFilters({
+      is_overdue: false,
+      is_upcoming: false,
+      has_assessment_due: false,
+      status: undefined,
     });
   }, [applyFilters]);
 
@@ -234,6 +296,7 @@ export default function Dashboard() {
     setActiveFilters({
       isOverdue: false,
       isUpcoming: false,
+      hasAssessmentDue: false,
       status: null,
     });
 
@@ -377,7 +440,7 @@ export default function Dashboard() {
   }, [debouncedSearchTerm, applyFilters, searchTerm]);
 
   // カウント計算のメモ化
-  const { expiredCount, nearDeadlineCount } = useMemo(() => {
+  const { expiredCount, nearDeadlineCount, assessmentDueCount } = useMemo(() => {
     return serviceRecipients.reduce(
     (counts, sr) => {
       // 期限切れ処理
@@ -403,9 +466,15 @@ export default function Dashboard() {
           counts.nearDeadlineCount++;
         }
       }
+
+      // アセスメント開始期限集計（is_latest_statusがアセスメントの利用者）
+      if (sr.latest_step === 'assessment') {
+        counts.assessmentDueCount++;
+      }
+
       return counts;
     },
-    { expiredCount: 0, nearDeadlineCount: 0 }
+    { expiredCount: 0, nearDeadlineCount: 0, assessmentDueCount: 0 }
   );
   }, [serviceRecipients]);
 
@@ -447,55 +516,72 @@ export default function Dashboard() {
                   {getCurrentDate()}
                 </div>
               </div>
-              
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-3 md:gap-4">
-                <CalendarLinkButton />
-              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 animate-in slide-in-from-top-4 duration-400 delay-150">
-              <div className="bg-gradient-to-br from-[#3d1f1f] to-[#2a1515] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 gap-4 mb-6 animate-in slide-in-from-top-4 duration-400 delay-150">
+              <div className="bg-gradient-to-br from-[#3d1f1f] to-[#2a1515] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200 lg:col-span-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="w-8 h-8 bg-[#ff9800]/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <span className="text-[#ff9800] text-sm">⚠️</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-medium">期限切れ</p>
+                    <p className="text-white text-xs font-medium" title="次回更新期限が過ぎた利用者">計画期限切れ</p>
                     <p className="text-xl font-bold text-white">{expiredCount}<span className="text-sm font-normal ml-1">件</span></p>
                   </div>
                   <BiFilterAlt
                     className={`cursor-pointer flex-shrink-0 ${activeFilters.isOverdue ? 'text-[#ffab40]' : 'text-[#ff9800] hover:text-[#ffab40]'}`}
                     size={20}
                     onClick={() => handleFilterToggle('isOverdue', !activeFilters.isOverdue)}
+                    title={activeFilters.isOverdue ? "フィルター解除" : "計画期限切れでフィルター"}
                   />
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-[#3d3d1f] to-[#2a2a15] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200">
+              <div className="bg-gradient-to-br from-[#3d3d1f] to-[#2a2a15] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200 lg:col-span-2">
                 <div className="flex items-center justify-between gap-2">
                   <div className="w-8 h-8 bg-[#ffd700]/20 rounded-lg flex items-center justify-center flex-shrink-0">
                     <span className="text-[#ffd700] text-sm">📋</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-medium">期限間近</p>
+                    <p className="text-white text-xs font-medium" title="次回更新期限まで30日以内の利用者">計画期限間近（30日以内）</p>
                     <p className="text-xl font-bold text-white">{nearDeadlineCount}<span className="text-sm font-normal ml-1">件</span></p>
                   </div>
                   <BiFilterAlt
                     className={`cursor-pointer flex-shrink-0 ${activeFilters.isUpcoming ? 'text-[#ffed4e]' : 'text-[#ffd700] hover:text-[#ffed4e]'}`}
                     size={20}
                     onClick={() => handleFilterToggle('isUpcoming', !activeFilters.isUpcoming)}
+                    title={activeFilters.isUpcoming ? "フィルター解除" : "計画期限間近でフィルター"}
                   />
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-[#1f2f3d] to-[#15202a] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200">
+              {/* アセスメント開始期限フィルター */}
+              <div className="bg-gradient-to-br from-[#1f2f3d] to-[#15202a] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200 lg:col-span-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="w-8 h-8 bg-[#00bcd4]/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <span className="text-[#00bcd4] text-sm">📝</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-white text-xs font-medium" title="is_latest_statusがアセスメントの利用者">アセスメント未完了</p>
+                    <p className="text-xl font-bold text-white">{assessmentDueCount}<span className="text-sm font-normal ml-1">件</span></p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-[#1f2f3d] to-[#15202a] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200 lg:col-span-3">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-medium">利用者数</p>
-                    <p className="text-xl font-bold text-white">{serviceRecipients.length}<span className="text-sm font-normal ml-1">名</span></p>
+                    <p className="text-white text-xs font-medium">総利用者数</p>
+                    <p className="text-xl font-bold text-white">{dashboardData.current_user_count}<span className="text-sm font-normal ml-1">名</span></p>
+                    {/* フィルタリング時は検索結果数も表示 */}
+                    {dashboardData.filtered_count !== undefined && dashboardData.filtered_count !== dashboardData.current_user_count && (
+                      <p className="text-sm text-[#00bcd4] mt-1">
+                        検索結果: <span className="font-semibold">{dashboardData.filtered_count}名</span>
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    {canEdit && (
+                    {/* {canEdit && (
                       <button
                         type="button"
                         data-testid="add-recipient-stats-button"
@@ -511,16 +597,16 @@ export default function Dashboard() {
                         <BiUserPlus className="h-3.5 w-3.5" />
                         <span className="lg:hidden">追加</span>
                       </button>
-                    )}
+                    )} */}
                     <div className="relative">
                       <input
                         type="text"
                         placeholder="検索"
                         value={searchTerm}
                         onChange={(e) => handleSearch(e.target.value)}
-                        className="bg-[#0f1419] border border-[#2a3441] rounded-lg px-2 py-1.5 text-xs text-white placeholder-gray-400 w-24 focus:outline-none focus:border-[#00bcd4]"
+                        className="bg-[#0f1419] border border-[#2a3441] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 w-48 focus:outline-none focus:border-[#00bcd4]"
                       />
-                      <span className="absolute right-2 top-1.5 text-[#00bcd4] text-xs">🔍</span>
+                      <span className="absolute right-3 top-2.5 text-[#00bcd4] text-sm">🔍</span>
                     </div>
                   </div>
                 </div>
@@ -545,7 +631,17 @@ export default function Dashboard() {
                 )}
               </div>
 
+
+
             </div>
+
+            {/* 選択中のフィルター条件を表示 */}
+            <ActiveFilters
+              activeFilters={activeFilters}
+              searchTerm={searchTerm}
+              onFilterRemove={handleFilterRemove}
+              onClearAll={handleClearAllFilters}
+            />
 
             <TableLoadingOverlay isLoading={isLoading}>
               <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441] shadow-xl animate-in slide-in-from-bottom-4 duration-400 delay-300">

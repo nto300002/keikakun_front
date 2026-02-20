@@ -19,7 +19,8 @@ export interface DashboardData {
   staff_role: StaffRole;
   office_id: string;
   office_name: string;
-  current_user_count: number;
+  current_user_count: number;      // 総利用者数（固定）
+  filtered_count: number;           // 検索結果数（フィルタリング後）
   max_user_count: number;
   billing_status: BillingStatus;
   recipients: DashboardRecipient[];

@@ -37,8 +37,8 @@ function CalendarLinkModal({
         {/* ヘッダー */}
         <div className="flex justify-between items-center p-6 border-b border-[#2a3441]">
           <div>
-            <h3 className="text-lg font-semibold text-white">Googleカレンダー連携</h3>
-            <p className="text-sm text-[#9ca3af] mt-1">サービスアカウントを使ってカレンダーと同期します。</p>
+            <h3 className="text-lg font-semibold text-white">Googleカレンダー連携状況確認</h3>
+            <p className="text-sm text-[#9ca3af] mt-1">サービスアカウントを使ってカレンダーと同期します。<br/>同期されていない場合、事業所のオーナーに確認してください。</p>
           </div>
           <button
             onClick={onClose}

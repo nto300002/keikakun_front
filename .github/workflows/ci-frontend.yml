@@ -32,8 +32,6 @@ jobs:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     needs: lint
-    # E2E Secrets が未設定の場合はスキップ（ローカルPR等）
-    if: ${{ secrets.E2E_OWNER_EMAIL != '' }}
     steps:
       - uses: actions/checkout@v4
 

@@ -10,21 +10,12 @@
  * npx playwright test e2e/dashboard-filtering.spec.ts
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+import { loginAsOwner } from './fixtures/auth';
 
-// テスト用の認証情報
-const TEST_USER = {
-  email: 'test@example.com',
-  password: 'TestPassword123!'
-};
-
-// ログインヘルパー
-async function login(page) {
-  await page.goto('/login');
-  await page.fill('input[name="email"]', TEST_USER.email);
-  await page.fill('input[name="password"]', TEST_USER.password);
-  await page.click('button[type="submit"]');
-  await page.waitForURL('/dashboard');
+// ログインヘルパー（auth フィクスチャと同じ実装を再利用）
+async function login(page: Page): Promise<void> {
+  await loginAsOwner(page);
 }
 
 test.describe('ダッシュボード複合条件検索機能', () => {
@@ -144,7 +135,8 @@ test.describe('ダッシュボード複合条件検索機能', () => {
     await page.waitForTimeout(500);
 
     // Assert: 両方のフィルターが適用されている
-    await expect(page.locator('text=計画期限切れ').nth(1)).toBeVisible();
+    // aria-label でチップを特定（<title>タグへの誤マッチを避けるため）
+    await expect(page.locator('[aria-label="計画期限切れ フィルターを解除"]')).toBeVisible();
     await expect(page.locator('text=検索: "田中"').first()).toBeVisible();
 
     // Assert: APIリクエストが両方のパラメータを含む（Network check）

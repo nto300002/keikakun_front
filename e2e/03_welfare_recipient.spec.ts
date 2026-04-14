@@ -73,7 +73,7 @@ test.describe('利用者登録', () => {
     // --- Section 3: 障害・疾患情報 ---
     await expect(page.locator('h3').filter({ hasText: '障害・疾患情報' })).toBeVisible();
 
-    await page.fill('input[placeholder*="統合失調症"]', recipient.disability_type);
+    await page.fill('textarea[placeholder*="統合失調症"]', recipient.disability_type);
     // 生活保護受給状況
     await page.locator('select').first().selectOption('not_receiving');
 
@@ -139,7 +139,7 @@ test.describe('利用者登録', () => {
     await page.fill('input[type="tel"]', '03-9999-0000');
     await page.click('button:text("次へ")');
 
-    await page.fill('input[placeholder*="統合失調症"]', recipient.disability_type);
+    await page.fill('textarea[placeholder*="統合失調症"]', recipient.disability_type);
     await page.locator('select').first().selectOption('not_receiving');
     await page.click('button:text("次へ")');
 

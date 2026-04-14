@@ -7,7 +7,7 @@
 /** 事前にDBに存在するテスト用オーナーアカウント */
 export const TEST_OWNER = {
   email: process.env.E2E_OWNER_EMAIL || 'e2e_owner@example.com',
-  password: process.env.E2E_OWNER_PASSWORD || 'TestPassword123!',
+  password: process.env.E2E_OWNER_PASSWORD || 'E2ePass123!',
 };
 
 /** テスト用スタッフ登録データ（毎回ユニークなメールアドレスを生成） */

@@ -25,7 +25,7 @@ test.describe('利用者登録', () => {
     const recipient = generateRecipientData();
 
     await page.goto('/recipients/new');
-    await expect(page.locator('h1').filter({ hasText: '利用者新規登録' })).toBeVisible();
+    await expect(page.locator('h1').filter({ hasText: '利用者新規登録' }).first()).toBeVisible();
 
     // --- Section 0: 基本情報 ---
     await page.fill('input[placeholder="山田"]', recipient.last_name);

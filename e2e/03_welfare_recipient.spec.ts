@@ -66,6 +66,8 @@ test.describe('利用者登録', () => {
     await page.fill('input[placeholder="花子"]', '太郎');
     await page.fill('input[placeholder="たなか"]', 'きんきゅう');
     await page.fill('input[placeholder="はなこ"]', 'たろう');
+    // 続柄（バックエンドで必須）
+    await page.locator('select').first().selectOption('その他');
     await page.fill('input[type="tel"]', '03-1234-5678');
 
     await page.click('button:text("次へ")');
@@ -136,6 +138,8 @@ test.describe('利用者登録', () => {
     await page.fill('input[placeholder="花子"]', '花子');
     await page.fill('input[placeholder="たなか"]', 'きんきゅう');
     await page.fill('input[placeholder="はなこ"]', 'はなこ');
+    // 続柄（バックエンドで必須）
+    await page.locator('select').first().selectOption('その他');
     await page.fill('input[type="tel"]', '03-9999-0000');
     await page.click('button:text("次へ")');
 

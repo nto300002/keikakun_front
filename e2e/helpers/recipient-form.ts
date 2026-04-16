@@ -93,5 +93,7 @@ export async function fillAndSubmitRecipientForm(
   await page.locator('h3').filter({ hasText: /手帳|年金/ }).waitFor({ timeout: 5000 });
 
   await page.click('button:text("登録完了")');
-  await page.waitForURL(/\/dashboard/, { timeout: 15000 });
+  // 本番環境ではダッシュボードの API 取得が多く load イベントが遅延するため
+  // URL 変更のコミットのみを待機する（waitUntil: 'commit'）
+  await page.waitForURL(/\/dashboard/, { timeout: 20000, waitUntil: 'commit' });
 }

@@ -10,6 +10,10 @@
 import { test, expect } from '@playwright/test';
 import { TEST_OWNER } from './helpers/test-data';
 
+// ログインフロー自体をテストするため、グローバルの storageState（ログイン済み状態）を使わない
+// これがないと既にログイン済みの状態でテストが始まり、ログインページへ遷移できない
+test.use({ storageState: undefined });
+
 test.describe('ログイン', () => {
 
   test('正常ログイン → ダッシュボードへ遷移', async ({ page }) => {

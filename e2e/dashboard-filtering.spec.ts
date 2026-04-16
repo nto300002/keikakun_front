@@ -79,7 +79,7 @@ test.describe('ダッシュボード複合条件検索機能', () => {
 
     // 検索ワードを入力
     await page.fill('input[placeholder="検索"]', '田中');
-    await page.waitForTimeout(500); // デバウンス待ち
+    // waitForTimeout は削除。次行の expect がデバウンス後の状態変化を待機する。
 
     // Assert: Active Filters セクションが表示される
     await expect(page.locator('text=絞り込み中:').first()).toBeVisible();
@@ -105,7 +105,7 @@ test.describe('ダッシュボード複合条件検索機能', () => {
     await page.getByRole('img', { name: '計画期限切れでフィルター' }).click();
     await page.getByRole('img', { name: '計画期限間近でフィルター' }).click();
     await page.fill('input[placeholder="検索"]', 'テスト');
-    await page.waitForTimeout(500);
+    // waitForTimeout は削除。次行の expect がデバウンス後の状態変化を待機する。
 
     // Assert: Active Filters が表示されている
     await expect(page.locator('text=絞り込み中:').first()).toBeVisible();
@@ -121,7 +121,7 @@ test.describe('ダッシュボード複合条件検索機能', () => {
     // Act: 複数のフィルターを同時に適用
     await page.getByRole('img', { name: '計画期限切れでフィルター' }).click();
     await page.fill('input[placeholder="検索"]', '田中');
-    await page.waitForTimeout(500);
+    // waitForTimeout は削除。次行の expect がデバウンス後の状態変化を待機する。
 
     // Assert: 両方のフィルターが適用されている
     await expect(page.locator('[aria-label="計画期限切れ フィルターを解除"]')).toBeVisible();
@@ -135,7 +135,7 @@ test.describe('ダッシュボード複合条件検索機能', () => {
 
     // Act: フィルター適用
     await page.getByRole('img', { name: '計画期限切れでフィルター' }).click();
-    await page.waitForTimeout(500);
+    // waitForTimeout は削除。次行の expect がフィルター適用後の DOM 変化を待機する。
 
     // Assert: フィルターが有効になったことを確認
     await expect(page.locator('[aria-label="計画期限切れ フィルターを解除"]')).toBeVisible();
@@ -187,9 +187,11 @@ test.describe('ダッシュボード複合条件検索機能', () => {
     // Act: フィルターを複数回切り替え
     for (let i = 0; i < 3; i++) {
       await filterIcon.click();
-      await page.waitForTimeout(100);
+      // アイコンが「解除」状態へ変化するまで待機（waitForTimeout の代替）
+      await expect(deactivateIcon).toBeVisible({ timeout: 2000 });
       await deactivateIcon.click();
-      await page.waitForTimeout(100);
+      // アイコンが「有効化」状態へ戻るまで待機
+      await expect(filterIcon).toBeVisible({ timeout: 2000 });
     }
 
     // Assert: エラーが発生しない、UIが正常

@@ -4,15 +4,36 @@
  * テスト間の衝突を避けるためタイムスタンプベースのユニーク値を使用する
  */
 
-/** 事前にDBに存在するテスト用オーナーアカウント */
+/**
+ * 必須環境変数を取得する。未設定の場合は即エラーを投げる。
+ * フォールバック値にパスワードを書かないためのガード。
+ */
+function requireEnv(key: string): string {
+  const val = process.env[key];
+  if (!val) {
+    throw new Error(
+      `環境変数 ${key} が設定されていません。` +
+      `E2Eテスト実行前に .env.local に設定してください。`
+    );
+  }
+  return val;
+}
+
+/** 事前にDBに存在するテスト用オーナーアカウント（env必須） */
 export const TEST_OWNER = {
-  email: process.env.E2E_OWNER_EMAIL || 'e2e_owner@example.com',
-  password: process.env.E2E_OWNER_PASSWORD || 'E2ePass123!',
+  email: requireEnv('E2E_OWNER_EMAIL'),
+  password: requireEnv('E2E_OWNER_PASSWORD'),
 };
 
-/** テスト用スタッフ登録データ（毎回ユニークなメールアドレスを生成） */
+/**
+ * テスト用スタッフ登録データ（毎回ユニークなメールアドレスを生成）
+ *
+ * パスワードは E2E_STAFF_PASSWORD 環境変数から取得（必須）。
+ * .env.local に設定すること。
+ */
 export function generateStaffData() {
   const uid = Date.now().toString(36);
+  const password = requireEnv('E2E_STAFF_PASSWORD');
   return {
     last_name: 'E2E',
     first_name: `スタッフ${uid}`,
@@ -20,8 +41,8 @@ export function generateStaffData() {
     first_name_furigana: 'すたっふ',
     email: `e2e_staff_${uid}@example.com`,
     role: 'employee' as const,
-    password: 'E2ePassword123!',
-    confirmPassword: 'E2ePassword123!',
+    password,
+    confirmPassword: password,
   };
 }
 
@@ -39,3 +60,6 @@ export function generateRecipientData() {
     disability_type: '知的障害',
   };
 }
+
+/** バックエンド API のベース URL（テストヘルパー共通） */
+export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '');

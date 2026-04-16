@@ -19,6 +19,8 @@ if (fs.existsSync(envLocalPath)) {
 
 export default defineConfig({
   testDir: './e2e',
+  // 全テスト完了後に E2E データを一括削除する
+  globalTeardown: './e2e/global-teardown.ts',
   // 登録系テストは順序依存があるためシリアル実行
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
@@ -35,9 +37,19 @@ export default defineConfig({
     navigationTimeout: 15000,
   },
   projects: [
+    // セットアッププロジェクト: 全テストより先に1回だけ実行してログイン状態を保存
+    {
+      name: 'setup',
+      testMatch: '**/auth.setup.ts',
+    },
+    // メインテストプロジェクト: storageState でログイン済み状態を引き継ぐ
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: './e2e/.auth/owner.json',
+      },
+      dependencies: ['setup'],
     },
   ],
   // ローカル実行時はNext.js dev serverを自動起動

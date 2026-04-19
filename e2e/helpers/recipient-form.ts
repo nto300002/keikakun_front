@@ -92,8 +92,29 @@ export async function fillAndSubmitRecipientForm(
   // --- Section 4: 手帳・年金詳細（必須項目なし） ---
   await page.locator('h3').filter({ hasText: /手帳|年金/ }).waitFor({ timeout: 5000 });
 
-  await page.click('button:text("登録完了")');
-  // 本番環境ではダッシュボードの API 取得が多く load イベントが遅延するため
-  // URL 変更のコミットのみを待機する（waitUntil: 'commit'）
-  await page.waitForURL(/\/dashboard/, { timeout: 20000, waitUntil: 'commit' });
+  // POST /api/v1/welfare-recipients/ のレスポンスを監視して実際のエラーを捕捉する
+  const [apiResponse] = await Promise.all([
+    page.waitForResponse(
+      (resp) => resp.url().includes('/welfare-recipients') && resp.request().method() === 'POST',
+      { timeout: 20000 },
+    ),
+    page.click('button:text("登録完了")'),
+  ]);
+
+  const status = apiResponse.status();
+  if (status !== 200 && status !== 201) {
+    const body = await apiResponse.text().catch(() => '(body 取得失敗)');
+    const currentUrl = page.url();
+    const pageErrorText = await page.locator('[class*="text-red"]').first().textContent().catch(() => 'なし');
+    throw new Error(
+      `利用者登録 API がエラーを返しました\n` +
+      `  status: ${status}\n` +
+      `  body: ${body}\n` +
+      `  現在URL: ${currentUrl}\n` +
+      `  画面エラー: ${pageErrorText}`,
+    );
+  }
+
+  // 登録成功 → /dashboard へのリダイレクトを待機
+  await page.waitForURL(/\/dashboard/, { timeout: 10000, waitUntil: 'commit' });
 }

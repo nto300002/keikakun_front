@@ -2,104 +2,103 @@
  * 認証ヘルパー
  *
  * auth.setup.ts からのみ使用される。
- *
- * # 認証の仕組み
- *
- * 1. auth.setup.ts（setup プロジェクト）が全テストより先に1回だけ実行される
- * 2. loginAsOwner() でログインし、Cookie 等を .auth/owner.json に保存する
- * 3. playwright.config.ts の chromium プロジェクトに storageState が設定されているため、
- *    標準 page フィクスチャは自動的に認証済みの状態で起動する
- *
- * # 各テストでの認証
- *
- * 各テストファイルは @playwright/test を直接 import し、標準 page フィクスチャを使う。
- * storageState は playwright.config.ts のプロジェクト設定が自動適用するため、
- * カスタムフィクスチャは不要。
  */
-import { type Page, expect } from '@playwright/test';
+import { type Page } from '@playwright/test';
 import * as path from 'path';
 import { TEST_OWNER } from '../helpers/test-data';
 
-/**
- * オーナーアカウントでログインする
- *
- * auth.setup.ts から呼び出される（テスト全体で1回のみ）。
- */
 export async function loginAsOwner(page: Page): Promise<void> {
-  // ── 診断: ベース URL とページ遷移を記録 ──────────────────────────────
   const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? '(未設定)';
   console.log(`[auth] PLAYWRIGHT_BASE_URL = ${baseURL}`);
 
-  // ページコンソールエラーを転送（ビルドエラー・JS エラーを CI ログで確認可能にする）
+  // ブラウザコンソールエラーを CI ログに転送
   page.on('console', (msg) => {
-    if (msg.type() === 'error') {
-      console.log(`[browser:error] ${msg.text()}`);
-    }
+    if (msg.type() === 'error') console.log(`[browser:error] ${msg.text()}`);
   });
   page.on('pageerror', (err) => {
     console.log(`[browser:pageerror] ${err.message}`);
   });
 
-  // ── /auth/login への遷移 ───────────────────────────────────────────
-  const response = await page.goto('/auth/login');
-  console.log(`[auth] goto /auth/login → status: ${response?.status()}, url: ${page.url()}`);
+  // ── /auth/login への遷移 ─────────────────────────────────────────
+  const gotoResponse = await page.goto('/auth/login');
+  console.log(`[auth] goto → status: ${gotoResponse?.status()}, url: ${page.url()}`);
 
-  // ページが正常に読み込まれているか確認
-  if (response && !response.ok()) {
-    const body = await response.text().catch(() => '(取得失敗)');
+  if (gotoResponse && !gotoResponse.ok()) {
+    const body = await gotoResponse.text().catch(() => '(取得失敗)');
     throw new Error(
-      `ログインページの取得に失敗しました\n` +
-      `  status: ${response.status()}\n` +
+      `ログインページが ${gotoResponse.status()} を返しました\n` +
       `  url: ${page.url()}\n` +
       `  body(先頭500文字): ${body.slice(0, 500)}`,
     );
   }
 
-  // DOM が安定するまで待機（React ハイドレーション完了後に操作する）
   await page.waitForLoadState('domcontentloaded');
-  console.log(`[auth] domcontentloaded → url: ${page.url()}`);
-
-  // email フィールドが出現するまで待機（ハイドレーション遅延対策）
   await page.waitForSelector('input[name="email"]', { timeout: 15000 });
-  console.log(`[auth] input[name="email"] found`);
-
   await page.fill('input[name="email"]', TEST_OWNER.email);
+  await page.waitForSelector('input[name="password"]', { timeout: 15000 });
+  await page.fill('input[name="password"]', TEST_OWNER.password);
 
-  // password フィールドが出現するまで明示的に待機して診断
-  const passwordSelector = 'input[name="password"]';
-  const passwordVisible = await page.waitForSelector(passwordSelector, { timeout: 15000 })
-    .then(() => true)
-    .catch(async () => {
-      // タイムアウト時：ページ状態をスナップショット
+  // ── ログインボタン押下 + /auth/token のレスポンスを同時に捕捉 ────
+  // NEXT_PUBLIC_API_URL がビルド時に未設定だと http://localhost:8000 に飛ぶため、
+  // 実際のリクエスト先 URL とレスポンスを記録して確認する。
+  const [loginApiResponse] = await Promise.all([
+    page.waitForResponse(
+      (resp) => resp.url().includes('/auth/token') && resp.request().method() === 'POST',
+      { timeout: 15000 },
+    ).catch(async () => {
+      // /auth/token へのリクエスト自体が来なかった（送信先が localhost 等でネットワークエラー）
+      const url = page.url();
+      const text = await page.locator('body').innerText().catch(() => '');
+      console.log(`[auth] ❌ /auth/token へのリクエストが 15 秒以内に発生しませんでした`);
+      console.log(`[auth]   現在 URL: ${url}`);
+      console.log(`[auth]   ページテキスト(先頭300): ${text.slice(0, 300)}`);
+      return null;
+    }),
+    page.click('button[type="submit"]'),
+  ]);
+
+  if (loginApiResponse) {
+    const loginStatus = loginApiResponse.status();
+    const loginUrl = loginApiResponse.url();
+    const loginBody = await loginApiResponse.text().catch(() => '(取得失敗)');
+    console.log(`[auth] /auth/token → status: ${loginStatus}, url: ${loginUrl}`);
+    console.log(`[auth] /auth/token body(先頭300): ${loginBody.slice(0, 300)}`);
+
+    if (loginStatus !== 200) {
       const currentUrl = page.url();
-      const title = await page.title().catch(() => '(取得失敗)');
-      const visibleText = await page.locator('body').innerText().catch(() => '(取得失敗)');
-      const screenshotPath = path.join(__dirname, '..', 'test-results', 'auth-debug.png');
-      await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
-      console.log(`[auth] ❌ input[name="password"] が見つかりません`);
-      console.log(`[auth]   現在 URL  : ${currentUrl}`);
-      console.log(`[auth]   ページタイトル: ${title}`);
-      console.log(`[auth]   表示テキスト(先頭300文字): ${visibleText.slice(0, 300)}`);
-      console.log(`[auth]   スクリーンショット: ${screenshotPath}`);
-      return false;
-    });
-
-  if (!passwordVisible) {
-    throw new Error('input[name="password"] が見つかりませんでした（上記ログを確認）');
+      throw new Error(
+        `ログイン API がエラーを返しました\n` +
+        `  リクエスト先: ${loginUrl}\n` +
+        `  status: ${loginStatus}\n` +
+        `  body: ${loginBody}\n` +
+        `  現在 URL: ${currentUrl}`,
+      );
+    }
+  } else {
+    // リクエスト自体が飛ばなかったケース
+    const screenshotPath = path.join(__dirname, '..', 'test-results', 'auth-no-request.png');
+    await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
+    throw new Error('/auth/token へのリクエストが発生しませんでした（ネットワークエラーの可能性。NEXT_PUBLIC_API_URL の Vercel Preview 設定を確認）');
   }
 
-  console.log(`[auth] input[name="password"] found`);
-  await page.fill(passwordSelector, TEST_OWNER.password);
-  await page.click('button[type="submit"]');
-
-  // ログイン後の全遷移先パターン（mfa-first-setup も含む）
+  // ── ログイン後のリダイレクト待機 ─────────────────────────────────
   await page.waitForURL(
     /\/(dashboard|auth\/mfa-verify|auth\/mfa-first-setup|auth\/select-office)/,
-    { timeout: 15000 }
-  );
-  console.log(`[auth] ログイン後 URL: ${page.url()}`);
+    { timeout: 15000 },
+  ).catch(async () => {
+    const currentUrl = page.url();
+    const text = await page.locator('body').innerText().catch(() => '');
+    const screenshotPath = path.join(__dirname, '..', 'test-results', 'auth-redirect-timeout.png');
+    await page.screenshot({ path: screenshotPath, fullPage: true }).catch(() => {});
+    throw new Error(
+      `ログイン後のリダイレクトが発生しませんでした\n` +
+      `  現在 URL: ${currentUrl}\n` +
+      `  ページテキスト(先頭300): ${text.slice(0, 300)}`,
+    );
+  });
 
-  // 事業所選択ページの場合は最初の事業所を選択
+  console.log(`[auth] ログイン成功 → ${page.url()}`);
+
   if (page.url().includes('select-office')) {
     await page.locator('button, a').filter({ hasText: /事業所|office/i }).first().click();
     await page.waitForURL(/\/dashboard/, { timeout: 10000 });

@@ -35,6 +35,13 @@ export default defineConfig({
     // 各テストのデフォルトタイムアウト
     actionTimeout: 10000,
     navigationTimeout: 15000,
+    // Vercel Deployment Protection の Automation Bypass
+    // VERCEL_AUTOMATION_BYPASS_SECRET が設定されている場合のみヘッダーを付与する。
+    // Vercel はこのヘッダーを受け取ると認証をバイパスするセッション Cookie を発行する。
+    // 参照: https://vercel.com/docs/deployment-protection/methods-to-bypass-deployment-protection/protection-bypass-for-automation
+    ...(process.env.VERCEL_AUTOMATION_BYPASS_SECRET
+      ? { extraHTTPHeaders: { 'x-vercel-protection-bypass': process.env.VERCEL_AUTOMATION_BYPASS_SECRET } }
+      : {}),
   },
   projects: [
     // セットアッププロジェクト: 全テストより先に1回だけ実行してログイン状態を保存

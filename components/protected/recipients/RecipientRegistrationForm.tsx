@@ -137,15 +137,9 @@ const INITIAL_FORM_DATA: FormData = {
     livelihoodProtection: '',
     specialRemarks: '',
   },
-  disabilityDetails: [
-    {
-      category: '',
-      gradeOrLevel: '',
-      physicalDisabilityType: '',
-      physicalDisabilityTypeOtherText: '',
-      applicationStatus: '',
-    },
-  ],
+  // 手帳・年金詳細は任意項目のため初期値は空配列とする
+  // （空エントリを持つとバックエンドの enum バリデーションで 422 エラーになる）
+  disabilityDetails: [],
 };
 
 // Enum options for dropdowns

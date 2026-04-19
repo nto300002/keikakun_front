@@ -102,16 +102,33 @@ export async function fillAndSubmitRecipientForm(
   ]);
 
   const status = apiResponse.status();
+  const bodyText = await apiResponse.text().catch(() => '(body 取得失敗)');
+
+  // ステータス・ボディを必ずログ出力（CI での可視化）
+  console.log(`[recipient-form] POST /welfare-recipients → ${status}`);
+  console.log(`[recipient-form] response body: ${bodyText.slice(0, 500)}`);
+
   if (status !== 200 && status !== 201) {
-    const body = await apiResponse.text().catch(() => '(body 取得失敗)');
     const currentUrl = page.url();
     const pageErrorText = await page.locator('[class*="text-red"]').first().textContent().catch(() => 'なし');
     throw new Error(
       `利用者登録 API がエラーを返しました\n` +
       `  status: ${status}\n` +
-      `  body: ${body}\n` +
+      `  body: ${bodyText}\n` +
       `  現在URL: ${currentUrl}\n` +
       `  画面エラー: ${pageErrorText}`,
+    );
+  }
+
+  // 200/201 でも success:false の場合はリダイレクトが起きないため確認
+  let bodyJson: Record<string, unknown> | null = null;
+  try { bodyJson = JSON.parse(bodyText); } catch { /* ignore */ }
+  if (bodyJson && bodyJson.success === false) {
+    const currentUrl = page.url();
+    throw new Error(
+      `利用者登録 API は 200 を返しましたが success:false でした\n` +
+      `  body: ${bodyText}\n` +
+      `  現在URL: ${currentUrl}`,
     );
   }
 

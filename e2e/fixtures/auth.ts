@@ -74,6 +74,29 @@ export async function loginAsOwner(page: Page): Promise<void> {
         `  現在 URL: ${currentUrl}`,
       );
     }
+
+    // ── Vercel Preview 対応: access_token Cookie をフロントドメインにも設定 ─────
+    // access_token は Domain=.keikakun.com で発行されるため、
+    // vercel.app ドメインでは Next.js middleware がこの Cookie を参照できない。
+    // ログインレスポンスの Set-Cookie ヘッダーから access_token を取得し、
+    // Playwright の browser context に Vercel ドメイン用として手動追加することで解決する。
+    const setCookieHeader = loginApiResponse.headers()['set-cookie'] ?? '';
+    const tokenMatch = setCookieHeader.match(/access_token=([^;]+)/);
+    if (tokenMatch) {
+      const currentHostname = new URL(page.url()).hostname;
+      await page.context().addCookies([{
+        name: 'access_token',
+        value: tokenMatch[1],
+        domain: currentHostname,
+        path: '/',
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+      }]);
+      console.log(`[auth] access_token を ${currentHostname} ドメインに追加しました`);
+    } else {
+      console.log(`[auth] ⚠️ Set-Cookie に access_token が見つかりませんでした`);
+    }
   } else {
     // リクエスト自体が飛ばなかったケース
     const screenshotPath = path.join(__dirname, '..', 'test-results', 'auth-no-request.png');

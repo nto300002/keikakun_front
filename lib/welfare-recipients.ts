@@ -221,13 +221,16 @@ export const transformFormDataToBackend = (formData: RecipientFormData): UserReg
       livelihoodProtection: formData.disabilityInfo.livelihoodProtection,
       specialRemarks: formData.disabilityInfo.specialRemarks,
     },
-    disability_details: formData.disabilityDetails.map((detail: DisabilityDetailFormData) => ({
-      category: detail.category,
-      gradeOrLevel: detail.gradeOrLevel || undefined,
-      physicalDisabilityType: detail.physicalDisabilityType || undefined,
-      physicalDisabilityTypeOtherText: detail.physicalDisabilityTypeOtherText || undefined,
-      applicationStatus: detail.applicationStatus,
-    })),
+    // カテゴリが未選択の空エントリはバックエンドのバリデーションエラーになるため除外する
+    disability_details: formData.disabilityDetails
+      .filter((detail: DisabilityDetailFormData) => detail.category.trim() !== '')
+      .map((detail: DisabilityDetailFormData) => ({
+        category: detail.category,
+        gradeOrLevel: detail.gradeOrLevel || undefined,
+        physicalDisabilityType: detail.physicalDisabilityType || undefined,
+        physicalDisabilityTypeOtherText: detail.physicalDisabilityTypeOtherText || undefined,
+        applicationStatus: detail.applicationStatus,
+      })),
   };
 };
 

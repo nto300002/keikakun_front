@@ -1,0 +1,107 @@
+name: CI Frontend
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  e2e:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      # ── PR の場合: Vercel プレビューデプロイの完了を待って URL を取得 ──
+      # Vercel は push イベントを受けて GitHub Deployments API にエントリを作成する。
+      # environment_url が success ステータスで返るまでポーリングする（最大 5 分）。
+      # Vercel token は不要 — GITHUB_TOKEN の読み取り権限で取得できる。
+      - name: Wait for Vercel preview deployment (PR only)
+        id: vercel
+        if: github.event_name == 'pull_request'
+        run: |
+          SHA="${{ github.event.pull_request.head.sha }}"
+          echo "対象 SHA: $SHA"
+
+          for i in $(seq 1 30); do
+            # この SHA に紐づく "Preview" 環境デプロイを検索
+            DEPLOY_ID=$(gh api "repos/${{ github.repository }}/deployments?sha=$SHA" \
+              --jq '[.[] | select(.environment | ascii_downcase | contains("preview"))] | .[0].id // empty')
+
+            if [ -n "$DEPLOY_ID" ] && [ "$DEPLOY_ID" != "null" ]; then
+              # success ステータスの environment_url を取得
+              ENV_URL=$(gh api "repos/${{ github.repository }}/deployments/$DEPLOY_ID/statuses" \
+                --jq '[.[] | select(.state == "success" and .environment_url != null and .environment_url != "")] | .[0].environment_url // empty')
+
+              if [ -n "$ENV_URL" ] && [ "$ENV_URL" != "null" ]; then
+                echo "✅ Vercel プレビュー URL: $ENV_URL"
+                echo "url=$ENV_URL" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            fi
+
+            echo "⏳ Vercel デプロイ待機中... ($i/30)"
+            sleep 10
+          done
+
+          echo "❌ タイムアウト: Vercel デプロイが 5 分以内に完了しませんでした"
+          exit 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          CI: "true"
+          # PR   → Vercel プレビュー URL（PR ブランチのコードに対してテスト）
+          # main → secrets.PLAYWRIGHT_BASE_URL（本番 URL に対してテスト）
+          PLAYWRIGHT_BASE_URL: ${{ steps.vercel.outputs.url || secrets.PLAYWRIGHT_BASE_URL }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.E2E_API_URL }}
+          E2E_OWNER_EMAIL: ${{ secrets.E2E_OWNER_EMAIL }}
+          E2E_OWNER_PASSWORD: ${{ secrets.E2E_OWNER_PASSWORD }}
+          E2E_STAFF_PASSWORD: ${{ secrets.E2E_STAFF_PASSWORD }}
+          # Vercel Deployment Protection バイパス（解決策 B 用: 未設定でも動作する）
+          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

@@ -107,17 +107,17 @@ export default function InquiryReplyModal({
     <Modal isOpen={isOpen} onClose={handleClose} title="返信を作成" size="xl">
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* 問い合わせ情報 */}
-        <div className="bg-[#1a2332] border border-[#2a3441] rounded-lg p-4">
-          <h3 className="text-sm font-medium text-gray-400 mb-2">返信先の問い合わせ</h3>
-          <p className="text-white font-medium">{inquiryTitle}</p>
+        <div className="bg-slate-50 border border-slate-300 rounded-lg p-4 dark:bg-[#1a2332] dark:border-[#2a3441]">
+          <h3 className="text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">返信先の問い合わせ</h3>
+          <p className="text-slate-900 dark:text-white font-medium">{inquiryTitle}</p>
           {senderEmail && (
-            <p className="text-sm text-gray-400 mt-1">送信先: {senderEmail}</p>
+            <p className="text-sm text-slate-600 dark:text-gray-400 mt-1">送信先: {senderEmail}</p>
           )}
         </div>
 
         {/* テンプレート選択 */}
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
             テンプレート（任意）
           </label>
           <div className="flex flex-wrap gap-2">
@@ -126,7 +126,7 @@ export default function InquiryReplyModal({
                 key={index}
                 type="button"
                 onClick={() => applyTemplate(template.content)}
-                className="px-3 py-1 bg-[#2a3441] text-gray-300 rounded hover:bg-[#3a4451] transition-colors text-sm"
+                className="px-3 py-1 bg-slate-100 text-slate-700 rounded hover:bg-slate-200 transition-colors text-sm dark:bg-[#2a3441] dark:text-gray-300 dark:hover:bg-[#3a4451]"
               >
                 {template.label}
               </button>
@@ -136,16 +136,16 @@ export default function InquiryReplyModal({
 
         {/* 返信内容 */}
         <div>
-          <label htmlFor="reply_content" className="block text-sm font-medium text-gray-300 mb-2">
+          <label htmlFor="reply_content" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
             返信内容（必須）<span className="text-red-400 ml-1">*</span>
           </label>
           <textarea
             id="reply_content"
             value={replyContent}
             onChange={(e) => setReplyContent(e.target.value)}
-            className={`w-full bg-[#1a2332] border ${
-              error && !replyContent.trim() ? 'border-red-500' : 'border-[#2a3441]'
-            } rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none`}
+            className={`w-full bg-white border ${
+              error && !replyContent.trim() ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
+            } rounded-lg px-4 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none dark:bg-[#1a2332] dark:text-white dark:placeholder-gray-500`}
             placeholder="返信内容を入力してください..."
             rows={10}
             maxLength={20000}
@@ -154,7 +154,7 @@ export default function InquiryReplyModal({
             <div>
               {error && <p className="text-sm text-red-400">{error}</p>}
             </div>
-            <p className="text-xs text-gray-500">{replyContent.length}/20,000</p>
+            <p className="text-xs text-slate-500 dark:text-gray-500">{replyContent.length}/20,000</p>
           </div>
         </div>
 
@@ -166,11 +166,11 @@ export default function InquiryReplyModal({
                 type="checkbox"
                 checked={sendEmail}
                 onChange={(e) => setSendEmail(e.target.checked)}
-                className="mt-1 w-4 h-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
+                className="mt-1 w-4 h-4 text-blue-600 bg-slate-100 dark:bg-gray-700 border-slate-300 dark:border-gray-600 rounded focus:ring-blue-500 focus:ring-2"
               />
               <div>
-                <p className="text-white font-medium">メールで送信する</p>
-                <p className="text-sm text-gray-400 mt-1">
+                <p className="text-slate-900 dark:text-white font-medium">メールで送信する</p>
+                <p className="text-sm text-slate-600 dark:text-gray-400 mt-1">
                   チェックを入れると、登録されたメールアドレスに返信が送信されます。
                   チェックを外すと、内部通知のみで返信されます。
                 </p>
@@ -182,9 +182,9 @@ export default function InquiryReplyModal({
         {/* プレビュー */}
         {replyContent && (
           <div>
-            <h3 className="text-sm font-medium text-gray-300 mb-2">プレビュー</h3>
-            <div className="bg-[#1a2332] border border-[#2a3441] rounded-lg p-4">
-              <p className="text-gray-300 whitespace-pre-wrap">{replyContent}</p>
+            <h3 className="text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">プレビュー</h3>
+            <div className="bg-slate-50 border border-slate-300 rounded-lg p-4 dark:bg-[#1a2332] dark:border-[#2a3441]">
+              <p className="text-slate-700 dark:text-gray-300 whitespace-pre-wrap">{replyContent}</p>
             </div>
           </div>
         )}
@@ -194,7 +194,7 @@ export default function InquiryReplyModal({
           <button
             type="button"
             onClick={handleClose}
-            className="px-6 py-2 bg-[#2a3441] text-gray-300 rounded-lg hover:bg-[#3a4451] transition-colors"
+            className="px-6 py-2 bg-slate-200 text-slate-900 rounded-lg hover:bg-slate-300 transition-colors dark:bg-[#2a3441] dark:text-gray-300 dark:hover:bg-[#3a4451]"
           >
             キャンセル
           </button>

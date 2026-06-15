@@ -54,17 +54,17 @@ export default function InquiriesTab() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'new':
-        return <span className="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs">新規</span>;
+        return <span className="bg-red-500/20 text-red-400 px-2 py-1 rounded text-base">新規</span>;
       case 'open':
-        return <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded text-xs">対応中</span>;
+        return <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded text-base">対応中</span>;
       case 'in_progress':
-        return <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-xs">担当割当済み</span>;
+        return <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-base">担当割当済み</span>;
       case 'answered':
-        return <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">回答済み</span>;
+        return <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-base">回答済み</span>;
       case 'closed':
-        return <span className="bg-gray-500/20 text-gray-400 px-2 py-1 rounded text-xs">クローズ</span>;
+        return <span className="bg-gray-500/20 text-gray-400 px-2 py-1 rounded text-base">クローズ</span>;
       case 'spam':
-        return <span className="bg-orange-500/20 text-orange-400 px-2 py-1 rounded text-xs">スパム</span>;
+        return <span className="bg-orange-500/20 text-orange-400 px-2 py-1 rounded text-base">スパム</span>;
       default:
         return null;
     }
@@ -75,7 +75,7 @@ export default function InquiriesTab() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">問い合わせ</h2>
+        <h2 className="text-3xl font-bold">問い合わせ</h2>
         <div className="flex gap-2">
           <select
             value={statusFilter}
@@ -132,17 +132,17 @@ export default function InquiriesTab() {
                       ) : (
                         <FaEnvelopeOpen className="w-4 h-4 text-gray-400" />
                       )}
-                      <span className="font-medium text-white">{inquiry.title}</span>
+                      <span className="font-semibold text-white">{inquiry.title}</span>
                       {getStatusBadge(inquiry.status)}
                     </div>
-                    <p className="text-gray-300 text-sm mb-2 line-clamp-2">{inquiry.content}</p>
-                    <div className="flex items-center gap-4 text-xs text-gray-400 mb-2">
+                    <p className="text-gray-300 text-base mb-2 line-clamp-2">{inquiry.content}</p>
+                    <div className="flex items-center gap-4 text-base text-gray-400 mb-2">
                       <span>送信者: {inquiry.sender_name || '未設定'}</span>
                       {inquiry.sender_email && <span>{inquiry.sender_email}</span>}
                       <span>{formatDate(inquiry.created_at)}</span>
                     </div>
                     {inquiry.assigned_staff && (
-                      <div className="text-xs text-gray-400 mb-2">
+                      <div className="text-base text-gray-400 mb-2">
                         <span>担当者: {inquiry.assigned_staff.last_name} {inquiry.assigned_staff.first_name}</span>
                       </div>
                     )}
@@ -173,7 +173,7 @@ export default function InquiriesTab() {
       {/* ページネーション */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 text-base">
             全 {total} 件中 {currentPage * ITEMS_PER_PAGE + 1} - {Math.min((currentPage + 1) * ITEMS_PER_PAGE, total)} 件を表示
           </p>
           <div className="flex gap-2">
@@ -199,28 +199,28 @@ export default function InquiriesTab() {
       {selectedInquiry && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold text-white mb-4">問い合わせ詳細</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">問い合わせ詳細</h3>
 
             <div className="space-y-4">
               {/* 基本情報 */}
               <div className="bg-gray-700 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-gray-300 mb-3">基本情報</h4>
+                <h4 className="text-base font-semibold text-gray-300 mb-3">基本情報</h4>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400 w-24">件名:</span>
+                    <span className="text-base text-gray-400 w-24">件名:</span>
                     <span className="text-white">{selectedInquiry.title}</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="text-sm text-gray-400 w-24 flex-shrink-0">内容:</span>
+                    <span className="text-base text-gray-400 w-24 flex-shrink-0">内容:</span>
                     <p className="text-white whitespace-pre-wrap flex-1">{selectedInquiry.content}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400 w-24">ステータス:</span>
+                    <span className="text-base text-gray-400 w-24">ステータス:</span>
                     {getStatusBadge(selectedInquiry.status)}
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400 w-24">優先度:</span>
-                    <span className={`px-2 py-1 rounded text-xs ${
+                    <span className="text-base text-gray-400 w-24">優先度:</span>
+                    <span className={`px-2 py-1 rounded text-base ${
                       selectedInquiry.priority === 'high' ? 'bg-red-500/20 text-red-400' :
                       selectedInquiry.priority === 'low' ? 'bg-gray-500/20 text-gray-400' :
                       'bg-blue-500/20 text-blue-400'
@@ -230,23 +230,23 @@ export default function InquiriesTab() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400 w-24">作成日時:</span>
-                    <span className="text-white text-sm">{formatDate(selectedInquiry.created_at)}</span>
+                    <span className="text-base text-gray-400 w-24">作成日時:</span>
+                    <span className="text-white text-base">{formatDate(selectedInquiry.created_at)}</span>
                   </div>
                 </div>
               </div>
 
               {/* 送信者情報 */}
               <div className="bg-gray-700 rounded-lg p-4">
-                <h4 className="text-sm font-semibold text-gray-300 mb-3">送信者情報</h4>
+                <h4 className="text-base font-semibold text-gray-300 mb-3">送信者情報</h4>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-400 w-24">名前:</span>
+                    <span className="text-base text-gray-400 w-24">名前:</span>
                     <span className="text-white">{selectedInquiry.sender_name || '未設定'}</span>
                   </div>
                   {selectedInquiry.sender_email && (
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-400 w-24">メール:</span>
+                      <span className="text-base text-gray-400 w-24">メール:</span>
                       <span className="text-white">{selectedInquiry.sender_email}</span>
                     </div>
                   )}
@@ -256,16 +256,16 @@ export default function InquiriesTab() {
               {/* 担当者情報 */}
               {selectedInquiry.assigned_staff && (
                 <div className="bg-gray-700 rounded-lg p-4">
-                  <h4 className="text-sm font-semibold text-gray-300 mb-3">担当者</h4>
+                  <h4 className="text-base font-semibold text-gray-300 mb-3">担当者</h4>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-400 w-24">担当者:</span>
+                      <span className="text-base text-gray-400 w-24">担当者:</span>
                       <span className="text-white">
                         {selectedInquiry.assigned_staff.last_name} {selectedInquiry.assigned_staff.first_name}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-gray-400 w-24">メール:</span>
+                      <span className="text-base text-gray-400 w-24">メール:</span>
                       <span className="text-white">{selectedInquiry.assigned_staff.email}</span>
                     </div>
                   </div>

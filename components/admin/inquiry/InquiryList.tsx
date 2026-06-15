@@ -69,7 +69,7 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
       open: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', label: '確認済み' },
       in_progress: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: '対応中' },
       answered: { bg: 'bg-green-500/20', text: 'text-green-400', label: '回答済み' },
-      closed: { bg: 'bg-gray-500/20', text: 'text-gray-400', label: 'クローズ' },
+      closed: { bg: 'bg-gray-500/20', text: 'text-slate-600 dark:text-gray-400', label: 'クローズ' },
       spam: { bg: 'bg-purple-500/20', text: 'text-purple-400', label: 'スパム' },
     };
 
@@ -83,7 +83,7 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
 
   const getPriorityBadge = (priority: InquiryPriority) => {
     const badges: Record<InquiryPriority, { bg: string; text: string; label: string }> = {
-      low: { bg: 'bg-gray-500/20', text: 'text-gray-400', label: '低' },
+      low: { bg: 'bg-gray-500/20', text: 'text-slate-600 dark:text-gray-400', label: '低' },
       normal: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: '通常' },
       high: { bg: 'bg-red-500/20', text: 'text-red-400', label: '高' },
     };
@@ -102,14 +102,14 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
     <div>
       {/* ヘッダー */}
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-white mb-4">問い合わせ一覧</h2>
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">問い合わせ一覧</h2>
 
         {/* フィルター */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
           {/* 検索 */}
           <div className="md:col-span-2">
             <div className="relative">
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-600 dark:text-gray-400" />
               <input
                 type="text"
                 placeholder="件名・本文で検索..."
@@ -118,7 +118,7 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
                   setFilters({ ...filters, search: e.target.value });
                   setCurrentPage(0);
                 }}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className="w-full bg-slate-100 dark:bg-gray-700 border border-slate-300 dark:border-gray-600 rounded-lg pl-10 pr-4 py-2 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
           </div>
@@ -131,7 +131,7 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
                 setFilters({ ...filters, status: e.target.value as InquiryStatus || undefined });
                 setCurrentPage(0);
               }}
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="">すべてのステータス</option>
               <option value="new">新規</option>
@@ -151,7 +151,7 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
                 setFilters({ ...filters, priority: e.target.value as InquiryPriority || undefined });
                 setCurrentPage(0);
               }}
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
               <option value="">すべての優先度</option>
               <option value="high">高</option>
@@ -163,7 +163,7 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
 
         {/* アクションボタン */}
         <div className="flex justify-between items-center">
-          <p className="text-gray-400 text-sm">全 {total} 件</p>
+          <p className="text-slate-600 dark:text-gray-400 text-sm">全 {total} 件</p>
           <button
             onClick={fetchInquiries}
             disabled={isLoading}
@@ -183,60 +183,60 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
       )}
 
       {/* テーブル */}
-      <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-slate-300 dark:border-gray-700 overflow-hidden">
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-400 mx-auto"></div>
-            <p className="text-gray-400 mt-4">読み込み中...</p>
+            <p className="text-slate-600 dark:text-gray-400 mt-4">読み込み中...</p>
           </div>
         ) : inquiries.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-gray-400">問い合わせがありません</p>
+            <p className="text-slate-600 dark:text-gray-400">問い合わせがありません</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-700/50">
+              <thead className="bg-slate-100 dark:bg-gray-700/50">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 dark:text-gray-300 uppercase tracking-wider">
                     件名
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 dark:text-gray-300 uppercase tracking-wider">
                     送信者
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 dark:text-gray-300 uppercase tracking-wider">
                     ステータス
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 dark:text-gray-300 uppercase tracking-wider">
                     優先度
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 dark:text-gray-300 uppercase tracking-wider">
                     作成日時
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 dark:text-gray-300 uppercase tracking-wider">
                     操作
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700">
+              <tbody className="divide-y divide-slate-300 dark:divide-gray-700">
                 {inquiries.map((inquiry) => (
-                  <tr key={inquiry.id} className="hover:bg-gray-700/30 transition-colors">
+                  <tr key={inquiry.id} className="hover:bg-slate-100 dark:hover:bg-gray-700/30 transition-colors">
                     <td className="px-4 py-3">
-                      <div className="text-white font-medium">{inquiry.title}</div>
+                      <div className="text-slate-900 dark:text-white font-medium">{inquiry.title}</div>
                     </td>
                     <td className="px-4 py-3">
-                      <div className="text-gray-300">{inquiry.sender_name || '未設定'}</div>
-                      <div className="text-xs text-gray-400">{inquiry.sender_email}</div>
+                      <div className="text-slate-700 dark:text-gray-300">{inquiry.sender_name || '未設定'}</div>
+                      <div className="text-xs text-slate-600 dark:text-gray-400">{inquiry.sender_email}</div>
                     </td>
                     <td className="px-4 py-3">{getStatusBadge(inquiry.status)}</td>
                     <td className="px-4 py-3">{getPriorityBadge(inquiry.priority)}</td>
-                    <td className="px-4 py-3 text-gray-300 text-sm">
+                    <td className="px-4 py-3 text-slate-700 dark:text-gray-300 text-sm">
                       {formatDate(inquiry.created_at)}
                     </td>
                     <td className="px-4 py-3">
                       <button
                         onClick={() => onSelectInquiry(inquiry.id)}
-                        className="text-purple-400 hover:text-purple-300 p-2 rounded-lg hover:bg-gray-600 transition-colors"
+                        className="text-purple-400 hover:text-purple-300 p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-gray-600 transition-colors"
                         title="詳細を表示"
                       >
                         <FaEye className="w-4 h-4" />
@@ -253,24 +253,24 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
       {/* ページネーション */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-gray-400 text-sm">
+          <p className="text-slate-600 dark:text-gray-400 text-sm">
             {currentPage * ITEMS_PER_PAGE + 1} - {Math.min((currentPage + 1) * ITEMS_PER_PAGE, total)} 件を表示
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setCurrentPage(currentPage - 1)}
               disabled={currentPage === 0}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
             >
               前へ
             </button>
-            <span className="px-4 py-2 text-gray-300">
+            <span className="px-4 py-2 text-slate-700 dark:text-gray-300">
               {currentPage + 1} / {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(currentPage + 1)}
               disabled={currentPage >= totalPages - 1}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
             >
               次へ
             </button>

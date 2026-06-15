@@ -63,18 +63,18 @@ export default function InquiryReplyModal({
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800 rounded-lg p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
-        <h3 className="text-xl font-bold text-white mb-4">問い合わせに返信</h3>
+        <h3 className="text-2xl font-bold text-white mb-4">問い合わせに返信</h3>
 
         {/* 問い合わせ情報 */}
         <div className="bg-gray-700 rounded-lg p-4 mb-6">
           <div className="space-y-2">
             <div className="flex items-start gap-2">
-              <span className="text-sm text-gray-400 w-20 flex-shrink-0">件名:</span>
-              <span className="text-white font-medium">{inquiryTitle}</span>
+              <span className="text-base text-gray-400 w-20 flex-shrink-0">件名:</span>
+              <span className="text-white font-semibold">{inquiryTitle}</span>
             </div>
             {senderEmail && (
               <div className="flex items-center gap-2">
-                <span className="text-sm text-gray-400 w-20 flex-shrink-0">送信先:</span>
+                <span className="text-base text-gray-400 w-20 flex-shrink-0">送信先:</span>
                 <span className="text-white">{senderEmail}</span>
               </div>
             )}
@@ -83,7 +83,7 @@ export default function InquiryReplyModal({
 
         {/* 返信内容入力 */}
         <div className="mb-6">
-          <label className="text-gray-300 text-sm block mb-2">
+          <label className="text-gray-300 text-base block mb-2">
             返信内容 <span className="text-red-400">*</span>
           </label>
           <textarea
@@ -94,7 +94,7 @@ export default function InquiryReplyModal({
             maxLength={20000}
             className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 resize-none"
           />
-          <p className="text-gray-400 text-xs mt-1">
+          <p className="text-gray-400 text-base mt-1">
             {replyContent.length} / 20,000文字
           </p>
         </div>
@@ -110,8 +110,8 @@ export default function InquiryReplyModal({
                 className="w-5 h-5 rounded border-gray-600 bg-gray-700 text-purple-600 focus:ring-purple-500 focus:ring-offset-gray-800"
               />
               <div className="flex-1">
-                <span className="text-white font-medium">メールで返信を送信</span>
-                <p className="text-gray-400 text-sm mt-1">
+                <span className="text-white font-semibold">メールで返信を送信</span>
+                <p className="text-gray-400 text-base mt-1">
                   チェックを入れると、送信者のメールアドレスに返信が送信されます。
                   チェックを外すと、内部通知のみが送信されます。
                 </p>
@@ -123,7 +123,7 @@ export default function InquiryReplyModal({
         {/* 注意事項 */}
         {!senderEmail && (
           <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-3 mb-6">
-            <p className="text-yellow-200 text-sm">
+            <p className="text-yellow-200 text-base">
               ⚠️ 送信者のメールアドレスが未設定のため、内部通知として送信されます。
             </p>
           </div>

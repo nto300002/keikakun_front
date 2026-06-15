@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useStaffRole } from '@/hooks/useStaffRole';
+import { getSupportPlanStepLabel } from './stepLabels';
 
 interface PlanDeliverableModalProps {
   isOpen: boolean;
@@ -97,12 +98,7 @@ export default function PlanDeliverableModal({
   }, [isOpen]);
 
   const getStepLabel = () => {
-    if (stepType === 'assessment' && cycleNumber === 1) return 'アセスメント';
-    if (stepType === 'assessment' && cycleNumber > 1) return 'モニタリング';
-    if (stepType === 'draft_plan') return '個別支援計画書作成';
-    if (stepType === 'staff_meeting') return '担当者会議';
-    if (stepType === 'final_plan_signed') return '個別支援計画書完成';
-    return stepType;
+    return getSupportPlanStepLabel(stepType);
   };
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -195,22 +191,22 @@ export default function PlanDeliverableModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={onClose}
     >
       <div
-        className="bg-[#1a1f2e] border border-[#2a3441] rounded-xl w-full max-w-lg animate-in fade-in-0 zoom-in-95 duration-200"
+        className="bg-white border border-slate-300 dark:bg-[#1a1f2e] dark:border-[#2a3441] rounded-xl w-full max-w-lg animate-in fade-in-0 zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* ヘッダー */}
-        <div className="flex justify-between items-center p-6 border-b border-[#2a3441]">
+        <div className="flex justify-between items-center p-6 border-b border-slate-300 dark:border-[#2a3441]">
           <div>
-            <h3 className="text-lg font-semibold text-white">{getStepLabel()}</h3>
-            <p className="text-sm text-[#9ca3af] mt-1">第{cycleNumber}回 サイクル</p>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">{getStepLabel()}</h3>
+            <p className="text-base font-semibold text-slate-600 dark:text-[#9ca3af] mt-1">第{cycleNumber}回</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors text-2xl"
+            className="text-slate-500 hover:text-slate-900 dark:text-gray-400 dark:hover:text-white transition-colors text-2xl"
             aria-label="閉じる"
           >
             ✕
@@ -221,16 +217,16 @@ export default function PlanDeliverableModal({
         <div className="p-6">
           {/* 既存のPDFがある場合 */}
           {existingPdfUrl && !selectedFile && (
-            <div className="mb-6 bg-[#0f1419] border border-[#2a3441] rounded-lg p-4">
+            <div className="mb-6 bg-slate-50 border border-slate-300 dark:bg-[#0f1419] dark:border-[#2a3441] rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">📄</span>
                   <div>
-                    <p className="text-white text-sm font-medium">{existingPdfFilename || 'PDF登録済み'}</p>
+                    <p className="text-slate-900 text-base font-semibold dark:text-white">{existingPdfFilename || 'PDF登録済み'}</p>
                     <div className="flex gap-3 mt-1">
                       <button
                         onClick={() => setShowPdfPreview(!showPdfPreview)}
-                        className="text-xs text-[#00bcd4] hover:underline"
+                        className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline"
                       >
                         {showPdfPreview ? 'プレビューを閉じる' : 'プレビューを表示'}
                       </button>
@@ -238,7 +234,7 @@ export default function PlanDeliverableModal({
                         href={existingPdfUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-[#00bcd4] hover:underline"
+                        className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline"
                       >
                         新しいタブで開く
                       </a>
@@ -249,10 +245,10 @@ export default function PlanDeliverableModal({
 
               {/* PDFプレビュー */}
               {showPdfPreview && (
-                <div className="mt-3 border border-[#2a3441] rounded-lg overflow-hidden">
+                <div className="mt-3 border border-slate-300 dark:border-[#2a3441] rounded-lg overflow-hidden">
                   {isLoadingPdf ? (
-                    <div className="h-[500px] flex items-center justify-center bg-[#0f1419]">
-                      <p className="text-[#9ca3af]">読み込み中...</p>
+                    <div className="h-[500px] flex items-center justify-center bg-slate-50 dark:bg-[#0f1419]">
+                      <p className="text-slate-600 dark:text-[#9ca3af]">読み込み中...</p>
                     </div>
                   ) : pdfBlobUrl ? (
                     <iframe
@@ -262,8 +258,8 @@ export default function PlanDeliverableModal({
                       allow="fullscreen"
                     />
                   ) : (
-                    <div className="h-[500px] flex items-center justify-center bg-[#0f1419]">
-                      <p className="text-[#9ca3af]">PDFが見つかりません</p>
+                    <div className="h-[500px] flex items-center justify-center bg-slate-50 dark:bg-[#0f1419]">
+                      <p className="text-slate-600 dark:text-[#9ca3af]">PDFが見つかりません</p>
                     </div>
                   )}
                 </div>
@@ -279,8 +275,8 @@ export default function PlanDeliverableModal({
               <div className="flex items-start gap-3">
                 <span className="text-2xl">⚠️</span>
                 <div>
-                  <p className="text-yellow-500 font-medium mb-1">閲覧専用モード</p>
-                  <p className="text-sm text-gray-300">
+                  <p className="text-yellow-700 font-semibold dark:text-yellow-500 mb-1">閲覧専用モード</p>
+                  <p className="text-base font-semibold text-slate-700 dark:text-gray-300">
                     一般の社員権限では個別支援計画のPDFをアップロードできません。
                     <br />
                     PDFのアップロードが必要な場合は、マネージャー職スタッフ/事務所オーナーにご依頼ください。
@@ -295,8 +291,8 @@ export default function PlanDeliverableModal({
                 {...getRootProps()}
                 className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${
                   isDragActive
-                    ? 'border-[#4f46e5] bg-[#4f46e5]/10'
-                    : 'border-[#2a3441] hover:border-[#4f46e5]/50 hover:bg-[#0f1419]'
+                    ? 'border-indigo-600 bg-indigo-50 dark:border-[#4f46e5] dark:bg-[#4f46e5]/10'
+                    : 'border-slate-300 hover:border-indigo-500 hover:bg-slate-50 dark:border-[#2a3441] dark:hover:border-[#4f46e5]/50 dark:bg-[#0f1419]'
                 }`}
               >
                 <input {...getInputProps()} />
@@ -304,21 +300,21 @@ export default function PlanDeliverableModal({
                   <span className="text-5xl">📎</span>
                   {selectedFile ? (
                     <>
-                      <p className="text-white font-medium">{selectedFile.name}</p>
-                      <p className="text-xs text-[#9ca3af]">
+                      <p className="text-slate-900 font-semibold dark:text-white">{selectedFile.name}</p>
+                      <p className="text-base font-semibold text-slate-600 dark:text-[#9ca3af]">
                         {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                       </p>
                     </>
                   ) : isDragActive ? (
-                    <p className="text-white">ここにドロップしてください</p>
+                    <p className="text-slate-900 font-semibold dark:text-white">ここにドロップしてください</p>
                   ) : (
                     <>
-                      <p className="text-white">
+                      <p className="text-slate-900 font-semibold dark:text-white">
                         PDFファイルをドラッグ&ドロップ
                         <br />
-                        または<span className="text-[#4f46e5]">クリックして選択</span>
+                        または<span className="text-indigo-600 dark:text-[#4f46e5]">クリックして選択</span>
                       </p>
-                      <p className="text-xs text-[#9ca3af]">最大ファイルサイズ: 10MB</p>
+                      <p className="text-base font-semibold text-slate-600 dark:text-[#9ca3af]">最大ファイルサイズ: 10MB</p>
                     </>
                   )}
                 </div>
@@ -326,19 +322,19 @@ export default function PlanDeliverableModal({
 
               {/* エラー表示 */}
               {error && (
-                <div className="mt-4 bg-[#ef4444]/10 border border-[#ef4444] rounded-lg p-3">
-                  <p className="text-[#ef4444] text-sm">⚠️ {error}</p>
+                <div className="mt-4 bg-red-50 border border-red-500 dark:bg-[#ef4444]/10 dark:border-[#ef4444] rounded-lg p-3">
+                  <p className="text-red-600 text-base font-semibold dark:text-[#ef4444]">⚠️ {error}</p>
                 </div>
               )}
 
               {/* アップロード進捗 */}
               {isUploading && uploadProgress > 0 && (
                 <div className="mt-4">
-                  <div className="flex justify-between text-sm text-[#9ca3af] mb-2">
+                  <div className="flex justify-between text-base font-semibold text-slate-600 dark:text-[#9ca3af] mb-2">
                     <span>アップロード中...</span>
                     <span>{uploadProgress}%</span>
                   </div>
-                  <div className="w-full bg-[#0f1419] rounded-full h-2 overflow-hidden">
+                  <div className="w-full bg-slate-200 dark:bg-[#0f1419] rounded-full h-2 overflow-hidden">
                     <div
                       className="bg-[#4f46e5] h-full transition-all duration-300"
                       style={{ width: `${uploadProgress}%` }}
@@ -351,11 +347,11 @@ export default function PlanDeliverableModal({
         </div>
 
         {/* フッター */}
-        <div className="flex justify-end gap-3 p-6 border-t border-[#2a3441]">
+        <div className="flex justify-end gap-3 p-6 border-t border-slate-300 dark:border-[#2a3441]">
           <button
             onClick={onClose}
             disabled={isUploading}
-            className="px-4 py-2 text-gray-400 hover:text-white transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-slate-600 hover:text-slate-900 font-semibold dark:text-gray-400 dark:hover:text-white transition-colors disabled:opacity-50"
           >
             {isEmployee ? '閉じる' : 'キャンセル'}
           </button>
@@ -363,7 +359,7 @@ export default function PlanDeliverableModal({
             <button
               onClick={handleUpload}
               disabled={!selectedFile || isUploading}
-              className="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-6 py-2 rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#4f46e5] hover:bg-[#4338ca] text-white px-6 py-2 rounded-lg transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isUploading ? 'アップロード中...' : 'アップロード'}
             </button>

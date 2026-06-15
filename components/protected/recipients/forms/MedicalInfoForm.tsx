@@ -54,14 +54,14 @@ export default function MedicalInfoForm({
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
           医療保険の種類 <span className="text-red-400">*</span>
         </label>
         <select
           required
           value={formData.medical_care_insurance}
           onChange={(e) => setFormData({ ...formData, medical_care_insurance: e.target.value as MedicalInfoInput['medical_care_insurance'] })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
         >
           <option value="national_health_insurance">国保</option>
           <option value="mutual_aid">共済</option>
@@ -73,7 +73,7 @@ export default function MedicalInfoForm({
 
       {formData.medical_care_insurance === 'other' && (
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
+          <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
             その他の詳細 <span className="text-red-400">*</span>
           </label>
           <input
@@ -81,21 +81,21 @@ export default function MedicalInfoForm({
             required
             value={formData.medical_care_insurance_other_text}
             onChange={(e) => setFormData({ ...formData, medical_care_insurance_other_text: e.target.value })}
-            className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+            className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
             placeholder="その他の医療保険の種類を入力してください"
           />
         </div>
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
           公費負担 <span className="text-red-400">*</span>
         </label>
         <select
           required
           value={formData.aiding}
           onChange={(e) => setFormData({ ...formData, aiding: e.target.value as 'none' | 'subsidized' | 'full_exemption' })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
         >
           <option value="none">なし</option>
           <option value="subsidized">あり（一部補助）</option>
@@ -111,7 +111,7 @@ export default function MedicalInfoForm({
             onChange={(e) => setFormData({ ...formData, history_of_hospitalization_in_the_past_2_years: e.target.checked })}
             className="w-4 h-4"
           />
-          <span className="text-white">過去2年以内に入院歴がある</span>
+          <span className="text-slate-900 dark:text-white">過去2年以内に入院歴がある</span>
         </label>
       </div>
 
@@ -120,7 +120,7 @@ export default function MedicalInfoForm({
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+          className="px-4 py-2 text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-white transition-colors"
         >
           キャンセル
         </button>

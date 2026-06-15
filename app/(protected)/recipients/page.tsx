@@ -6,6 +6,7 @@ import { welfareRecipientsApi, type WelfareRecipient } from '@/lib/welfare-recip
 import { MagnifyingGlassIcon, PlusIcon, UserIcon } from '@heroicons/react/24/outline';
 import Breadcrumb from '@/components/ui/Breadcrumb';
 
+// UI設計意図: 利用者一覧は探す・確認する画面なので、氏名や連絡先などの主要情報をtext-base以上にし、操作ボタンは44px以上を確保する。
 export default function RecipientsListPage() {
   const [recipients, setRecipients] = useState<WelfareRecipient[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -58,20 +59,20 @@ export default function RecipientsListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0f1419] to-[#1a2332] p-4 lg:p-8">
+    <div className="min-h-screen bg-slate-100 p-4 lg:p-8 dark:bg-gradient-to-b dark:from-[#0f1419] dark:to-[#1a2332]">
       <div className="max-w-7xl mx-auto">
         {/* Breadcrumb */}
         <Breadcrumb items={[{ label: '利用者一覧', current: true }]} />
         {/* Header */}
-        <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441] p-6 mb-6">
+        <div className="bg-white rounded-lg border border-slate-300 p-6 mb-6 shadow-sm dark:bg-[#0f1419cc] dark:border-[#2a3441]">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-white">利用者管理</h1>
-              <p className="text-gray-400 mt-1">登録済み利用者: {totalRecipients}名</p>
+              <h1 className="text-3xl font-bold text-slate-950 dark:text-white">利用者管理</h1>
+              <p className="text-base font-semibold text-slate-600 mt-1 dark:text-gray-400">登録済み利用者: {totalRecipients}名</p>
             </div>
             <Link
               href="/recipients/new"
-              className="flex items-center gap-2 px-4 py-2 bg-[#10b981] hover:bg-[#0f9f6e] text-white rounded-lg font-medium transition-colors"
+              className="flex min-h-[44px] items-center gap-2 px-4 py-2 bg-[#10b981] hover:bg-[#0f9f6e] text-base font-semibold text-white rounded-lg transition-colors"
             >
               <PlusIcon className="w-5 h-5" />
               新規登録
@@ -80,7 +81,7 @@ export default function RecipientsListPage() {
         </div>
 
         {/* Search Bar */}
-        <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441] p-6 mb-6">
+        <div className="bg-white rounded-lg border border-slate-300 p-6 mb-6 shadow-sm dark:bg-[#0f1419cc] dark:border-[#2a3441]">
           <form onSubmit={handleSearch} className="flex gap-4">
             <div className="flex-1 relative">
               <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -89,12 +90,12 @@ export default function RecipientsListPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="名前で検索（漢字・ふりがな）"
-                className="w-full pl-10 pr-4 py-2 bg-[#1a2332] border border-[#2a3441] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#10b981]"
+                className="w-full min-h-[44px] pl-10 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-base font-semibold text-slate-900 placeholder-slate-500 focus:outline-none focus:border-[#10b981] dark:bg-[#1a2332] dark:border-[#2a3441] dark:text-white dark:placeholder-gray-500"
               />
             </div>
             <button
               type="submit"
-              className="px-6 py-2 bg-[#2a3441] hover:bg-[#3a4451] text-white rounded-lg font-medium transition-colors"
+              className="min-h-[44px] px-6 py-2 bg-slate-600 hover:bg-slate-700 text-base font-semibold text-white rounded-lg transition-colors dark:bg-[#2a3441] dark:hover:bg-[#3a4451]"
             >
               検索
             </button>
@@ -102,83 +103,83 @@ export default function RecipientsListPage() {
         </div>
 
         {/* Recipients List */}
-        <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441]">
+        <div className="bg-white rounded-lg border border-slate-300 shadow-sm dark:bg-[#0f1419cc] dark:border-[#2a3441]">
           {isLoading ? (
             <div className="p-8 text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#10b981]"></div>
-              <p className="mt-4 text-gray-400">読み込み中...</p>
+              <p className="mt-4 text-base font-semibold text-slate-600 dark:text-gray-400">読み込み中...</p>
             </div>
           ) : error ? (
             <div className="p-8 text-center">
-              <p className="text-red-400">{error}</p>
+              <p className="text-base font-semibold text-red-400">{error}</p>
             </div>
           ) : recipients.length === 0 ? (
             <div className="p-8 text-center">
-              <UserIcon className="w-12 h-12 mx-auto text-gray-600 mb-4" />
-              <p className="text-gray-400">利用者が見つかりません</p>
+              <UserIcon className="w-12 h-12 mx-auto text-slate-400 mb-4 dark:text-gray-600" />
+              <p className="text-base font-semibold text-slate-600 dark:text-gray-400">利用者が見つかりません</p>
             </div>
           ) : (
             <>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-[#1a2332] border-b border-[#2a3441]">
+                  <thead className="bg-slate-100 border-b border-slate-300 dark:bg-[#1a2332] dark:border-[#2a3441]">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-base font-semibold text-slate-600 dark:text-gray-400">
                         氏名
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-base font-semibold text-slate-600 dark:text-gray-400">
                         ふりがな
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-base font-semibold text-slate-600 dark:text-gray-400">
                         年齢
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-base font-semibold text-slate-600 dark:text-gray-400">
                         性別
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-base font-semibold text-slate-600 dark:text-gray-400">
                         連絡先
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      <th className="px-6 py-3 text-left text-base font-semibold text-slate-600 dark:text-gray-400">
                         操作
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#2a3441]">
+                  <tbody className="divide-y divide-slate-200 dark:divide-[#2a3441]">
                     {recipients.map((recipient) => (
-                      <tr key={recipient.id} className="hover:bg-[#1a2332] transition-colors">
+                      <tr key={recipient.id} className="hover:bg-slate-50 transition-colors dark:hover:bg-[#1a2332]">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Link
                             href={`/recipients/${recipient.id}`}
-                            className="text-sm font-medium text-white hover:text-[#10b981] transition-colors cursor-pointer"
+                            className="text-lg font-bold text-slate-950 hover:text-[#10b981] transition-colors cursor-pointer dark:text-white"
                           >
                             {recipient.last_name} {recipient.first_name}
                           </Link>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-400">
+                          <div className="text-base font-semibold text-slate-600 dark:text-gray-400">
                             {recipient.last_name_furigana} {recipient.first_name_furigana}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-400">
+                          <div className="text-base font-semibold text-slate-600 dark:text-gray-400">
                             {calculateAge(recipient.birth_day)}歳
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-400">
+                          <div className="text-base font-semibold text-slate-600 dark:text-gray-400">
                             {recipient.gender === 'male' ? '男性' :
                              recipient.gender === 'female' ? '女性' : 'その他'}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-400">
+                          <div className="text-base font-semibold text-slate-600 dark:text-gray-400">
                             {recipient.detail?.tel || '-'}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
                           <Link
                             href={`/recipients/${recipient.id}`}
-                            className="text-[#10b981] hover:text-[#0f9f6e] text-sm font-medium"
+                            className="inline-flex min-h-[44px] items-center rounded-md border border-[#10b981]/60 px-4 py-2 text-base font-semibold text-[#10b981] hover:bg-[#10b981]/10 hover:text-[#0f9f6e]"
                           >
                             詳細
                           </Link>
@@ -191,21 +192,21 @@ export default function RecipientsListPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="px-6 py-4 bg-[#1a2332] border-t border-[#2a3441] flex justify-between items-center">
+                <div className="px-6 py-4 bg-slate-100 border-t border-slate-300 flex justify-between items-center dark:bg-[#1a2332] dark:border-[#2a3441]">
                   <button
                     onClick={() => fetchRecipients(currentPage - 1, searchQuery)}
                     disabled={currentPage === 1}
-                    className="px-4 py-2 text-sm text-gray-400 hover:text-white disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+                    className="min-h-[44px] px-4 py-2 text-base font-semibold text-slate-600 hover:text-slate-950 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors dark:text-gray-400 dark:hover:text-white dark:disabled:text-gray-600"
                   >
                     前へ
                   </button>
-                  <div className="text-sm text-gray-400">
+                  <div className="text-base font-semibold text-gray-400">
                     {currentPage} / {totalPages} ページ
                   </div>
                   <button
                     onClick={() => fetchRecipients(currentPage + 1, searchQuery)}
                     disabled={currentPage === totalPages}
-                    className="px-4 py-2 text-sm text-gray-400 hover:text-white disabled:text-gray-600 disabled:cursor-not-allowed transition-colors"
+                    className="min-h-[44px] px-4 py-2 text-base font-semibold text-slate-600 hover:text-slate-950 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors dark:text-gray-400 dark:hover:text-white dark:disabled:text-gray-600"
                   >
                     次へ
                   </button>

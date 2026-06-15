@@ -65,7 +65,7 @@ export default function HospitalVisitForm({
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
           病名 <span className="text-red-400">*</span>
         </label>
         <input
@@ -73,13 +73,13 @@ export default function HospitalVisitForm({
           required
           value={formData.disease}
           onChange={(e) => setFormData({ ...formData, disease: e.target.value })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
           placeholder="例: 高血圧症"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
           症状 <span className="text-red-400">*</span>
         </label>
         <input
@@ -87,13 +87,13 @@ export default function HospitalVisitForm({
           required
           value={formData.symptoms}
           onChange={(e) => setFormData({ ...formData, symptoms: e.target.value })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
           placeholder="例: めまい、頭痛"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
           医療機関名 <span className="text-red-400">*</span>
         </label>
         <input
@@ -101,14 +101,14 @@ export default function HospitalVisitForm({
           required
           value={formData.medical_institution}
           onChange={(e) => setFormData({ ...formData, medical_institution: e.target.value })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
           placeholder="例: 〇〇クリニック"
         />
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
+          <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
             主治医 <span className="text-red-400">*</span>
           </label>
           <input
@@ -116,13 +116,13 @@ export default function HospitalVisitForm({
             required
             value={formData.doctor}
             onChange={(e) => setFormData({ ...formData, doctor: e.target.value })}
-            className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+            className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
             placeholder="例: 山田太郎"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
+          <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
             電話番号 <span className="text-red-400">*</span>
           </label>
           <input
@@ -130,14 +130,14 @@ export default function HospitalVisitForm({
             required
             value={formData.tel}
             onChange={(e) => setFormData({ ...formData, tel: e.target.value })}
-            className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+            className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
             placeholder="03-1234-5678"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
           通院頻度 <span className="text-red-400">*</span>
         </label>
         <input
@@ -145,14 +145,14 @@ export default function HospitalVisitForm({
           required
           value={formData.frequency_of_hospital_visits}
           onChange={(e) => setFormData({ ...formData, frequency_of_hospital_visits: e.target.value })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
           placeholder="例: 月1回"
         />
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
+          <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
             開始日
           </label>
           <DateDrumPicker
@@ -164,7 +164,7 @@ export default function HospitalVisitForm({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">
+          <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
             終了日
           </label>
           <DateDrumPicker
@@ -184,19 +184,19 @@ export default function HospitalVisitForm({
             onChange={(e) => setFormData({ ...formData, taking_medicine: e.target.checked })}
             className="w-4 h-4"
           />
-          <span className="text-white">服薬あり</span>
+          <span className="text-slate-900 dark:text-white">服薬あり</span>
         </label>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
           特記事項
         </label>
         <textarea
           value={formData.special_remarks}
           onChange={(e) => setFormData({ ...formData, special_remarks: e.target.value })}
           rows={3}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
           placeholder="その他特記事項があれば入力してください"
         />
       </div>
@@ -206,7 +206,7 @@ export default function HospitalVisitForm({
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+          className="px-4 py-2 text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-white transition-colors"
         >
           キャンセル
         </button>

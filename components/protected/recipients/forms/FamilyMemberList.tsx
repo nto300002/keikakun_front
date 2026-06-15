@@ -66,7 +66,7 @@ export default function FamilyMemberList({
   if (showForm) {
     return (
       <div>
-        <h4 className="text-md font-semibold text-white mb-4">
+        <h4 className="text-md font-semibold text-slate-950 dark:text-white mb-4">
           {editingMember ? '家族情報の編集' : '家族情報の追加'}
         </h4>
         <FamilyMemberForm
@@ -92,35 +92,35 @@ export default function FamilyMemberList({
       </div>
 
       {familyMembers.length === 0 ? (
-        <p className="text-gray-100 text-sm">家族情報が登録されていません。</p>
+        <p className="text-slate-700 dark:text-gray-100 text-sm">家族情報が登録されていません。</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-300">
-                <th className="text-left py-2 px-3 text-gray-100 font-medium">氏名</th>
-                <th className="text-left py-2 px-3 text-gray-100 font-medium">続柄</th>
-                <th className="text-left py-2 px-3 text-gray-100 font-medium">世帯</th>
-                <th className="text-left py-2 px-3 text-gray-100 font-medium">健康状態</th>
-                <th className="text-left py-2 px-3 text-gray-100 font-medium">備考</th>
-                <th className="text-right py-2 px-3 text-gray-100 font-medium">操作</th>
+                <th className="text-left py-2 px-3 text-slate-700 dark:text-gray-100 font-medium">氏名</th>
+                <th className="text-left py-2 px-3 text-slate-700 dark:text-gray-100 font-medium">続柄</th>
+                <th className="text-left py-2 px-3 text-slate-700 dark:text-gray-100 font-medium">世帯</th>
+                <th className="text-left py-2 px-3 text-slate-700 dark:text-gray-100 font-medium">健康状態</th>
+                <th className="text-left py-2 px-3 text-slate-700 dark:text-gray-100 font-medium">備考</th>
+                <th className="text-right py-2 px-3 text-slate-700 dark:text-gray-100 font-medium">操作</th>
               </tr>
             </thead>
             <tbody>
               {familyMembers.map((member) => (
-                <tr key={member.id} className="border-b border-[#2a3441]/50">
-                  <td className="py-3 px-3 text-white">{member.name}</td>
-                  <td className="py-3 px-3 text-white">{member.relationship}</td>
-                  <td className="py-3 px-3 text-white">{getHouseholdLabel(member.household)}</td>
-                  <td className="py-3 px-3 text-white">{member.ones_health}</td>
-                  <td className="py-3 px-3 text-gray-100">
+                <tr key={member.id} className="border-b border-slate-200 dark:border-[#2a3441]/50">
+                  <td className="py-3 px-3 text-slate-900 dark:text-white">{member.name}</td>
+                  <td className="py-3 px-3 text-slate-900 dark:text-white">{member.relationship}</td>
+                  <td className="py-3 px-3 text-slate-900 dark:text-white">{getHouseholdLabel(member.household)}</td>
+                  <td className="py-3 px-3 text-slate-900 dark:text-white">{member.ones_health}</td>
+                  <td className="py-3 px-3 text-slate-700 dark:text-gray-100">
                     <ExpandableText text={member.remarks} maxLength={50} />
                   </td>
                   <td className="py-3 px-3">
                     <div className="flex justify-end gap-2">
                       <button
                         onClick={() => handleEdit(member)}
-                        className="p-1 text-gray-100 hover:text-white hover:bg-[#2a3441] rounded transition-colors"
+                        className="p-1 text-slate-700 dark:text-gray-100 hover:text-slate-950 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-600 dark:bg-[#2a3441] rounded transition-colors"
                       >
                         <PencilIcon className="w-4 h-4" />
                       </button>

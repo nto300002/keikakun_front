@@ -54,16 +54,16 @@ export default function Modal({
       onClick={handleBackdropClick}
     >
       <div
-        className={`bg-[#0f1419] border border-[#2a3441] rounded-lg w-full ${sizeClasses[size]} my-8 max-h-[calc(100vh-4rem)] flex flex-col`}
+        className={`bg-white border border-slate-300 text-slate-900 shadow-xl dark:bg-[#0f1419] dark:border-[#2a3441] dark:text-white rounded-lg w-full ${sizeClasses[size]} my-8 max-h-[calc(100vh-4rem)] flex flex-col`}
       >
         {/* Header */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-6 border-b border-[#2a3441] flex-shrink-0">
-            {title && <h2 className="text-xl font-semibold text-white">{title}</h2>}
+          <div className="flex items-center justify-between p-6 border-b border-slate-300 dark:border-[#2a3441] flex-shrink-0">
+            {title && <h2 className="text-xl font-semibold text-slate-950 dark:text-white">{title}</h2>}
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="p-2 text-gray-400 hover:text-white hover:bg-[#2a3441] rounded-lg transition-colors ml-auto"
+                className="p-2 text-slate-500 hover:text-slate-950 hover:bg-slate-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-[#2a3441] rounded-lg transition-colors ml-auto"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>

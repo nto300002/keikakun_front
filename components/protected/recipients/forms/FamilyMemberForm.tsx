@@ -59,7 +59,7 @@ export default function FamilyMemberForm({
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-100 mb-2">
+        <label className="block text-sm font-medium text-slate-700 dark:text-gray-100 mb-2">
           氏名 <span className="text-red-400">*</span>
         </label>
         <input
@@ -67,12 +67,12 @@ export default function FamilyMemberForm({
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-100 mb-2">
+        <label className="block text-sm font-medium text-slate-700 dark:text-gray-100 mb-2">
           続柄 <span className="text-red-400">*</span>
         </label>
         <input
@@ -80,13 +80,13 @@ export default function FamilyMemberForm({
           required
           value={formData.relationship}
           onChange={(e) => setFormData({ ...formData, relationship: e.target.value })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
           placeholder="例: 父、母、兄弟"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-100 mb-2">
+        <label className="block text-sm font-medium text-slate-700 dark:text-gray-100 mb-2">
           世帯 <span className="text-red-400">*</span>
         </label>
         <div className="flex gap-4">
@@ -99,7 +99,7 @@ export default function FamilyMemberForm({
               onChange={(e) => setFormData({ ...formData, household: e.target.value as 'same' | 'separate' })}
               className="mr-2"
             />
-            <span className="text-white">同じ</span>
+            <span className="text-slate-900 dark:text-white">同じ</span>
           </label>
           <label className="flex items-center">
             <input
@@ -110,13 +110,13 @@ export default function FamilyMemberForm({
               onChange={(e) => setFormData({ ...formData, household: e.target.value as 'same' | 'separate' })}
               className="mr-2"
             />
-            <span className="text-white">別</span>
+            <span className="text-slate-900 dark:text-white">別</span>
           </label>
         </div>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-100 mb-2">
+        <label className="block text-sm font-medium text-slate-700 dark:text-gray-100 mb-2">
           健康状態 <span className="text-red-400">*</span>
         </label>
         <input
@@ -124,20 +124,20 @@ export default function FamilyMemberForm({
           required
           value={formData.ones_health}
           onChange={(e) => setFormData({ ...formData, ones_health: e.target.value })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
           placeholder="例: 良好、持病あり"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-100 mb-2">
+        <label className="block text-sm font-medium text-slate-700 dark:text-gray-100 mb-2">
           備考
         </label>
         <textarea
           value={formData.remarks}
           onChange={(e) => setFormData({ ...formData, remarks: e.target.value })}
           rows={3}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
         />
       </div>
 
@@ -146,7 +146,7 @@ export default function FamilyMemberForm({
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="px-4 py-2 text-gray-100 hover:text-white transition-colors"
+          className="px-4 py-2 text-slate-700 dark:text-gray-100 hover:text-slate-950 dark:hover:text-white transition-colors"
         >
           キャンセル
         </button>

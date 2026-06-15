@@ -76,34 +76,34 @@ export default function ServiceHistoryList({
       </div>
 
       {serviceHistory.length === 0 ? (
-        <p className="text-gray-400 text-center py-8">サービス利用歴がありません</p>
+        <p className="text-slate-600 dark:text-gray-400 text-center py-8">サービス利用歴がありません</p>
       ) : (
         <div className="space-y-3">
           {serviceHistory.map((history) => (
             <div
               key={history.id}
-              className="p-4 bg-[#0f1419] rounded-lg border border-[#2a3441] hover:border-[#3a4451] transition-colors"
+              className="p-4 bg-white dark:bg-[#0f1419] rounded-lg border border-slate-300 dark:border-[#2a3441] hover:border-[#3a4451] transition-colors"
             >
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1 space-y-2">
                   <div className="grid md:grid-cols-2 gap-3 text-sm">
                     <div>
-                      <p className="text-gray-400">事業所名</p>
-                      <p className="text-white font-medium">{history.office_name}</p>
+                      <p className="text-slate-600 dark:text-gray-400">事業所名</p>
+                      <p className="text-slate-900 dark:text-white font-medium">{history.office_name}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400">サービス名</p>
-                      <p className="text-white">{history.service_name}</p>
+                      <p className="text-slate-600 dark:text-gray-400">サービス名</p>
+                      <p className="text-slate-900 dark:text-white">{history.service_name}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400">利用開始日</p>
-                      <p className="text-white">
+                      <p className="text-slate-600 dark:text-gray-400">利用開始日</p>
+                      <p className="text-slate-900 dark:text-white">
                         {new Date(history.starting_day).toLocaleDateString('ja-JP')}
                       </p>
                     </div>
                     <div>
-                      <p className="text-gray-400">利用時間/月</p>
-                      <p className="text-white">{history.amount_used}</p>
+                      <p className="text-slate-600 dark:text-gray-400">利用時間/月</p>
+                      <p className="text-slate-900 dark:text-white">{history.amount_used}</p>
                     </div>
                   </div>
                 </div>
@@ -111,7 +111,7 @@ export default function ServiceHistoryList({
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(history)}
-                    className="p-2 text-gray-400 hover:text-white transition-colors"
+                    className="p-2 text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-white transition-colors"
                     title="編集"
                   >
                     <PencilIcon className="w-4 h-4" />

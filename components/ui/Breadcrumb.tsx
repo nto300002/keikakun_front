@@ -16,14 +16,15 @@ interface BreadcrumbProps {
 export default function Breadcrumb({ items }: BreadcrumbProps) {
   return (
     <nav aria-label="パンくずリスト" className="mb-6">
-      <ol className="flex items-center space-x-2 text-sm">
+      {/* UI設計意図: パンくずも主要導線として扱い、text-base以上とライト/ダーク双方の十分なコントラストを確保する。 */}
+      <ol className="flex items-center space-x-2 text-base font-semibold">
         {/* ダッシュボード（ホーム） */}
         <li>
           <Link
             href="/dashboard"
-            className="flex items-center text-gray-400 hover:text-white transition-colors"
+            className="flex items-center text-slate-600 hover:text-slate-950 transition-colors dark:text-gray-300 dark:hover:text-white"
           >
-            <HomeIcon className="w-4 h-4 mr-1" />
+            <HomeIcon className="w-5 h-5 mr-1.5" />
             ダッシュボード
           </Link>
         </li>
@@ -31,15 +32,15 @@ export default function Breadcrumb({ items }: BreadcrumbProps) {
         {/* 各パンくずリストアイテム */}
         {items.map((item, index) => (
           <li key={index} className="flex items-center">
-            <ChevronRightIcon className="w-4 h-4 text-gray-500 mx-2" />
+            <ChevronRightIcon className="w-5 h-5 text-slate-400 mx-2 dark:text-gray-500" />
             {item.current || !item.href ? (
-              <span className="text-white font-medium" aria-current="page">
+              <span className="text-slate-950 font-bold dark:text-white" aria-current="page">
                 {item.label}
               </span>
             ) : (
               <Link
                 href={item.href}
-                className="text-gray-400 hover:text-white transition-colors"
+                className="text-slate-600 hover:text-slate-950 transition-colors dark:text-gray-300 dark:hover:text-white"
               >
                 {item.label}
               </Link>

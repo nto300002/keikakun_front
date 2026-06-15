@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DateDrumPicker from '@/components/ui/DateDrumPicker';
 import EmployeeActionRequestModal from '@/components/common/EmployeeActionRequestModal';
@@ -101,6 +101,14 @@ interface FormData {
   disabilityInfo: DisabilityInfoData;
   disabilityDetails: DisabilityDetailData[];
 }
+
+const createEmptyDisabilityDetail = (): DisabilityDetailData => ({
+  category: '',
+  gradeOrLevel: '',
+  physicalDisabilityType: '',
+  physicalDisabilityTypeOtherText: '',
+  applicationStatus: '',
+});
 
 const INITIAL_FORM_DATA: FormData = {
   basicInfo: {
@@ -243,6 +251,9 @@ const GRADE_LEVEL_OPTIONS = {
   ],
 };
 
+const SENIOR_RECIPIENT_FORM_CLASS =
+  'space-y-8 [&_h1]:text-4xl [&_h1]:font-bold [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-2xl [&_h3]:font-bold [&_h4]:text-xl [&_h4]:font-bold [&_p]:text-base [&_p]:font-semibold [&_label]:text-lg [&_label]:font-bold [&_input]:text-lg [&_input]:font-semibold [&_input]:px-4 [&_input]:py-3 [&_select]:text-lg [&_select]:font-semibold [&_select]:px-4 [&_select]:py-3 [&_textarea]:text-lg [&_textarea]:font-semibold [&_textarea]:px-4 [&_textarea]:py-3 [&_button]:text-lg [&_button]:font-bold';
+
 export default function UserRegistrationForm() {
   const [currentSection, setCurrentSection] = useState(0);
   const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
@@ -268,6 +279,15 @@ export default function UserRegistrationForm() {
   const getProgressPercentage = () => {
     return ((currentSection + 1) / sections.length) * 100;
   };
+
+  useEffect(() => {
+    if (currentSection !== 4 || formData.disabilityDetails.length > 0) return;
+
+    setFormData(prev => ({
+      ...prev,
+      disabilityDetails: [createEmptyDisabilityDetail()],
+    }));
+  }, [currentSection, formData.disabilityDetails.length]);
 
   // Form validation for each section
   const validateSection = (sectionId: number): boolean => {
@@ -412,13 +432,7 @@ export default function UserRegistrationForm() {
   const addDisabilityDetail = () => {
     setFormData(prev => ({
       ...prev,
-      disabilityDetails: [...prev.disabilityDetails, {
-        category: '',
-        gradeOrLevel: '',
-        physicalDisabilityType: '',
-        physicalDisabilityTypeOtherText: '',
-        applicationStatus: '',
-      }],
+      disabilityDetails: [...prev.disabilityDetails, createEmptyDisabilityDetail()],
     }));
   };
 
@@ -481,11 +495,11 @@ export default function UserRegistrationForm() {
   };
 
   return (
-    <>
+    <div className={SENIOR_RECIPIENT_FORM_CLASS}>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white mb-2">利用者新規登録</h1>
-        <p className="text-gray-400">新しい利用者の情報を登録します</p>
+        <h1 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">利用者新規登録</h1>
+        <p className="text-slate-600 dark:text-gray-400">新しい利用者の情報を登録します</p>
       </div>
 
         {/* Progress Bar */}
@@ -496,10 +510,10 @@ export default function UserRegistrationForm() {
                 key={section.id}
                 className={`flex items-center ${index < sections.length - 1 ? 'flex-1' : ''}`}
               >
-                <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-bold ${
+                <div className={`w-9 h-9 rounded-full border-2 flex items-center justify-center text-base font-bold ${
                   index <= currentSection
                     ? 'bg-[#10b981] border-[#10b981] text-white'
-                    : 'border-gray-600 text-gray-400'
+                    : 'border-gray-600 text-slate-600 dark:text-gray-400'
                 }`}>
                   {index + 1}
                 </div>
@@ -512,8 +526,8 @@ export default function UserRegistrationForm() {
             ))}
           </div>
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-white">{sections[currentSection].title}</h2>
-            <p className="text-gray-400 text-sm">{sections[currentSection].description}</p>
+            <h2 className="text-xl font-semibold text-slate-950 dark:text-white">{sections[currentSection].title}</h2>
+            <p className="text-slate-600 dark:text-gray-400 text-sm">{sections[currentSection].description}</p>
           </div>
           <div className="mt-4 bg-gray-700 rounded-full h-2">
             <div
@@ -524,22 +538,22 @@ export default function UserRegistrationForm() {
         </div>
 
         {/* Form Content */}
-        <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441] p-8">
+        <div className="bg-white dark:bg-[#0f1419cc] rounded-lg border border-slate-300 dark:border-[#2a3441] p-8">
           {currentSection === 0 && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-white mb-4">基本情報</h3>
+              <h3 className="text-lg font-semibold text-slate-950 dark:text-white mb-4">基本情報</h3>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                     姓 <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.basicInfo.lastName}
                     onChange={(e) => handleBasicInfoChange('lastName', e.target.value)}
-                    className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                      errors.lastName ? 'border-red-500' : 'border-[#2a3441]'
+                    className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                      errors.lastName ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                     }`}
                     placeholder="山田"
                   />
@@ -547,15 +561,15 @@ export default function UserRegistrationForm() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                     名 <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.basicInfo.firstName}
                     onChange={(e) => handleBasicInfoChange('firstName', e.target.value)}
-                    className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                      errors.firstName ? 'border-red-500' : 'border-[#2a3441]'
+                    className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                      errors.firstName ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                     }`}
                     placeholder="太郎"
                   />
@@ -563,15 +577,15 @@ export default function UserRegistrationForm() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                     姓（ふりがな） <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.basicInfo.lastNameFurigana}
                     onChange={(e) => handleBasicInfoChange('lastNameFurigana', e.target.value)}
-                    className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                      errors.lastNameFurigana ? 'border-red-500' : 'border-[#2a3441]'
+                    className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                      errors.lastNameFurigana ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                     }`}
                     placeholder="やまだ"
                   />
@@ -579,15 +593,15 @@ export default function UserRegistrationForm() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                     名（ふりがな） <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
                     value={formData.basicInfo.firstNameFurigana}
                     onChange={(e) => handleBasicInfoChange('firstNameFurigana', e.target.value)}
-                    className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                      errors.firstNameFurigana ? 'border-red-500' : 'border-[#2a3441]'
+                    className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                      errors.firstNameFurigana ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                     }`}
                     placeholder="たろう"
                   />
@@ -595,7 +609,7 @@ export default function UserRegistrationForm() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                     生年月日 <span className="text-red-400">*</span>
                   </label>
                   <DateDrumPicker
@@ -609,14 +623,14 @@ export default function UserRegistrationForm() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                     性別 <span className="text-red-400">*</span>
                   </label>
                   <select
                     value={formData.basicInfo.gender}
                     onChange={(e) => handleBasicInfoChange('gender', e.target.value)}
-                    className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                      errors.gender ? 'border-red-500' : 'border-[#2a3441]'
+                    className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                      errors.gender ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                     }`}
                   >
                     <option value="">選択してください</option>
@@ -632,18 +646,18 @@ export default function UserRegistrationForm() {
 
           {currentSection === 1 && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-white mb-4">連絡先・住所情報</h3>
+              <h3 className="text-lg font-semibold text-slate-950 dark:text-white mb-4">連絡先・住所情報</h3>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                   住所 <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   value={formData.contactAddress.address}
                   onChange={(e) => handleContactAddressChange('address', e.target.value)}
                   rows={3}
-                  className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.address ? 'border-red-500' : 'border-[#2a3441]'
+                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                    errors.address ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                   }`}
                   placeholder="例：東京都新宿区西新宿1-1-1"
                 />
@@ -651,14 +665,14 @@ export default function UserRegistrationForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                   居住形態 <span className="text-red-400">*</span>
                 </label>
                 <select
                   value={formData.contactAddress.formOfResidence}
                   onChange={(e) => handleContactAddressChange('formOfResidence', e.target.value)}
-                  className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.formOfResidence ? 'border-red-500' : 'border-[#2a3441]'
+                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                    errors.formOfResidence ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                   }`}
                 >
                   <option value="">選択してください</option>
@@ -671,26 +685,26 @@ export default function UserRegistrationForm() {
 
               {formData.contactAddress.formOfResidence === 'other' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">その他詳細</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">その他詳細</label>
                   <input
                     type="text"
                     value={formData.contactAddress.formOfResidenceOtherText || ''}
                     onChange={(e) => handleContactAddressChange('formOfResidenceOtherText', e.target.value)}
-                    className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                    className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                     placeholder="詳細を入力してください"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                   交通手段 <span className="text-red-400">*</span>
                 </label>
                 <select
                   value={formData.contactAddress.meansOfTransportation}
                   onChange={(e) => handleContactAddressChange('meansOfTransportation', e.target.value)}
-                  className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.meansOfTransportation ? 'border-red-500' : 'border-[#2a3441]'
+                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                    errors.meansOfTransportation ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                   }`}
                 >
                   <option value="">選択してください</option>
@@ -703,27 +717,27 @@ export default function UserRegistrationForm() {
 
               {formData.contactAddress.meansOfTransportation === 'other' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">その他詳細</label>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">その他詳細</label>
                   <input
                     type="text"
                     value={formData.contactAddress.meansOfTransportationOtherText || ''}
                     onChange={(e) => handleContactAddressChange('meansOfTransportationOtherText', e.target.value)}
-                    className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                    className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                     placeholder="詳細を入力してください"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                   電話番号 <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="tel"
                   value={formData.contactAddress.tel}
                   onChange={(e) => handleContactAddressChange('tel', e.target.value)}
-                  className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.tel ? 'border-red-500' : 'border-[#2a3441]'
+                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                    errors.tel ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                   }`}
                   placeholder="例：090-1234-5678"
                 />
@@ -735,7 +749,7 @@ export default function UserRegistrationForm() {
           {currentSection === 2 && (
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">緊急連絡先情報</h3>
+                <h3 className="text-lg font-semibold text-slate-950 dark:text-white">緊急連絡先情報</h3>
                 <button
                   onClick={addEmergencyContact}
                   disabled={formData.emergencyContacts.length >= 3}
@@ -746,7 +760,7 @@ export default function UserRegistrationForm() {
               </div>
 
               {formData.emergencyContacts.map((contact, index) => (
-                <div key={index} className="border border-[#2a3441] rounded-lg p-6 relative">
+                <div key={index} className="border border-slate-300 dark:border-[#2a3441] rounded-lg p-6 relative">
                   {formData.emergencyContacts.length > 1 && (
                     <button
                       onClick={() => removeEmergencyContact(index)}
@@ -756,19 +770,19 @@ export default function UserRegistrationForm() {
                     </button>
                   )}
 
-                  <h4 className="text-md font-medium text-white mb-4">緊急連絡先 {index + 1}</h4>
+                  <h4 className="text-md font-medium text-slate-900 dark:text-white mb-4">緊急連絡先 {index + 1}</h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                         姓 <span className="text-red-400">*</span>
                       </label>
                       <input
                         type="text"
                         value={contact.lastName}
                         onChange={(e) => handleEmergencyContactChange(index, 'lastName', e.target.value)}
-                        className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                          errors[`emergencyContact${index}LastName`] ? 'border-red-500' : 'border-[#2a3441]'
+                        className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                          errors[`emergencyContact${index}LastName`] ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                         }`}
                         placeholder="田中"
                       />
@@ -778,15 +792,15 @@ export default function UserRegistrationForm() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                         名 <span className="text-red-400">*</span>
                       </label>
                       <input
                         type="text"
                         value={contact.firstName}
                         onChange={(e) => handleEmergencyContactChange(index, 'firstName', e.target.value)}
-                        className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                          errors[`emergencyContact${index}FirstName`] ? 'border-red-500' : 'border-[#2a3441]'
+                        className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                          errors[`emergencyContact${index}FirstName`] ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                         }`}
                         placeholder="花子"
                       />
@@ -796,15 +810,15 @@ export default function UserRegistrationForm() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                         姓（ふりがな） <span className="text-red-400">*</span>
                       </label>
                       <input
                         type="text"
                         value={contact.lastNameFurigana}
                         onChange={(e) => handleEmergencyContactChange(index, 'lastNameFurigana', e.target.value)}
-                        className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                          errors[`emergencyContact${index}LastNameFurigana`] ? 'border-red-500' : 'border-[#2a3441]'
+                        className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                          errors[`emergencyContact${index}LastNameFurigana`] ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                         }`}
                         placeholder="たなか"
                       />
@@ -814,15 +828,15 @@ export default function UserRegistrationForm() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                         名（ふりがな） <span className="text-red-400">*</span>
                       </label>
                       <input
                         type="text"
                         value={contact.firstNameFurigana}
                         onChange={(e) => handleEmergencyContactChange(index, 'firstNameFurigana', e.target.value)}
-                        className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                          errors[`emergencyContact${index}FirstNameFurigana`] ? 'border-red-500' : 'border-[#2a3441]'
+                        className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                          errors[`emergencyContact${index}FirstNameFurigana`] ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                         }`}
                         placeholder="はなこ"
                       />
@@ -832,11 +846,11 @@ export default function UserRegistrationForm() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">続柄・関係性</label>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">続柄・関係性</label>
                       <select
                         value={contact.relationship}
                         onChange={(e) => handleEmergencyContactChange(index, 'relationship', e.target.value)}
-                        className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                        className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                       >
                         <option value="">選択してください</option>
                         {RELATIONSHIP_OPTIONS.map(option => (
@@ -846,15 +860,15 @@ export default function UserRegistrationForm() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                         電話番号 <span className="text-red-400">*</span>
                       </label>
                       <input
                         type="tel"
                         value={contact.tel}
                         onChange={(e) => handleEmergencyContactChange(index, 'tel', e.target.value)}
-                        className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                          errors[`emergencyContact${index}Tel`] ? 'border-red-500' : 'border-[#2a3441]'
+                        className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                          errors[`emergencyContact${index}Tel`] ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                         }`}
                         placeholder="例：090-1234-5678"
                       />
@@ -865,23 +879,23 @@ export default function UserRegistrationForm() {
                   </div>
 
                   <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">住所</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">住所</label>
                     <input
                       type="text"
                       value={contact.address || ''}
                       onChange={(e) => handleEmergencyContactChange(index, 'address', e.target.value)}
-                      className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                      className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                       placeholder="住所（任意）"
                     />
                   </div>
 
                   <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">備考</label>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">備考</label>
                     <textarea
                       value={contact.notes || ''}
                       onChange={(e) => handleEmergencyContactChange(index, 'notes', e.target.value)}
                       rows={2}
-                      className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                      className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                       placeholder="備考（任意）"
                     />
                   </div>
@@ -892,18 +906,18 @@ export default function UserRegistrationForm() {
 
           {currentSection === 3 && (
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-white mb-4">障害・疾患情報</h3>
+              <h3 className="text-lg font-semibold text-slate-950 dark:text-white mb-4">障害・疾患情報</h3>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                   障害または疾患名 <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   value={formData.disabilityInfo.disabilityOrDiseaseName}
                   onChange={(e) => handleDisabilityInfoChange('disabilityOrDiseaseName', e.target.value)}
                   rows={3}
-                  className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.disabilityOrDiseaseName ? 'border-red-500' : 'border-[#2a3441]'
+                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                    errors.disabilityOrDiseaseName ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                   }`}
                   placeholder="例：統合失調症、知的障害、身体障害など"
                 />
@@ -911,14 +925,14 @@ export default function UserRegistrationForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                   生活保護受給状況 <span className="text-red-400">*</span>
                 </label>
                 <select
                   value={formData.disabilityInfo.livelihoodProtection}
                   onChange={(e) => handleDisabilityInfoChange('livelihoodProtection', e.target.value)}
-                  className={`w-full px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.livelihoodProtection ? 'border-red-500' : 'border-[#2a3441]'
+                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
+                    errors.livelihoodProtection ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
                   }`}
                 >
                   <option value="">選択してください</option>
@@ -930,16 +944,16 @@ export default function UserRegistrationForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">特記事項</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">特記事項</label>
                 <textarea
                   value={formData.disabilityInfo.specialRemarks || ''}
                   onChange={(e) => handleDisabilityInfoChange('specialRemarks', e.target.value)}
                   rows={4}
                   maxLength={2000}
-                  className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                   placeholder="手帳情報以外の重要な障害特性、配慮事項、医療的ケアの必要性等（2000文字以内）"
                 />
-                <div className="text-right text-xs text-gray-400 mt-1">
+                <div className="text-right text-xs text-slate-600 dark:text-gray-400 mt-1">
                   {(formData.disabilityInfo.specialRemarks || '').length}/2000文字
                 </div>
               </div>
@@ -949,7 +963,7 @@ export default function UserRegistrationForm() {
           {currentSection === 4 && (
             <div className="space-y-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">手帳・年金詳細情報</h3>
+                <h3 className="text-lg font-semibold text-slate-950 dark:text-white">手帳・年金詳細情報</h3>
                 <button
                   onClick={addDisabilityDetail}
                   className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
@@ -959,7 +973,7 @@ export default function UserRegistrationForm() {
               </div>
 
               {formData.disabilityDetails.map((detail, index) => (
-                <div key={index} className="border border-[#2a3441] rounded-lg p-6 relative">
+                <div key={index} className="border border-slate-300 dark:border-[#2a3441] rounded-lg p-6 relative">
                   {formData.disabilityDetails.length > 1 && (
                     <button
                       onClick={() => removeDisabilityDetail(index)}
@@ -969,17 +983,17 @@ export default function UserRegistrationForm() {
                     </button>
                   )}
 
-                  <h4 className="text-md font-medium text-white mb-4">手帳・年金情報 {index + 1}</h4>
+                  <h4 className="text-md font-medium text-slate-900 dark:text-white mb-4">手帳・年金情報 {index + 1}</h4>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                         カテゴリ <span className="text-red-400">*</span>
                       </label>
                       <select
                         value={detail.category}
                         onChange={(e) => handleDisabilityDetailChange(index, 'category', e.target.value)}
-                        className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                        className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                       >
                         <option value="">選択してください</option>
                         {DISABILITY_CATEGORY_OPTIONS.map(option => (
@@ -989,11 +1003,11 @@ export default function UserRegistrationForm() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">等級・レベル</label>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">等級・レベル</label>
                       <select
                         value={detail.gradeOrLevel || ''}
                         onChange={(e) => handleDisabilityDetailChange(index, 'gradeOrLevel', e.target.value)}
-                        className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                        className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                       >
                         <option value="">選択してください</option>
                         {detail.category && GRADE_LEVEL_OPTIONS[detail.category as keyof typeof GRADE_LEVEL_OPTIONS]?.map(option => (
@@ -1003,13 +1017,13 @@ export default function UserRegistrationForm() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                         申請状況 <span className="text-red-400">*</span>
                       </label>
                       <select
                         value={detail.applicationStatus}
                         onChange={(e) => handleDisabilityDetailChange(index, 'applicationStatus', e.target.value)}
-                        className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                        className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                       >
                         <option value="">選択してください</option>
                         {APPLICATION_STATUS_OPTIONS.map(option => (
@@ -1021,11 +1035,11 @@ export default function UserRegistrationForm() {
                     {detail.category === 'physical_handbook' && (
                       <>
                         <div>
-                          <label className="block text-sm font-medium text-gray-300 mb-2">身体障害種別</label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">身体障害種別</label>
                           <select
                             value={detail.physicalDisabilityType || ''}
                             onChange={(e) => handleDisabilityDetailChange(index, 'physicalDisabilityType', e.target.value)}
-                            className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                            className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                           >
                             <option value="">選択してください</option>
                             {PHYSICAL_DISABILITY_TYPE_OPTIONS.map(option => (
@@ -1036,12 +1050,12 @@ export default function UserRegistrationForm() {
 
                         {detail.physicalDisabilityType === 'other' && (
                           <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">その他詳細</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">その他詳細</label>
                             <input
                               type="text"
                               value={detail.physicalDisabilityTypeOtherText || ''}
                               onChange={(e) => handleDisabilityDetailChange(index, 'physicalDisabilityTypeOtherText', e.target.value)}
-                              className="w-full px-3 py-2 bg-[#1a1f2e] border border-[#2a3441] rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
+                              className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
                               placeholder="詳細を入力してください"
                             />
                           </div>
@@ -1061,11 +1075,11 @@ export default function UserRegistrationForm() {
           )}
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8 pt-6 border-t border-[#2a3441]">
+          <div className="flex justify-between mt-8 pt-6 border-t border-slate-300 dark:border-[#2a3441]">
             <button
               onClick={handlePrevious}
               disabled={currentSection === 0}
-              className="px-6 py-2 text-gray-400 hover:text-white disabled:cursor-not-allowed transition-colors"
+              className="px-6 py-2 text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-white disabled:cursor-not-allowed transition-colors"
             >
               前へ
             </button>
@@ -1073,7 +1087,7 @@ export default function UserRegistrationForm() {
             <div className="flex gap-3">
               <button
                 onClick={() => router.push('/dashboard')}
-                className="px-6 py-2 border border-[#2a3441] text-gray-300 hover:text-white hover:border-gray-500 rounded-lg transition-colors"
+                className="px-6 py-2 border border-slate-300 dark:border-[#2a3441] text-slate-700 dark:text-gray-300 hover:text-slate-950 dark:hover:text-white hover:border-gray-500 rounded-lg transition-colors"
               >
                 キャンセル
               </button>
@@ -1123,6 +1137,6 @@ export default function UserRegistrationForm() {
           actionDescription={`利用者「${pendingFormData.basicInfo.lastName} ${pendingFormData.basicInfo.firstName}」を登録`}
         />
       )}
-    </>
+    </div>
   );
 }

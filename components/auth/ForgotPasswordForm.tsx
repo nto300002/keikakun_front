@@ -41,25 +41,25 @@ export default function ForgotPasswordForm() {
 
   if (isSubmitted) {
     return (
-      <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           {/* Header */}
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-2">
+            <h2 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
               メール送信完了
             </h2>
-            <p className="text-gray-400">
+            <p className="text-slate-600 dark:text-gray-400">
               パスワードリセット用のメールを送信しました
             </p>
           </div>
 
-          <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
+          <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-slate-200 dark:border-gray-700 p-8">
             <div className="space-y-6">
               <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
                 <p className="text-green-400 text-sm mb-2">
                   <strong>{email}</strong> 宛にパスワードリセット用のメールを送信しました。
                 </p>
-                <p className="text-gray-300 text-sm">
+                <p className="text-slate-700 dark:text-gray-300 text-sm">
                   メール内のリンクをクリックして、新しいパスワードを設定してください。
                 </p>
               </div>
@@ -68,7 +68,7 @@ export default function ForgotPasswordForm() {
                 <p className="text-blue-400 text-sm font-medium mb-2">
                   📧 メールが届かない場合
                 </p>
-                <ul className="text-gray-300 text-sm space-y-1 list-disc list-inside">
+                <ul className="text-slate-700 dark:text-gray-300 text-sm space-y-1 list-disc list-inside">
                   <li>迷惑メールフォルダをご確認ください</li>
                   <li>メールアドレスが正しいか確認してください</li>
                   <li>リンクの有効期限は30分です</li>
@@ -77,7 +77,7 @@ export default function ForgotPasswordForm() {
 
               <button
                 onClick={handleBackToLogin}
-                className="w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
+                className="w-full bg-slate-200 text-slate-800 hover:bg-slate-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500 font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
               >
                 ログイン画面に戻る
               </button>
@@ -89,29 +89,29 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-white mb-2">
+          <h2 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
             パスワードをリセット
           </h2>
-          <p className="text-gray-400">
+          <p className="text-slate-600 dark:text-gray-400">
             登録済みのメールアドレスを入力してください
           </p>
         </div>
 
-        <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
+        <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-slate-200 dark:border-gray-700 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-              <p className="text-gray-300 text-sm">
+              <p className="text-slate-700 dark:text-gray-300 text-sm">
                 入力されたメールアドレス宛に、パスワードリセット用のリンクを送信します。
                 リンクの有効期限は30分です。
               </p>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                 メールアドレス <span className="text-red-400">*</span>
               </label>
               <input
@@ -121,7 +121,7 @@ export default function ForgotPasswordForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 placeholder="admin@example.com"
                 disabled={isLoading}
               />
@@ -138,7 +138,7 @@ export default function ForgotPasswordForm() {
             <button
               type="button"
               onClick={handleBackToLogin}
-              className="w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
+              className="w-full bg-slate-200 text-slate-800 hover:bg-slate-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500 font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
             >
               ログイン画面に戻る
             </button>

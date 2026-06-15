@@ -67,18 +67,18 @@ export default function MfaVerifyPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-white mb-2">
+          <h2 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
             MFA認証
           </h2>
-          <p className="text-gray-400">
+          <p className="text-slate-600 dark:text-gray-400">
             認証アプリで生成されたコードを入力してください。
           </p>
         </div>
 
-        <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
+        <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-slate-200 dark:border-gray-700 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm">
@@ -96,7 +96,7 @@ export default function MfaVerifyPage() {
             )}
 
             <div>
-              <label htmlFor="totp-code" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="totp-code" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                 認証コード <span className="text-red-400">*</span>
               </label>
               <input
@@ -106,7 +106,7 @@ export default function MfaVerifyPage() {
                 required
                 value={totpCode}
                 onChange={(e) => setTotpCode(e.target.value)}
-                className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 placeholder="6桁のコード"
                 maxLength={6}
               />

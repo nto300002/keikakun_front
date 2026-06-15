@@ -90,15 +90,15 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
       {submitSuccess ? (
         <div className="text-center py-8">
           <div className="mb-4 text-green-400 text-5xl">✓</div>
-          <h3 className="text-xl font-semibold text-white mb-2">送信が完了しました</h3>
-          <p className="text-gray-400">お問い合わせありがとうございます。</p>
-          <p className="text-gray-400">後ほど担当者よりご連絡いたします。</p>
+          <h3 className="text-xl font-semibold text-slate-950 dark:text-white mb-2">送信が完了しました</h3>
+          <p className="text-slate-600 dark:text-gray-400">お問い合わせありがとうございます。</p>
+          <p className="text-slate-600 dark:text-gray-400">後ほど担当者よりご連絡いたします。</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* お名前（任意） */}
           <div>
-            <label htmlFor="sender_name" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="sender_name" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
               お名前（任意）
             </label>
             <input
@@ -106,14 +106,14 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
               id="sender_name"
               value={formData.sender_name}
               onChange={(e) => setFormData({ ...formData, sender_name: e.target.value })}
-              className="w-full bg-[#1a2332] border border-[#2a3441] rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-950 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-[#2a3441] dark:bg-[#1a2332] dark:text-white dark:placeholder-gray-500"
               placeholder="山田太郎"
             />
           </div>
 
           {/* メールアドレス（必須） */}
           <div>
-            <label htmlFor="sender_email" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="sender_email" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
               メールアドレス（必須）<span className="text-red-400 ml-1">*</span>
             </label>
             <input
@@ -121,9 +121,9 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
               id="sender_email"
               value={formData.sender_email ?? ''}
               onChange={(e) => setFormData({ ...formData, sender_email: e.target.value })}
-              className={`w-full bg-[#1a2332] border ${
-                errors.sender_email ? 'border-red-500' : 'border-[#2a3441]'
-              } rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full rounded-lg border bg-white px-4 py-2 text-slate-950 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-[#1a2332] dark:text-white dark:placeholder-gray-500 ${
+                errors.sender_email ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
+              }`}
               placeholder="example@example.com"
             />
             {errors.sender_email && (
@@ -133,14 +133,14 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
 
           {/* 問い合わせ種別 */}
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="category" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
               問い合わせ種別
             </label>
             <select
               id="category"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value as InquiryCategory })}
-              className="w-full bg-[#1a2332] border border-[#2a3441] rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-[#2a3441] dark:bg-[#1a2332] dark:text-white"
             >
               <option value="質問">質問</option>
               <option value="不具合">不具合報告</option>
@@ -150,7 +150,7 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
 
           {/* 件名 */}
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
               件名（必須）<span className="text-red-400 ml-1">*</span>
             </label>
             <input
@@ -158,9 +158,9 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              className={`w-full bg-[#1a2332] border ${
-                errors.title ? 'border-red-500' : 'border-[#2a3441]'
-              } rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500`}
+              className={`w-full rounded-lg border bg-white px-4 py-2 text-slate-950 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-[#1a2332] dark:text-white dark:placeholder-gray-500 ${
+                errors.title ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
+              }`}
               placeholder="件名を入力してください"
               maxLength={200}
             />
@@ -168,22 +168,22 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
               <div>
                 {errors.title && <p className="text-sm text-red-400">{errors.title}</p>}
               </div>
-              <p className="text-xs text-gray-500">{formData.title.length}/200</p>
+              <p className="text-xs text-slate-500 dark:text-gray-500">{formData.title.length}/200</p>
             </div>
           </div>
 
           {/* 内容 */}
           <div>
-            <label htmlFor="content" className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="content" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
               内容（必須）<span className="text-red-400 ml-1">*</span>
             </label>
             <textarea
               id="content"
               value={formData.content}
               onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className={`w-full bg-[#1a2332] border ${
-                errors.content ? 'border-red-500' : 'border-[#2a3441]'
-              } rounded-lg px-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none`}
+              className={`w-full rounded-lg border bg-white px-4 py-2 text-slate-950 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none dark:bg-[#1a2332] dark:text-white dark:placeholder-gray-500 ${
+                errors.content ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
+              }`}
               placeholder="お問い合わせ内容を詳しくご記入ください"
               rows={6}
               maxLength={20000}
@@ -192,7 +192,7 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
               <div>
                 {errors.content && <p className="text-sm text-red-400">{errors.content}</p>}
               </div>
-              <p className="text-xs text-gray-500">{formData.content.length}/20,000</p>
+              <p className="text-xs text-slate-500 dark:text-gray-500">{formData.content.length}/20,000</p>
             </div>
           </div>
 
@@ -208,7 +208,7 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
             <button
               type="button"
               onClick={handleClose}
-              className="px-6 py-2 bg-[#2a3441] text-gray-300 rounded-lg hover:bg-[#3a4451] transition-colors"
+              className="px-6 py-2 rounded-lg bg-slate-200 text-slate-800 transition-colors hover:bg-slate-300 dark:bg-[#2a3441] dark:text-gray-300 dark:hover:bg-[#3a4451]"
             >
               キャンセル
             </button>

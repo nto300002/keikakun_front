@@ -83,46 +83,46 @@ export default function MessagesTab() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">メッセージ・お知らせ</h2>
+      <h2 className="text-3xl font-bold mb-6 text-slate-900 dark:text-white">メッセージ</h2>
 
       {/* フィルター */}
       <div className="flex gap-2 mb-6 flex-wrap">
         <button
           onClick={() => setFilter('all')}
-          className={`px-4 py-2 rounded-lg font-medium ${
+          className={`px-5 py-3 rounded-lg text-base font-bold ${
             filter === 'all'
               ? 'bg-blue-600 text-white'
-              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
+              : 'bg-slate-200 text-slate-900 hover:bg-slate-300 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-600/70'
           }`}
         >
           すべて
         </button>
         <button
           onClick={() => setFilter('unread')}
-          className={`px-4 py-2 rounded-lg font-medium ${
+          className={`px-5 py-3 rounded-lg text-base font-bold ${
             filter === 'unread'
               ? 'bg-blue-600 text-white'
-              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
+              : 'bg-slate-200 text-slate-900 hover:bg-slate-300 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-600/70'
           }`}
         >
           未読のみ
         </button>
         <button
           onClick={() => setFilter('personal')}
-          className={`px-4 py-2 rounded-lg font-medium ${
+          className={`px-5 py-3 rounded-lg text-base font-bold ${
             filter === 'personal'
               ? 'bg-blue-600 text-white'
-              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
+              : 'bg-slate-200 text-slate-900 hover:bg-slate-300 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-600/70'
           }`}
         >
           💬 個別メッセージ
         </button>
         <button
           onClick={() => setFilter('announcement')}
-          className={`px-4 py-2 rounded-lg font-medium ${
+          className={`px-5 py-3 rounded-lg text-base font-bold ${
             filter === 'announcement'
               ? 'bg-purple-600 text-white'
-              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
+              : 'bg-slate-200 text-slate-900 hover:bg-slate-300 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-600/70'
           }`}
         >
           📢 お知らせ
@@ -130,7 +130,7 @@ export default function MessagesTab() {
         <button
           onClick={handleMarkAllAsRead}
           disabled={isLoading}
-          className="ml-auto bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 px-4 py-2 rounded-lg font-medium disabled:opacity-50"
+          className="ml-auto bg-slate-200 hover:bg-slate-300 text-slate-900 dark:bg-gray-700/50 dark:hover:bg-gray-600/70 dark:text-gray-300 px-5 py-3 rounded-lg text-base font-bold disabled:opacity-50"
         >
           すべて既読にする
         </button>
@@ -138,9 +138,9 @@ export default function MessagesTab() {
 
       {/* メッセージ一覧 */}
       {isLoading ? (
-        <div className="text-center py-8 text-gray-400">読み込み中...</div>
+        <div className="text-center py-8 text-lg font-semibold text-slate-600 dark:text-gray-400">読み込み中...</div>
       ) : messages.length === 0 ? (
-        <div className="text-center py-8 text-gray-400">
+        <div className="text-center py-8 text-lg font-semibold text-slate-600 dark:text-gray-400">
           {filter === 'unread' && '未読のメッセージはありません'}
           {filter === 'personal' && '個別メッセージはありません'}
           {filter === 'announcement' && 'お知らせはありません'}

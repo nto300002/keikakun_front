@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { FaHome, FaBars, FaTimes } from 'react-icons/fa';
 import { usePushNotification } from '@/hooks/usePushNotification';
 import { http } from '@/lib/http';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 interface User {
   id: string;
@@ -304,15 +305,15 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     <BillingProvider>
       <PastDueModalWrapper />
       <Suspense fallback={null}>
-        <div className="min-h-screen bg-gray-900 text-gray-200 flex flex-col">
+        <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col dark:bg-gray-900 dark:text-gray-100">
           {/* Header */}
-          <header className="bg-gray-800 border-b border-gray-700 sticky top-0 z-10">
+          <header className="bg-white border-b border-slate-300 sticky top-0 z-10 shadow-sm dark:bg-gray-800 dark:border-gray-700">
           <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Left Side - Office Name / Icon */}
               <div className="flex items-center relative">
                 {/* PC: テキスト表示 */}
-                <Link href="/dashboard" className="hidden md:block text-lg font-semibold text-white hover:text-blue-400">
+                <Link href="/dashboard" className="hidden md:block text-xl font-bold text-slate-900 hover:text-blue-700 dark:text-white dark:hover:text-blue-400">
                   事務所名: {office ? `${office.name}${office.office_type ? `（${getOfficeTypeLabel(office.office_type, true)}）` : ''}` : '事務所名が登録されていません'}
                 </Link>
 
@@ -324,7 +325,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                   onMouseDown={handleLongPressStart}
                   onMouseUp={handleLongPressEnd}
                   onMouseLeave={handleLongPressEnd}
-                  className="md:hidden text-2xl text-white hover:text-blue-400 transition-colors p-2 rounded-md hover:bg-gray-700"
+                  className="md:hidden text-2xl text-slate-900 hover:text-blue-700 transition-colors p-2 rounded-md hover:bg-slate-100 dark:text-white dark:hover:text-blue-400 dark:hover:bg-gray-700"
                   aria-label="ホームに戻る"
                 >
                   <FaHome />
@@ -333,7 +334,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                 {/* ツールチップ（モバイルのみ） */}
                 {showOfficeTooltip && office && (
                   <div
-                    className="md:hidden absolute top-full left-0 mt-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-md shadow-lg whitespace-nowrap z-50 border border-gray-700"
+                    className="md:hidden absolute top-full left-0 mt-2 px-3 py-2 bg-white text-slate-900 text-base font-semibold rounded-md shadow-lg whitespace-nowrap z-50 border border-slate-300 dark:bg-gray-900 dark:text-white dark:border-gray-700"
                     onClick={() => setShowOfficeTooltip(false)}
                   >
                     {office.name}{office.office_type ? `（${getOfficeTypeLabel(office.office_type, true)}）` : ''}
@@ -346,10 +347,10 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                 {user?.role === 'owner' && (
                   <Link
                     href="/admin"
-                    className={`text-sm font-medium px-3 py-2 rounded-md transition-colors ${
+                    className={`text-base font-semibold px-4 py-2.5 rounded-md transition-colors ${
                       pathname === '/admin'
-                        ? 'bg-gray-700 text-white border-b-2 border-blue-500'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                        ? 'bg-blue-50 text-blue-800 border-b-2 border-blue-600 dark:bg-gray-700 dark:text-white dark:border-blue-500'
+                        : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700'
                     }`}
                   >
                     管理者設定
@@ -357,20 +358,20 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                 )}
                 <Link
                   href="/dashboard"
-                  className={`text-sm font-medium px-3 py-2 rounded-md transition-colors ${
+                  className={`text-base font-semibold px-4 py-2.5 rounded-md transition-colors ${
                     pathname === '/dashboard'
-                      ? 'bg-gray-700 text-white border-b-2 border-blue-500'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                      ? 'bg-blue-50 text-blue-800 border-b-2 border-blue-600 dark:bg-gray-700 dark:text-white dark:border-blue-500'
+                      : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700'
                   }`}
                 >
                   利用者ダッシュボード
                 </Link>
                 <Link
                   href="/profile"
-                  className={`text-sm font-medium px-3 py-2 rounded-md transition-colors ${
+                  className={`text-base font-semibold px-4 py-2.5 rounded-md transition-colors ${
                     pathname === '/profile'
-                      ? 'bg-gray-700 text-white border-b-2 border-blue-500'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                      ? 'bg-blue-50 text-blue-800 border-b-2 border-blue-600 dark:bg-gray-700 dark:text-white dark:border-blue-500'
+                      : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700'
                   }`}
                 >
                   プロフィール
@@ -382,8 +383,8 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                     onMouseLeave={() => setIsNoticeHovered(false)}
                     className={`relative flex flex-col items-center gap-1 p-2 rounded-md transition-colors ${
                       pathname === '/notice'
-                        ? 'bg-gray-700 text-white'
-                        : 'text-gray-400 hover:text-white hover:bg-gray-700'
+                        ? 'bg-blue-50 text-blue-800 dark:bg-gray-700 dark:text-white'
+                        : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700'
                     }`}
                     aria-label={unreadCount > 0 ? `${unreadCount}件の未読通知があります` : '通知'}
                   >
@@ -393,16 +394,16 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                       </svg>
                       {/* 未読通知がある場合のみ赤い丸を表示 */}
                       {unreadCount > 0 && (
-                        <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-gray-800"></span>
+                        <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 ring-2 ring-white dark:ring-gray-800"></span>
                       )}
                     </div>
-                    <span className="text-xs">通知/メッセージ</span>
+                    <span className="text-base font-semibold">通知/メッセージ</span>
                   </button>
 
                   {/* 通知プレビューポップオーバー */}
                   {isMounted && isNoticeHovered && ((unreadCount > 0 && recentUnreadNotices.length > 0) || deadlineAlerts.length > 0) && (
                     <div
-                      className="absolute right-0 top-full mt-2 w-80 bg-[#0f1419] border border-[#2a2a3e] rounded-lg shadow-xl z-50 p-4"
+                      className="absolute right-0 top-full mt-2 w-80 bg-white border border-slate-300 rounded-lg shadow-xl z-50 p-4 dark:bg-[#0f1419] dark:border-[#2a2a3e]"
                       onMouseEnter={() => setIsNoticeHovered(true)}
                       onMouseLeave={() => setIsNoticeHovered(false)}
                     >
@@ -410,22 +411,22 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                       {unreadCount > 0 && recentUnreadNotices.length > 0 && (
                         <>
                           <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-white font-semibold text-sm">最新の未読通知</h4>
-                            <span className="text-xs text-gray-400">{unreadCount}件</span>
+                            <h4 className="text-slate-900 font-semibold text-base dark:text-white">最新の未読通知</h4>
+                            <span className="text-base font-semibold text-slate-500 dark:text-gray-400">{unreadCount}件</span>
                           </div>
                           <div className="space-y-2">
                             {recentUnreadNotices.map((notice) => (
                               <div
                                 key={notice.id}
-                                className="p-3 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer border border-gray-700/50"
+                                className="p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer border border-slate-200 dark:bg-gray-800/50 dark:hover:bg-gray-800 dark:border-gray-700/50"
                                 onClick={() => router.push('/notice')}
                               >
                                 <div className="flex items-start justify-between gap-2 mb-1">
-                                  <h5 className="text-white text-sm font-medium line-clamp-1">{notice.title}</h5>
+                                  <h5 className="text-slate-900 text-base font-semibold line-clamp-1 dark:text-white">{notice.title}</h5>
                                   <span className="inline-block w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5"></span>
                                 </div>
-                                <p className="text-gray-400 text-xs line-clamp-2 mb-2">{notice.content}</p>
-                                <time className="text-gray-500 text-xs">
+                                <p className="text-slate-600 text-base font-semibold line-clamp-2 mb-2 dark:text-gray-400">{notice.content}</p>
+                                <time className="text-slate-500 text-base font-semibold dark:text-gray-500">
                                   {new Date(notice.created_at).toLocaleString('ja-JP', {
                                     month: 'short',
                                     day: 'numeric',
@@ -437,10 +438,10 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                             ))}
                           </div>
                           {unreadCount > 2 && (
-                            <div className="mt-3 pt-3 border-t border-gray-700">
+                            <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-700">
                               <button
                                 onClick={() => router.push('/notice')}
-                                className="w-full text-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                                className="w-full text-center text-blue-400 hover:text-blue-300 text-base font-semibold transition-colors"
                               >
                                 すべての通知を見る
                               </button>
@@ -452,33 +453,33 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                       {/* 期限アラートセクション */}
                       {deadlineAlerts.length > 0 && (
                         <>
-                          <div className={`${unreadCount > 0 && recentUnreadNotices.length > 0 ? 'mt-3 pt-3 border-t border-gray-700' : ''}`}>
+                          <div className={`${unreadCount > 0 && recentUnreadNotices.length > 0 ? 'mt-3 pt-3 border-t border-slate-200 dark:border-gray-700' : ''}`}>
                             <div className="flex items-center justify-between mb-3">
-                              <h4 className="text-white font-semibold text-sm">更新期限が近い利用者</h4>
-                              <span className="text-xs text-gray-400">{totalDeadlineAlerts}件</span>
+                              <h4 className="text-slate-900 font-semibold text-base dark:text-white">更新期限が近い利用者</h4>
+                              <span className="text-base font-semibold text-slate-500 dark:text-gray-400">{totalDeadlineAlerts}件</span>
                             </div>
                             <div className="space-y-2">
                               {deadlineAlerts.map((alert, index) => (
                                 <div
                                   key={`${alert.id}-${alert.alert_type || 'renewal'}-${index}`}
-                                  className="p-3 bg-gray-800/50 hover:bg-gray-800 rounded-lg transition-colors cursor-pointer border border-gray-700/50 flex items-center justify-between"
+                                  className="p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer border border-slate-200 flex items-center justify-between dark:bg-gray-800/50 dark:hover:bg-gray-800 dark:border-gray-700/50"
                                   onClick={() => router.push(`/support_plan/${alert.id}`)}
                                 >
                                   <div className="flex items-center gap-2">
                                     <span className="text-orange-400">⚠️</span>
-                                    <span className="text-white text-sm">{alert.full_name}</span>
+                                    <span className="text-slate-900 text-base font-semibold dark:text-white">{alert.full_name}</span>
                                   </div>
                                   <div className="flex items-center gap-2">
                                     {alert.alert_type === 'assessment_incomplete' ? (
-                                      <span className="text-sm text-red-400">
+                                      <span className="text-base font-semibold text-red-400">
                                         アセスメント未完了
                                       </span>
                                     ) : alert.alert_type === 'renewal_overdue' ? (
-                                      <span className="text-sm text-red-400 font-semibold">
+                                      <span className="text-base text-red-400 font-semibold">
                                         期限切れ
                                       </span>
                                     ) : (
-                                      <span className={`text-sm ${
+                                      <span className={`text-base font-semibold ${
                                         (alert.days_remaining ?? 0) <= 15 ? 'text-red-400' :
                                         (alert.days_remaining ?? 0) <= 25 ? 'text-orange-400' :
                                         'text-yellow-400'
@@ -494,10 +495,10 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                           </div>
                           {/* さらに表示ボタン（まだ表示していないデータがある場合） */}
                           {deadlineAlertsOffset < totalDeadlineAlerts && (
-                            <div className="mt-3 pt-3 border-t border-gray-700">
+                            <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-700">
                               <button
                                 onClick={handleLoadMoreDeadlineAlerts}
-                                className="w-full text-center text-blue-400 hover:text-blue-300 text-sm font-medium transition-colors"
+                                className="w-full text-center text-blue-400 hover:text-blue-300 text-base font-semibold transition-colors"
                               >
                                 さらに表示
                               </button>
@@ -509,9 +510,10 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                   )}
                 </div>
 
+                <ThemeToggle />
                 <button
                   onClick={handleLogout}
-                  className="bg-gray-700 hover:bg-gray-600 text-gray-200 px-4 py-2 rounded-md text-sm font-medium border border-gray-600"
+                  className="bg-slate-100 hover:bg-slate-200 text-slate-800 px-4 py-2.5 rounded-md text-base font-semibold border border-slate-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 dark:border-gray-600"
                 >
                   ログアウト
                 </button>
@@ -520,7 +522,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
               {/* Mobile Hamburger Button */}
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="md:hidden text-white p-2 rounded-md hover:bg-gray-700 transition-colors"
+                className="md:hidden text-slate-900 p-2 rounded-md hover:bg-slate-100 transition-colors dark:text-white dark:hover:bg-gray-700"
                 aria-label="メニューを開く"
               >
                 {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
@@ -529,15 +531,15 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
 
             {/* Mobile Menu */}
             {isMenuOpen && (
-              <div className="md:hidden py-4 border-t border-gray-700">
+              <div className="md:hidden py-4 border-t border-slate-200 dark:border-gray-700">
                 {user?.role === 'owner' && (
                   <Link
                     href="/admin"
                     onClick={() => setIsMenuOpen(false)}
-                    className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                    className={`block px-4 py-3 text-base font-semibold rounded-md transition-colors ${
                       pathname === '/admin'
-                        ? 'bg-gray-700 text-white'
-                        : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                        ? 'bg-blue-50 text-blue-800 dark:bg-gray-700 dark:text-white'
+                        : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700'
                     }`}
                   >
                     管理者設定
@@ -546,10 +548,10 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                 <Link
                   href="/dashboard"
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`block px-4 py-3 text-base font-semibold rounded-md transition-colors ${
                     pathname === '/dashboard'
-                      ? 'bg-gray-700 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                      ? 'bg-blue-50 text-blue-800 dark:bg-gray-700 dark:text-white'
+                      : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700'
                   }`}
                 >
                   利用者ダッシュボード
@@ -557,10 +559,10 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                 <Link
                   href="/profile"
                   onClick={() => setIsMenuOpen(false)}
-                  className={`block px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                  className={`block px-4 py-3 text-base font-semibold rounded-md transition-colors ${
                     pathname === '/profile'
-                      ? 'bg-gray-700 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                      ? 'bg-blue-50 text-blue-800 dark:bg-gray-700 dark:text-white'
+                      : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700'
                   }`}
                 >
                   プロフィール
@@ -570,25 +572,28 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                     setIsMenuOpen(false);
                     router.push('/notice');
                   }}
-                  className={`w-full text-left px-4 py-2 text-sm font-medium rounded-md transition-colors flex items-center gap-2 ${
+                  className={`w-full text-left px-4 py-3 text-base font-semibold rounded-md transition-colors flex items-center gap-2 ${
                     pathname === '/notice'
-                      ? 'bg-gray-700 text-white'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-700'
+                      ? 'bg-blue-50 text-blue-800 dark:bg-gray-700 dark:text-white'
+                      : 'text-slate-700 hover:text-slate-950 hover:bg-slate-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700'
                   }`}
                 >
                   <span>通知/メッセージ</span>
                   {unreadCount > 0 && (
-                    <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+                    <span className="inline-flex items-center justify-center px-2 py-1 text-base font-bold leading-none text-white bg-red-600 rounded-full">
                       {unreadCount}
                     </span>
                   )}
                 </button>
+                <div className="px-4 py-2">
+                  <ThemeToggle />
+                </div>
                 <button
                   onClick={() => {
                     setIsMenuOpen(false);
                     handleLogout();
                   }}
-                  className="w-full text-left px-4 py-2 text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 rounded-md transition-colors"
+                  className="w-full text-left px-4 py-3 text-base font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100 rounded-md transition-colors dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-700"
                 >
                   ログアウト
                 </button>
@@ -601,14 +606,14 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
         <TrialExpiryBanner />
 
         {/* Main Content */}
-        <main className="flex-grow container mx-auto p-6 md:p-8 bg-gray-800 text-gray-100 rounded-lg shadow-md my-6">
+        <main className="flex-grow container mx-auto p-6 md:p-8 bg-white text-slate-900 rounded-lg shadow-md my-6 dark:bg-gray-800 dark:text-gray-100">
           {children}
         </main>
 
         {/* Footer */}
-        <footer className="bg-gray-800 border-t border-gray-700">
+        <footer className="bg-white border-t border-slate-300 dark:bg-gray-800 dark:border-gray-700">
           <div className="container mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <p className="text-center text-sm text-gray-400">
+            <p className="text-center text-base font-semibold text-slate-600 dark:text-gray-300">
               © {new Date().getFullYear()} ケイカくん. All rights reserved.
             </p>
           </div>

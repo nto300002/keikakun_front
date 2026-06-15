@@ -123,22 +123,22 @@ export default function MessageSendForm() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">メッセージ送信(事務所内)</h1>
+      <h1 className="text-3xl font-bold mb-6 text-slate-900 dark:text-white">送信</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* メッセージタイプ選択 */}
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <label className="block text-sm font-semibold mb-3 text-gray-200">
+        <div className="bg-white rounded-lg p-6 border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+          <label className="block text-lg font-bold mb-3 text-slate-700 dark:text-gray-200">
             メッセージタイプ
           </label>
           <div className="flex gap-4">
             <button
               type="button"
               onClick={() => setMessageType('personal')}
-              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${
+              className={`flex-1 px-6 py-4 rounded-lg text-lg font-bold transition-all ${
                 messageType === 'personal'
                   ? 'bg-blue-600 text-white border-2 border-blue-500'
-                  : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70 border-2 border-gray-600'
+                  : 'bg-slate-200 text-slate-900 hover:bg-slate-300 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-600/70 border-2 border-slate-300 dark:border-gray-600'
               }`}
             >
               💬 個別メッセージ
@@ -147,15 +147,15 @@ export default function MessageSendForm() {
               type="button"
               onClick={() => setMessageType('announcement')}
               disabled={currentUserRole !== 'owner' && currentUserRole !== 'manager'}
-              className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all ${
+              className={`flex-1 px-6 py-4 rounded-lg text-lg font-bold transition-all ${
                 messageType === 'announcement'
                   ? 'bg-purple-600 text-white border-2 border-purple-500'
-                  : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70 border-2 border-gray-600'
+                  : 'bg-slate-200 text-slate-900 hover:bg-slate-300 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-600/70 border-2 border-slate-300 dark:border-gray-600'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               📢 一斉通知
               {(currentUserRole !== 'owner' && currentUserRole !== 'manager') && (
-                <span className="block text-xs mt-1">(オーナー/管理者のみ)</span>
+                <span className="block text-sm mt-1">(オーナー/管理者のみ)</span>
               )}
             </button>
           </div>
@@ -163,44 +163,44 @@ export default function MessageSendForm() {
 
         {/* 受信者選択（個別メッセージの場合のみ） */}
         {messageType === 'personal' && (
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div className="bg-white rounded-lg p-6 border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
             <div className="flex items-center justify-between mb-3">
-              <label className="block text-sm font-semibold text-gray-200">
+              <label className="block text-lg font-bold text-slate-700 dark:text-gray-200">
                 受信者選択 ({selectedStaffIds.length}人選択中)
               </label>
               <button
                 type="button"
                 onClick={handleSelectAll}
-                className="text-sm text-blue-400 hover:text-blue-300 font-medium"
+                className="text-base text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 font-bold"
               >
                 {selectedStaffIds.length === staffList.length ? '全員解除' : '全員選択'}
               </button>
             </div>
 
             {isFetchingStaff ? (
-              <div className="text-center py-4 text-gray-400">読み込み中...</div>
+              <div className="text-center py-4 text-lg font-semibold text-slate-600 dark:text-gray-400">読み込み中...</div>
             ) : staffList.length === 0 ? (
-              <div className="text-center py-4 text-gray-400">
+              <div className="text-center py-4 text-lg font-semibold text-slate-600 dark:text-gray-400">
                 送信可能なスタッフがいません
               </div>
             ) : (
-              <div className="max-h-60 overflow-y-auto space-y-2 bg-gray-900/50 rounded-lg p-4">
+              <div className="max-h-60 overflow-y-auto space-y-2 bg-slate-50 dark:bg-gray-900/50 rounded-lg p-4">
                 {staffList.map((staff) => (
                   <label
                     key={staff.id}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-700/50 cursor-pointer transition-colors"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-gray-700/50 cursor-pointer transition-colors"
                   >
                     <input
                       type="checkbox"
                       checked={selectedStaffIds.includes(staff.id)}
                       onChange={() => handleStaffToggle(staff.id)}
-                      className="w-5 h-5 rounded border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-900"
+                      className="w-5 h-5 rounded border-slate-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-900"
                     />
                     <div className="flex-1">
-                      <div className="text-white font-medium">{staff.username}</div>
-                      <div className="text-gray-400 text-sm">{staff.email}</div>
+                      <div className="text-slate-900 dark:text-white text-lg font-bold">{staff.username}</div>
+                      <div className="text-slate-600 dark:text-gray-400 text-base font-semibold">{staff.email}</div>
                     </div>
-                    <span className="text-xs px-2 py-1 rounded bg-gray-700 text-gray-300">
+                    <span className="text-base font-bold px-3 py-1 rounded bg-slate-100 text-slate-700 dark:bg-gray-700 dark:text-gray-300">
                       {staff.role === 'owner' ? 'オーナー' : staff.role === 'manager' ? '管理者' : '一般'}
                     </span>
                   </label>
@@ -211,8 +211,8 @@ export default function MessageSendForm() {
         )}
 
         {/* 優先度選択 */}
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <label className="block text-sm font-semibold mb-3 text-gray-200">
+        <div className="bg-white rounded-lg p-6 border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+          <label className="block text-lg font-bold mb-3 text-slate-700 dark:text-gray-200">
             優先度
           </label>
           <div className="grid grid-cols-4 gap-3">
@@ -226,10 +226,10 @@ export default function MessageSendForm() {
                 key={value}
                 type="button"
                 onClick={() => setPriority(value)}
-                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                className={`px-5 py-3 rounded-lg text-lg font-bold transition-all ${
                   priority === value
                     ? `bg-${color}-600 text-white border-2 border-${color}-500`
-                    : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70 border-2 border-gray-600'
+                    : 'bg-slate-200 text-slate-900 hover:bg-slate-300 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-600/70 border-2 border-slate-300 dark:border-gray-600'
                 }`}
               >
                 {label}
@@ -239,8 +239,8 @@ export default function MessageSendForm() {
         </div>
 
         {/* タイトル入力 */}
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <label htmlFor="title" className="block text-sm font-semibold mb-3 text-gray-200">
+        <div className="bg-white rounded-lg p-6 border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+          <label htmlFor="title" className="block text-lg font-bold mb-3 text-slate-700 dark:text-gray-200">
             タイトル <span className="text-red-400">*</span>
           </label>
           <input
@@ -250,17 +250,17 @@ export default function MessageSendForm() {
             onChange={(e) => setTitle(e.target.value)}
             maxLength={200}
             placeholder="メッセージのタイトルを入力してください"
-            className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-900/50 border border-slate-300 dark:border-gray-600 rounded-lg text-lg font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
-          <div className="mt-2 text-xs text-gray-400 text-right">
+          <div className="mt-2 text-base font-semibold text-slate-600 dark:text-gray-400 text-right">
             {title.length} / 200文字
           </div>
         </div>
 
         {/* 本文入力 */}
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-          <label htmlFor="content" className="block text-sm font-semibold mb-3 text-gray-200">
+        <div className="bg-white rounded-lg p-6 border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+          <label htmlFor="content" className="block text-lg font-bold mb-3 text-slate-700 dark:text-gray-200">
             本文 <span className="text-red-400">*</span>
           </label>
           <textarea
@@ -270,10 +270,10 @@ export default function MessageSendForm() {
             maxLength={10000}
             rows={8}
             placeholder="メッセージの本文を入力してください"
-            className="w-full px-4 py-3 bg-gray-900/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="w-full px-4 py-3 bg-slate-50 dark:bg-gray-900/50 border border-slate-300 dark:border-gray-600 rounded-lg text-lg font-semibold text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             required
           />
-          <div className="mt-2 text-xs text-gray-400 text-right">
+          <div className="mt-2 text-base font-semibold text-slate-600 dark:text-gray-400 text-right">
             {content.length} / 10,000文字
           </div>
         </div>
@@ -284,14 +284,14 @@ export default function MessageSendForm() {
             type="button"
             onClick={() => router.back()}
             disabled={isLoading}
-            className="flex-1 px-6 py-3 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg font-semibold transition-colors disabled:opacity-50"
+            className="flex-1 px-6 py-4 bg-slate-200 hover:bg-slate-300 text-slate-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200 rounded-lg text-lg font-bold transition-colors disabled:opacity-50"
           >
             キャンセル
           </button>
           <button
             type="submit"
             disabled={isLoading}
-            className="flex-1 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isLoading ? (
               <>

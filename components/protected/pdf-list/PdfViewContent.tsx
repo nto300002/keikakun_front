@@ -29,6 +29,7 @@ import { welfareRecipientsApi } from '@/lib/welfare-recipients';
 import { PlanDeliverableListItem } from '@/types/pdf-deliverable';
 import { RecipientOption } from '@/types/pdf';
 import { StaffRole } from '@/types/staff';
+import { SUPPORT_PLAN_STEP_LABELS } from '../support_plan/stepLabels';
 
 interface PdfViewContentProps {
   initialPdfs: PlanDeliverableListItem[];
@@ -40,11 +41,11 @@ interface PdfViewContentProps {
 
 // ラベル定義
 const DELIVERABLE_TYPE_LABELS: Record<string, string> = {
-  assessment_sheet: 'アセスメントシート',
-  monitoring_report_pdf: 'モニタリング報告書',
-  draft_plan_pdf: '計画書（原案）',
-  staff_meeting_minutes: '担当者会議議事録',
-  final_plan_signed_pdf: '計画書（署名済）',
+  assessment_sheet: SUPPORT_PLAN_STEP_LABELS.assessment,
+  monitoring_report_pdf: SUPPORT_PLAN_STEP_LABELS.monitoring,
+  draft_plan_pdf: SUPPORT_PLAN_STEP_LABELS.draft_plan,
+  staff_meeting_minutes: SUPPORT_PLAN_STEP_LABELS.staff_meeting,
+  final_plan_signed_pdf: SUPPORT_PLAN_STEP_LABELS.final_plan_signed,
 };
 
 function useDebounce<T>(value: T, delay: number): T {
@@ -203,7 +204,7 @@ export default function PdfViewContent({
 
       {/* ヘッダー */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <h1 className="text-2xl md:text-3xl font-bold">PDF一覧</h1>
+        <h1 className="text-3xl md:text-4xl font-bold">PDF一覧</h1>
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full md:w-auto">
           {/* 検索 */}
@@ -213,23 +214,23 @@ export default function PdfViewContent({
               placeholder="検索キーワード"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-11 text-lg font-semibold"
             />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           </div>
 
           {/* 利用者絞り込み */}
           <Select value={filterRecipient} onValueChange={setFilterRecipient}>
-            <SelectTrigger className="w-full sm:w-[200px]">
+            <SelectTrigger className="w-full sm:w-[240px] text-lg font-semibold">
               <div className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
+                <Filter className="h-5 w-5" />
                 <SelectValue placeholder="利用者で絞り込み" />
               </div>
             </SelectTrigger>
             <SelectContent className="max-h-[300px] z-50 bg-white dark:bg-gray-900 border border-gray-50 dark:border-gray-200 shadow-lg">
-              <SelectItem value="all">全て</SelectItem>
+              <SelectItem value="all" className="text-lg font-semibold">全て</SelectItem>
               {recipients.map((recipient) => (
-                <SelectItem key={recipient.id} value={recipient.id}>
+                <SelectItem key={recipient.id} value={recipient.id} className="text-lg font-semibold">
                   {recipient.last_name} {recipient.first_name}
                 </SelectItem>
               ))}
@@ -242,9 +243,9 @@ export default function PdfViewContent({
               variant="outline"
               size="default"
               onClick={handleReset}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto text-lg font-bold"
             >
-              <X className="h-4 w-4 mr-2" />
+              <X className="h-5 w-5 mr-2" />
               リセット
             </Button>
           )}
@@ -254,9 +255,9 @@ export default function PdfViewContent({
       {/* エラー */}
       {error && (
         <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>エラー</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
+          <AlertCircle className="h-5 w-5" />
+          <AlertTitle className="text-lg font-bold">エラー</AlertTitle>
+          <AlertDescription className="text-base font-semibold">{error}</AlertDescription>
         </Alert>
       )}
 
@@ -264,7 +265,7 @@ export default function PdfViewContent({
       {isLoading && (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-          <p className="text-muted-foreground">PDFを読み込み中...</p>
+          <p className="text-lg font-semibold text-muted-foreground">PDFを読み込み中...</p>
         </div>
       )}
 
@@ -272,8 +273,8 @@ export default function PdfViewContent({
       {!isLoading && pdfs.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12 text-center">
           <FileX className="h-12 w-12 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">PDFは見つかりません</h3>
-          <p className="text-muted-foreground">この事業所にアップロードされたPDFはありません</p>
+          <h3 className="text-2xl font-bold mb-2">PDFは見つかりません</h3>
+          <p className="text-lg font-semibold text-muted-foreground">この事業所にアップロードされたPDFはありません</p>
         </div>
       )}
 
@@ -289,7 +290,7 @@ export default function PdfViewContent({
               key={pdf.id}
               role="listitem"
               aria-label={`${pdf.original_filename}, ${pdf.welfare_recipient?.full_name || ''}, ${DELIVERABLE_TYPE_LABELS[pdf.deliverable_type] || pdf.deliverable_type}`}
-              className="p-4 hover:bg-accent/50 transition-colors cursor-pointer"
+              className="p-5 hover:bg-accent/50 transition-colors cursor-pointer"
               onClick={() => handleOpenPreview(pdf)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleOpenPreview(pdf);
@@ -300,11 +301,11 @@ export default function PdfViewContent({
                 {/* タイトルとメタ */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <FileText className="h-5 w-5 text-primary flex-shrink-0" />
-                    <h3 className="font-semibold text-lg truncate">{pdf.original_filename}</h3>
+                    <FileText className="h-6 w-6 text-primary flex-shrink-0" />
+                    <h3 className="text-xl font-bold truncate">{pdf.original_filename}</h3>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex flex-wrap items-center gap-2 text-base font-semibold text-muted-foreground">
                     <span>
                       {pdf.welfare_recipient?.full_name || ''}
                     </span>
@@ -315,7 +316,7 @@ export default function PdfViewContent({
                     {pdf.plan_cycle && (
                       <>
                         <span>|</span>
-                        <span>（第{pdf.plan_cycle.cycle_number}サイクル）</span>
+                        <span>（第{pdf.plan_cycle.cycle_number}回）</span>
                       </>
                     )}
                   </div>
@@ -323,7 +324,7 @@ export default function PdfViewContent({
 
                 {/* ラベルと矢印 */}
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className="px-3 py-1 text-base font-bold">
                     {DELIVERABLE_TYPE_LABELS[pdf.deliverable_type] || pdf.deliverable_type}
                   </Badge>
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -341,6 +342,7 @@ export default function PdfViewContent({
             variant="outline"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
+            className="text-base font-bold"
           >
             前
           </Button>
@@ -362,7 +364,7 @@ export default function PdfViewContent({
                 key={pageNum}
                 variant={currentPage === pageNum ? 'default' : 'outline'}
                 onClick={() => handlePageChange(pageNum)}
-                className="min-w-[40px]"
+                className="min-w-[44px] text-base font-bold"
               >
                 {pageNum}
               </Button>
@@ -373,6 +375,7 @@ export default function PdfViewContent({
             variant="outline"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
+            className="text-base font-bold"
           >
             次
           </Button>
@@ -383,8 +386,8 @@ export default function PdfViewContent({
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
           <DialogHeader>
-            <DialogTitle>{selectedPdf?.original_filename}</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-2xl font-bold">{selectedPdf?.original_filename}</DialogTitle>
+            <DialogDescription className="text-base font-semibold">
               {selectedPdf && (
                 <>
                   {selectedPdf.welfare_recipient?.full_name || ''} | {' '}
@@ -405,8 +408,8 @@ export default function PdfViewContent({
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={handleDownload}>
-              <Download className="mr-2 h-4 w-4" />
+            <Button variant="outline" onClick={handleDownload} className="text-lg font-bold">
+              <Download className="mr-2 h-5 w-5" />
               ダウンロード
             </Button>
           </DialogFooter>

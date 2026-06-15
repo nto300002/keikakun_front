@@ -140,25 +140,25 @@ export default function NotificationSettings() {
 
   if (isLoading) {
     return (
-      <div className="bg-gray-800 shadow-md rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">通知設定</h2>
-        <p className="text-gray-400">読み込み中...</p>
+      <div className="bg-white border border-slate-300 text-slate-900 shadow-md rounded-lg p-6 font-semibold dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+        <h2 className="text-2xl font-semibold mb-5">通知設定</h2>
+        <p className="text-slate-600 dark:text-gray-400">読み込み中...</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-800 shadow-md rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4">通知設定</h2>
-      <p className="text-gray-400 mb-6">
+    <div className="bg-white border border-slate-300 text-slate-900 shadow-md rounded-lg p-6 font-semibold dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+      <h2 className="text-2xl font-semibold mb-5">通知設定</h2>
+      <p className="text-slate-600 dark:text-gray-400 mb-7">
         期限アラートやアクション承認をどのように受け取るか設定できます
       </p>
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between p-4 border rounded-lg">
+        <div className="flex items-center justify-between p-4 border border-slate-300 rounded-lg dark:border-gray-700">
           <div>
-            <h3 className="font-medium">アプリ内通知</h3>
-            <p className="text-sm text-gray-400">
+            <h3 className="text-lg font-semibold">アプリ内通知</h3>
+            <p className="text-base text-slate-600 dark:text-gray-400">
               アプリ内のトースト通知で受け取る
             </p>
           </div>
@@ -174,11 +174,11 @@ export default function NotificationSettings() {
           </label>
         </div>
 
-        <div className="p-4 border rounded-lg">
+        <div className="p-4 border border-slate-300 rounded-lg dark:border-gray-700">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="font-medium">メール通知</h3>
-              <p className="text-sm text-gray-400">
+              <h3 className="text-lg font-semibold">メール通知</h3>
+              <p className="text-base text-slate-600 dark:text-gray-400">
                 期限アラートをメールで受け取る（毎日9:00）
               </p>
             </div>
@@ -195,46 +195,46 @@ export default function NotificationSettings() {
           </div>
 
           {preferences.email_notification && (
-            <div className="mt-3 pt-3 border-t border-gray-700">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+            <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-700">
+              <label className="block text-base font-semibold text-slate-700 dark:text-gray-300 mb-2">
                 通知開始日数
               </label>
               <select
                 value={preferences.email_threshold_days}
                 onChange={(e) => handleThresholdChange('email_threshold_days', parseInt(e.target.value))}
                 disabled={isSaving}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                className="w-full px-5 py-4 bg-white border border-slate-300 rounded-md text-lg text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               >
                 <option value={5}>5日前</option>
                 <option value={10}>10日前</option>
                 <option value={20}>20日前</option>
                 <option value={30}>30日前</option>
               </select>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-base text-slate-600 dark:text-gray-400 mt-1">
                 更新期限の何日前からメール通知を送るか設定できます
               </p>
             </div>
           )}
         </div>
 
-        <div className="p-4 border rounded-lg">
+        <div className="p-4 border border-slate-300 rounded-lg dark:border-gray-700">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="font-medium">システム通知（Web Push）</h3>
-              <p className="text-sm text-gray-400">
+              <h3 className="text-lg font-semibold">システム通知（Web Push）</h3>
+              <p className="text-base text-slate-600 dark:text-gray-400">
                 デバイスのシステム通知で受け取る
               </p>
 
               {!isSupported && (
-                <p className="text-sm text-red-500 mt-2">
+                <p className="text-base text-red-500 mt-2">
                   お使いのブラウザはシステム通知をサポートしていません
                 </p>
               )}
 
               {isSupported && isIOS && !isPWA && (
                 <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded">
-                  <p className="text-sm text-yellow-800 font-medium">iOSでの設定方法:</p>
-                  <ol className="text-sm text-yellow-700 mt-1 list-decimal list-inside">
+                  <p className="text-base text-yellow-800 font-semibold">iOSでの設定方法:</p>
+                  <ol className="text-base text-yellow-700 mt-1 list-decimal list-inside">
                     <li>Safariで「共有」ボタンをタップ</li>
                     <li>「ホーム画面に追加」を選択</li>
                     <li>追加したアイコンからアプリを開く</li>
@@ -244,7 +244,7 @@ export default function NotificationSettings() {
               )}
 
               {pushError && (
-                <p className="text-sm text-red-500 mt-2">
+                <p className="text-base text-red-500 mt-2">
                   エラー: {pushError}
                 </p>
               )}
@@ -262,22 +262,22 @@ export default function NotificationSettings() {
           </div>
 
           {preferences.system_notification && isSupported && (
-            <div className="mt-3 pt-3 border-t border-gray-700">
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+            <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-700">
+              <label className="block text-base font-semibold text-slate-700 dark:text-gray-300 mb-2">
                 通知開始日数
               </label>
               <select
                 value={preferences.push_threshold_days}
                 onChange={(e) => handleThresholdChange('push_threshold_days', parseInt(e.target.value))}
                 disabled={isSaving}
-                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+                className="w-full px-5 py-4 bg-white border border-slate-300 rounded-md text-lg text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               >
                 <option value={5}>5日前</option>
                 <option value={10}>10日前</option>
                 <option value={20}>20日前</option>
                 <option value={30}>30日前</option>
               </select>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="text-base text-slate-600 dark:text-gray-400 mt-1">
                 更新期限の何日前からWeb Push通知を送るか設定できます
               </p>
             </div>
@@ -286,7 +286,7 @@ export default function NotificationSettings() {
       </div>
 
       {isSaving && (
-        <p className="text-sm text-gray-400 mt-4">保存中...</p>
+        <p className="text-base text-slate-600 dark:text-gray-400 mt-4">保存中...</p>
       )}
     </div>
   );

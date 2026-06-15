@@ -12,6 +12,8 @@ interface EmploymentSectionProps {
   onRefresh: () => void;
 }
 
+// UI設計意図: 就労情報は文章量が多く確認頻度も高いため、本文・ラベル・入力系をtext-base以上にして視覚的負荷を下げる。
+// 変更概要: 親スコープで表示/編集モーダル内の文字サイズを底上げし、福祉職員が読み進めやすい密度に調整する。
 export default function EmploymentSection({
   recipientId,
   employment,
@@ -100,14 +102,14 @@ export default function EmploymentSection({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 [&_h3]:text-xl [&_h3]:font-semibold [&_p]:text-base [&_p]:font-semibold [&_div]:text-base [&_div]:font-semibold [&_span]:text-base [&_span]:font-semibold [&_label]:text-base [&_label]:font-semibold [&_input]:text-base [&_input]:font-semibold [&_textarea]:text-base [&_textarea]:font-semibold [&_select]:text-base [&_select]:font-semibold [&_button]:text-base [&_button]:font-semibold">
       {/* 就労関係について */}
-      <div className="bg-[#1a2332] rounded-lg p-6 border border-[#2a3441]">
+      <div className="bg-slate-50 dark:bg-[#1a2332] rounded-lg p-6 border border-slate-300 dark:border-[#2a3441]">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold text-white">就労関係について</h3>
+          <h3 className="text-lg font-semibold text-slate-950 dark:text-white">就労関係について</h3>
           <button
             onClick={handleOpenModal}
-            className="flex items-center gap-2 px-4 py-2 bg-[#2a3441] hover:bg-[#3a4451] text-white rounded-lg transition-colors text-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-slate-600 dark:bg-[#2a3441] hover:bg-slate-700 dark:hover:bg-[#3a4451] text-white rounded-lg transition-colors text-sm"
           >
             {employment ? (
               <>
@@ -124,66 +126,66 @@ export default function EmploymentSection({
         </div>
 
         {!employment ? (
-          <p className="text-gray-400 text-sm">データがありません</p>
+          <p className="text-slate-600 dark:text-gray-400 text-sm">データがありません</p>
         ) : (
           <div className="space-y-4">
             <div className="space-y-3">
               <div>
-                <p className="text-gray-400 text-sm mb-2">過去の就労経験</p>
+                <p className="text-slate-600 dark:text-gray-400 text-sm mb-2">過去の就労経験</p>
                 <div className="space-y-2 pl-4">
                   <div>
-                    <span className="text-gray-400">一般就労やパート、アルバイトの経験: </span>
-                    <span className="text-white">{employment.regular_or_part_time_job ? 'ある' : 'ない'}</span>
+                    <span className="text-slate-600 dark:text-gray-400">一般就労やパート、アルバイトの経験: </span>
+                    <span className="text-slate-900 dark:text-white">{employment.regular_or_part_time_job ? 'ある' : 'ない'}</span>
                   </div>
                   <div>
-                    <span className="text-gray-400">就労移行、継続支援の経験: </span>
-                    <span className="text-white">{employment.employment_support ? 'ある' : 'ない'}</span>
+                    <span className="text-slate-600 dark:text-gray-400">就労移行、継続支援の経験: </span>
+                    <span className="text-slate-900 dark:text-white">{employment.employment_support ? 'ある' : 'ない'}</span>
                   </div>
                   {employment.qualifications && (
                     <div>
-                      <span className="text-gray-400">免許、資格、検定: </span>
-                      <ExpandableText text={employment.qualifications} maxLength={50} className="inline text-white" />
+                      <span className="text-slate-600 dark:text-gray-400">免許、資格、検定: </span>
+                      <ExpandableText text={employment.qualifications} maxLength={50} className="inline text-slate-900 dark:text-white" />
                     </div>
                   )}
                   {employment.main_places_of_employment && (
                     <div>
-                      <span className="text-gray-400">主な就労先と期間: </span>
-                      <ExpandableText text={employment.main_places_of_employment} maxLength={50} className="inline text-white" />
+                      <span className="text-slate-600 dark:text-gray-400">主な就労先と期間: </span>
+                      <ExpandableText text={employment.main_places_of_employment} maxLength={50} className="inline text-slate-900 dark:text-white" />
                     </div>
                   )}
                   <div>
-                    <span className="text-gray-400">一般就労希望: </span>
-                    <span className="text-white">{employment.general_employment_request ? 'ある' : 'ない'}</span>
+                    <span className="text-slate-600 dark:text-gray-400">一般就労希望: </span>
+                    <span className="text-slate-900 dark:text-white">{employment.general_employment_request ? 'ある' : 'ない'}</span>
                   </div>
                   {employment.desired_job && (
                     <div>
-                      <span className="text-gray-400">希望する仕事: </span>
-                      <ExpandableText text={employment.desired_job} maxLength={50} className="inline text-white" />
+                      <span className="text-slate-600 dark:text-gray-400">希望する仕事: </span>
+                      <ExpandableText text={employment.desired_job} maxLength={50} className="inline text-slate-900 dark:text-white" />
                     </div>
                   )}
                   {employment.special_remarks && (
                     <div>
-                      <span className="text-gray-400">特記事項: </span>
-                      <ExpandableText text={employment.special_remarks} maxLength={50} className="inline text-white" />
+                      <span className="text-slate-600 dark:text-gray-400">特記事項: </span>
+                      <ExpandableText text={employment.special_remarks} maxLength={50} className="inline text-slate-900 dark:text-white" />
                     </div>
                   )}
                   {employment.no_employment_experience && (
                     <div>
-                      <span className="text-gray-400">就労経験なし: </span>
-                      <span className="text-white">はい</span>
-                      <div className="pl-6 mt-2 space-y-1 border-l-2 border-[#2a3441] ml-2">
+                      <span className="text-slate-600 dark:text-gray-400">就労経験なし: </span>
+                      <span className="text-slate-900 dark:text-white">はい</span>
+                      <div className="pl-6 mt-2 space-y-1 border-l-2 border-slate-300 dark:border-[#2a3441] ml-2">
                         {employment.attended_job_selection_office && (
-                          <div className="text-white text-sm">• 就労選択事業所に通所した</div>
+                          <div className="text-slate-900 dark:text-white text-sm">• 就労選択事業所に通所した</div>
                         )}
                         {employment.received_employment_assessment && (
-                          <div className="text-white text-sm">• 就労アセスメント受けた</div>
+                          <div className="text-slate-900 dark:text-white text-sm">• 就労アセスメント受けた</div>
                         )}
                         {employment.employment_other_experience && (
                           <div>
-                            <div className="text-white text-sm">• その他</div>
+                            <div className="text-slate-900 dark:text-white text-sm">• その他</div>
                             {employment.employment_other_text && (
                               <div className="pl-4 mt-1">
-                                <ExpandableText text={employment.employment_other_text} maxLength={50} className="text-white text-sm" />
+                                <ExpandableText text={employment.employment_other_text} maxLength={50} className="text-slate-900 dark:text-white text-sm" />
                               </div>
                             )}
                           </div>
@@ -200,23 +202,23 @@ export default function EmploymentSection({
 
       {/* 施設外就労 */}
       {employment && (
-        <div className="bg-[#1a2332] rounded-lg p-6 border border-[#2a3441]">
-          <h3 className="text-lg font-semibold text-white mb-4">施設外就労</h3>
+        <div className="bg-slate-50 dark:bg-[#1a2332] rounded-lg p-6 border border-slate-300 dark:border-[#2a3441]">
+          <h3 className="text-lg font-semibold text-slate-950 dark:text-white mb-4">施設外就労</h3>
           <div className="space-y-3">
             <div>
-              <p className="text-gray-400 text-sm">希望</p>
-              <p className="text-white">{getWorkOutsideFacilityLabel(employment.work_outside_the_facility)}</p>
+              <p className="text-slate-600 dark:text-gray-400 text-sm">希望</p>
+              <p className="text-slate-900 dark:text-white">{getWorkOutsideFacilityLabel(employment.work_outside_the_facility)}</p>
             </div>
               {employment.desired_tasks_on_asobe && (
                   <div>
-                    <span className="text-gray-400">asoBeで希望する作業: </span>
-                    <ExpandableText text={employment.desired_tasks_on_asobe} maxLength={50} className="inline text-white" />
+                    <span className="text-slate-600 dark:text-gray-400">asoBeで希望する作業: </span>
+                    <ExpandableText text={employment.desired_tasks_on_asobe} maxLength={50} className="inline text-slate-900 dark:text-white" />
                   </div>
               )}
             {employment.special_note_about_working_outside_the_facility && (
               <div>
-                <p className="text-gray-400 text-sm">特記事項</p>
-                <div className="text-white">
+                <p className="text-slate-600 dark:text-gray-400 text-sm">特記事項</p>
+                <div className="text-slate-900 dark:text-white">
                   <ExpandableText
                     text={employment.special_note_about_working_outside_the_facility}
                     maxLength={50}
@@ -239,7 +241,7 @@ export default function EmploymentSection({
 
           {/* チェックボックス群 */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
               過去の就労経験
             </label>
             <div className="space-y-2 pl-2">
@@ -248,36 +250,36 @@ export default function EmploymentSection({
                   type="checkbox"
                   checked={formData.regular_or_part_time_job}
                   onChange={(e) => setFormData({ ...formData, regular_or_part_time_job: e.target.checked })}
-                  className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-slate-300 dark:border-[#2a3441] bg-white dark:bg-[#0f1419] text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-gray-400">一般就労やパート、アルバイトの経験がある</span>
+                <span className="text-slate-600 dark:text-gray-400">一般就労やパート、アルバイトの経験がある</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.employment_support}
                   onChange={(e) => setFormData({ ...formData, employment_support: e.target.checked })}
-                  className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-slate-300 dark:border-[#2a3441] bg-white dark:bg-[#0f1419] text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-gray-400">就労移行、継続支援の経験がある</span>
+                <span className="text-slate-600 dark:text-gray-400">就労移行、継続支援の経験がある</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.work_experience_in_the_past_year}
                   onChange={(e) => setFormData({ ...formData, work_experience_in_the_past_year: e.target.checked })}
-                  className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-slate-300 dark:border-[#2a3441] bg-white dark:bg-[#0f1419] text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-gray-400">過去1年以内に就労経験がある</span>
+                <span className="text-slate-600 dark:text-gray-400">過去1年以内に就労経験がある</span>
               </label>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={formData.suspension_of_work}
                   onChange={(e) => setFormData({ ...formData, suspension_of_work: e.target.checked })}
-                  className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-slate-300 dark:border-[#2a3441] bg-white dark:bg-[#0f1419] text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-gray-400">現在休職中である</span>
+                <span className="text-slate-600 dark:text-gray-400">現在休職中である</span>
               </label>
 
               {/* Task 1: 就労経験なし（親チェックボックス） */}
@@ -296,31 +298,31 @@ export default function EmploymentSection({
                       employment_other_text: checked ? formData.employment_other_text : '',
                     });
                   }}
-                  className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-slate-300 dark:border-[#2a3441] bg-white dark:bg-[#0f1419] text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-gray-400">就労経験なし</span>
+                <span className="text-slate-600 dark:text-gray-400">就労経験なし</span>
               </label>
 
               {/* 子チェックボックス（親がtrueの時のみ表示） */}
               {formData.no_employment_experience && (
-                <div className="pl-6 space-y-2 border-l-2 border-[#2a3441] ml-2">
+                <div className="pl-6 space-y-2 border-l-2 border-slate-300 dark:border-[#2a3441] ml-2">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.attended_job_selection_office}
                       onChange={(e) => setFormData({ ...formData, attended_job_selection_office: e.target.checked })}
-                      className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-slate-300 dark:border-[#2a3441] bg-white dark:bg-[#0f1419] text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-gray-400">就労選択事業所に通所した</span>
+                    <span className="text-slate-600 dark:text-gray-400">就労選択事業所に通所した</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={formData.received_employment_assessment}
                       onChange={(e) => setFormData({ ...formData, received_employment_assessment: e.target.checked })}
-                      className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-slate-300 dark:border-[#2a3441] bg-white dark:bg-[#0f1419] text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-gray-400">就労アセスメント受けた</span>
+                    <span className="text-slate-600 dark:text-gray-400">就労アセスメント受けた</span>
                   </label>
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -334,9 +336,9 @@ export default function EmploymentSection({
                           employment_other_text: checked ? formData.employment_other_text : '',
                         });
                       }}
-                      className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                      className="w-4 h-4 rounded border-slate-300 dark:border-[#2a3441] bg-white dark:bg-[#0f1419] text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-gray-400">その他<span className="text-red-200">*(チェックを入れた場合、詳細を入力してください)</span></span>
+                    <span className="text-slate-600 dark:text-gray-400">その他<span className="text-red-200">*(チェックを入れた場合、詳細を入力してください)</span></span>
                   </label>
 
                   {/* その他のテキスト入力（employment_other_experienceがtrueの時のみ表示） */}
@@ -347,7 +349,7 @@ export default function EmploymentSection({
                         onChange={(e) => setFormData({ ...formData, employment_other_text: e.target.value })}
                         rows={2}
                         maxLength={1000}
-                        className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none text-sm"
+                        className="w-full px-3 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none text-sm"
                         placeholder="その他の詳細を入力（1000文字以内）"
                       />
                     </div>
@@ -359,7 +361,7 @@ export default function EmploymentSection({
 
           {/* 免許、資格、検定 */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
               免許、資格、検定
             </label>
             <textarea
@@ -367,14 +369,14 @@ export default function EmploymentSection({
               onChange={(e) => setFormData({ ...formData, qualifications: e.target.value })}
               rows={3}
               maxLength={500}
-              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
               placeholder="保有している免許・資格・検定を入力"
             />
           </div>
 
           {/* 主な就労先と期間 */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
               主な就労先と期間
             </label>
             <textarea
@@ -382,7 +384,7 @@ export default function EmploymentSection({
               onChange={(e) => setFormData({ ...formData, main_places_of_employment: e.target.value })}
               rows={3}
               maxLength={500}
-              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
               placeholder="これまでの就労先と期間を入力"
             />
           </div>
@@ -394,15 +396,15 @@ export default function EmploymentSection({
                 type="checkbox"
                 checked={formData.general_employment_request}
                 onChange={(e) => setFormData({ ...formData, general_employment_request: e.target.checked })}
-                className="w-4 h-4 rounded border-[#2a3441] bg-[#0f1419] text-blue-600 focus:ring-blue-500"
+                className="w-4 h-4 rounded border-slate-300 dark:border-[#2a3441] bg-white dark:bg-[#0f1419] text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-gray-400">一般就労を希望する</span>
+              <span className="text-slate-600 dark:text-gray-400">一般就労を希望する</span>
             </label>
           </div>
 
           {/* 希望する仕事 */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
               希望する仕事
             </label>
             <input
@@ -410,14 +412,14 @@ export default function EmploymentSection({
               value={formData.desired_job}
               onChange={(e) => setFormData({ ...formData, desired_job: e.target.value })}
               maxLength={255}
-              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
               placeholder="希望する職種を入力"
             />
           </div>
 
           {/* 特記事項 */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
               特記事項
             </label>
             <textarea
@@ -425,7 +427,7 @@ export default function EmploymentSection({
               onChange={(e) => setFormData({ ...formData, special_remarks: e.target.value })}
               rows={3}
               maxLength={1000}
-              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
               placeholder="その他特記事項を入力"
             />
           </div>
@@ -433,13 +435,13 @@ export default function EmploymentSection({
 
           {/* 施設外就労の希望 */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
               施設外就労の希望 <span className="text-red-400">*</span>
             </label>
             <select
               value={formData.work_outside_the_facility}
               onChange={(e) => setFormData({ ...formData, work_outside_the_facility: e.target.value as EmploymentInput['work_outside_the_facility'] })}
-              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500"
+              className="w-full px-3 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500"
               required
             >
               <option value="hope">希望する</option>
@@ -450,7 +452,7 @@ export default function EmploymentSection({
 
           {/* asoBeで希望する作業 */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
               asoBeで希望する作業
             </label>
             <textarea
@@ -458,14 +460,14 @@ export default function EmploymentSection({
               onChange={(e) => setFormData({ ...formData, desired_tasks_on_asobe: e.target.value })}
               rows={3}
               maxLength={1000}
-              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
               placeholder="asoBeで希望する作業内容を入力（1000文字以内）"
             />
           </div>
 
           {/* 施設外就労の特記事項 */}
           <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
+            <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
               施設外就労の特記事項
             </label>
             <textarea
@@ -473,17 +475,17 @@ export default function EmploymentSection({
               onChange={(e) => setFormData({ ...formData, special_note_about_working_outside_the_facility: e.target.value })}
               rows={3}
               maxLength={1000}
-              className="w-full px-3 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full px-3 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-blue-500 resize-none"
               placeholder="施設外就労に関する特記事項を入力"
             />
           </div>
 
           {/* ボタン */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-[#2a3441]">
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-300 dark:border-[#2a3441]">
             <button
               type="button"
               onClick={() => setShowModal(false)}
-              className="px-4 py-2 bg-[#2a3441] hover:bg-[#3a4451] text-white rounded-lg transition-colors"
+              className="px-4 py-2 bg-slate-600 dark:bg-[#2a3441] hover:bg-slate-700 dark:hover:bg-[#3a4451] text-white rounded-lg transition-colors"
               disabled={isSubmitting}
             >
               キャンセル

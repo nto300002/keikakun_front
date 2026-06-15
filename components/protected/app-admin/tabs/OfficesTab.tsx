@@ -70,7 +70,7 @@ export default function OfficesTab() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">事務所一覧</h2>
+        <h2 className="text-3xl font-bold">事務所一覧</h2>
         <div className="flex gap-2">
           <div className="relative">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -116,12 +116,12 @@ export default function OfficesTab() {
             <table className="w-full">
               <thead className="bg-gray-700">
                 <tr>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium">事務所名</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium">種別</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium">住所</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium">電話番号</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium">メール</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium"></th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">事務所名</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">種別</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">住所</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">電話番号</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">メール</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold"></th>
                 </tr>
               </thead>
               <tbody>
@@ -134,21 +134,21 @@ export default function OfficesTab() {
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <FaBuilding className="w-4 h-4 text-purple-400" />
-                        <span className="text-white font-medium">{office.name}</span>
+                        <span className="text-white font-semibold">{office.name}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="bg-gray-600 text-gray-200 px-2 py-1 rounded text-xs">
+                      <span className="bg-gray-600 text-gray-200 px-2 py-1 rounded text-base">
                         {getOfficeTypeName(office.office_type)}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-300 text-sm">
+                    <td className="py-3 px-4 text-gray-300 text-base">
                       {office.address || '-'}
                     </td>
-                    <td className="py-3 px-4 text-gray-300 text-sm">
+                    <td className="py-3 px-4 text-gray-300 text-base">
                       {office.phone_number || '-'}
                     </td>
-                    <td className="py-3 px-4 text-gray-300 text-sm">
+                    <td className="py-3 px-4 text-gray-300 text-base">
                       {office.email || '-'}
                     </td>
                     <td className="py-3 px-4">
@@ -165,7 +165,7 @@ export default function OfficesTab() {
       {/* ページネーション */}
       {(currentPage > 0 || hasNextPage) && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 text-base">
             {offices.length} 件を表示中（ページ {currentPage + 1}）
           </p>
           <div className="flex gap-2">

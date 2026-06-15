@@ -123,7 +123,7 @@ function MfaSetupFormComponent() {
                         >
                             QRコードを再取得
                         </button>
-                        <p className="mt-2 text-sm text-gray-600">
+                        <p className="mt-2 text-sm text-slate-600 dark:text-gray-400">
                             問題が解決しない場合は、管理者にお問い合わせください。
                         </p>
                     </div>
@@ -135,7 +135,7 @@ function MfaSetupFormComponent() {
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex flex-col items-center">
-                <p className="text-gray-700 mb-4">
+                <p className="text-slate-700 dark:text-gray-300 mb-4">
                     認証アプリ（Google Authenticatorなど）で以下のQRコードをスキャンしてください。
                 </p>
                 {qrCodeUri && (
@@ -143,12 +143,12 @@ function MfaSetupFormComponent() {
                         <QRCodeCanvas value={qrCodeUri} size={200} />
                     </div>
                 )}
-                <p className="mt-4 text-sm text-gray-600">または、以下のキーを手動で入力してください。</p>
-                <p className="mt-1 text-sm font-mono p-2 bg-gray-500 rounded">{secretKey}</p>
+                <p className="mt-4 text-sm text-slate-600 dark:text-gray-400">または、以下のキーを手動で入力してください。</p>
+                <p className="mt-1 text-sm font-mono p-2 bg-slate-100 text-slate-950 dark:bg-gray-700 dark:text-white rounded">{secretKey}</p>
             </div>
 
             <div>
-                <label htmlFor="totp-code" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="totp-code" className="block text-sm font-medium text-slate-700 dark:text-gray-300">
                     認証アプリに表示された6桁のコード
                 </label>
                 <input
@@ -156,7 +156,7 @@ function MfaSetupFormComponent() {
                     name="totp-code"
                     type="text"
                     required
-                    className="w-full px-3 py-2 mt-1 text-gray-600 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full px-3 py-2 mt-1 bg-white text-slate-950 placeholder-slate-400 border border-slate-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-[#1A1A1A] dark:text-white dark:placeholder-gray-500 dark:border-gray-600"
                     value={totpCode}
                     onChange={(e) => setTotpCode(e.target.value)}
                     placeholder="123456"

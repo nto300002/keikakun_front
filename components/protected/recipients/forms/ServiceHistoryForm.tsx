@@ -59,7 +59,7 @@ export default function ServiceHistoryForm({
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
           事業所名 <span className="text-red-400">*</span>
         </label>
         <input
@@ -67,13 +67,13 @@ export default function ServiceHistoryForm({
           required
           value={formData.office_name}
           onChange={(e) => setFormData({ ...formData, office_name: e.target.value })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
           placeholder="例: 〇〇事業所"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
           サービス名 <span className="text-red-400">*</span>
         </label>
         <input
@@ -81,13 +81,13 @@ export default function ServiceHistoryForm({
           required
           value={formData.service_name}
           onChange={(e) => setFormData({ ...formData, service_name: e.target.value })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
           placeholder="例: 就労継続支援B型"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
           利用開始日 <span className="text-red-400">*</span>
         </label>
         <DateDrumPicker
@@ -99,7 +99,7 @@ export default function ServiceHistoryForm({
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-slate-600 dark:text-gray-400 mb-2">
           利用時間/月 <span className="text-red-400">*</span>
         </label>
         <input
@@ -107,7 +107,7 @@ export default function ServiceHistoryForm({
           required
           value={formData.amount_used}
           onChange={(e) => setFormData({ ...formData, amount_used: e.target.value })}
-          className="w-full px-4 py-2 bg-[#0f1419] border border-[#2a3441] rounded-lg text-white focus:outline-none focus:border-[#10b981]"
+          className="w-full px-4 py-2 bg-white dark:bg-[#0f1419] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:border-[#10b981]"
           placeholder="例: 60時間"
         />
       </div>
@@ -117,7 +117,7 @@ export default function ServiceHistoryForm({
           type="button"
           onClick={onCancel}
           disabled={isSubmitting}
-          className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+          className="px-4 py-2 text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-white transition-colors"
         >
           キャンセル
         </button>

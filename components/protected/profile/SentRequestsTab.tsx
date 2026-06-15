@@ -132,7 +132,7 @@ export default function SentRequestsTab() {
         <div className="mb-4 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg">
           <div className="flex items-center justify-between">
             <span>{error}</span>
-            <button onClick={() => setError(null)} className="ml-4 text-white hover:text-gray-200">
+            <button onClick={() => setError(null)} className="ml-4 text-white dark:hover:text-gray-200 hover:text-red-100">
               ×
             </button>
           </div>
@@ -146,7 +146,7 @@ export default function SentRequestsTab() {
           className={`px-4 py-2 rounded-lg font-medium ${
             filter === 'all'
               ? 'bg-blue-600 text-white'
-              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-600/70'
           }`}
         >
           すべて
@@ -156,7 +156,7 @@ export default function SentRequestsTab() {
           className={`px-4 py-2 rounded-lg font-medium ${
             filter === 'pending'
               ? 'bg-blue-600 text-white'
-              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-600/70'
           }`}
         >
           承認待ち
@@ -166,7 +166,7 @@ export default function SentRequestsTab() {
           className={`px-4 py-2 rounded-lg font-medium ${
             filter === 'completed'
               ? 'bg-blue-600 text-white'
-              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/70'
+              : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-600/70'
           }`}
         >
           処理済み
@@ -175,9 +175,9 @@ export default function SentRequestsTab() {
 
       {/* リクエスト一覧 */}
       {isLoading ? (
-        <div className="text-center py-8 text-gray-400">読み込み中...</div>
+        <div className="text-center py-8 text-slate-600 dark:text-gray-400">読み込み中...</div>
       ) : requests.length === 0 ? (
-        <div className="text-center py-8 text-gray-400">
+        <div className="text-center py-8 text-slate-600 dark:text-gray-400">
           {filter === 'pending' && '承認待ちのリクエストはありません'}
           {filter === 'completed' && '処理済みのリクエストはありません'}
           {filter === 'all' && 'リクエストはありません'}

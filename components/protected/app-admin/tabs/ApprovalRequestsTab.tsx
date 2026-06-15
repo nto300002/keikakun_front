@@ -89,11 +89,11 @@ export default function ApprovalRequestsTab() {
   const getStatusBadge = (status: WithdrawalRequestStatus) => {
     switch (status) {
       case 'pending':
-        return <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded text-xs">承認待ち</span>;
+        return <span className="bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded text-base">承認待ち</span>;
       case 'approved':
-        return <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">承認済み</span>;
+        return <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-base">承認済み</span>;
       case 'rejected':
-        return <span className="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs">却下</span>;
+        return <span className="bg-red-500/20 text-red-400 px-2 py-1 rounded text-base">却下</span>;
       default:
         return null;
     }
@@ -104,7 +104,7 @@ export default function ApprovalRequestsTab() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">退会リクエスト</h2>
+        <h2 className="text-3xl font-bold">退会リクエスト</h2>
         <div className="flex gap-2">
           <select
             value={statusFilter}
@@ -154,21 +154,21 @@ export default function ApprovalRequestsTab() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <FaExclamationTriangle className="w-4 h-4 text-yellow-400" />
-                      <span className="font-medium text-white">{request.title}</span>
+                      <span className="font-semibold text-white">{request.title}</span>
                       {getStatusBadge(request.status)}
                     </div>
-                    <p className="text-gray-300 text-sm mb-2">{request.reason}</p>
-                    <div className="flex items-center gap-4 text-xs text-gray-400">
+                    <p className="text-gray-300 text-base mb-2">{request.reason}</p>
+                    <div className="flex items-center gap-4 text-base text-gray-400">
                       <span>事務所: {request.office_name}</span>
                       <span>申請者: {request.requester_name}</span>
                       <span>申請日: {formatDate(request.created_at)}</span>
                     </div>
                     {request.reviewer_notes && (
                       <div className="mt-3 p-3 bg-gray-700/50 rounded-lg">
-                        <p className="text-xs text-gray-400 mb-1">
+                        <p className="text-base text-gray-400 mb-1">
                           {request.status === 'approved' ? '承認者コメント' : '却下理由'}:
                         </p>
-                        <p className="text-gray-300 text-sm">{request.reviewer_notes}</p>
+                        <p className="text-gray-300 text-base">{request.reviewer_notes}</p>
                       </div>
                     )}
                   </div>
@@ -203,7 +203,7 @@ export default function ApprovalRequestsTab() {
       {/* ページネーション */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 text-base">
             全 {total} 件中 {currentPage * ITEMS_PER_PAGE + 1} - {Math.min((currentPage + 1) * ITEMS_PER_PAGE, total)} 件を表示
           </p>
           <div className="flex gap-2">
@@ -231,16 +231,16 @@ export default function ApprovalRequestsTab() {
           <div className="bg-gray-800 rounded-lg p-6 max-w-lg w-full">
             <div className="flex items-center gap-3 mb-4">
               <FaExclamationTriangle className="w-8 h-8 text-yellow-400" />
-              <h3 className="text-xl font-bold text-white">退会承認の確認</h3>
+              <h3 className="text-2xl font-bold text-white">退会承認の確認</h3>
             </div>
             <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-4">
-              <p className="text-red-400 text-sm">
+              <p className="text-red-400 text-base">
                 この操作を実行すると、事務所「{selectedRequest.office_name}」と所属するすべてのスタッフが論理削除されます。
                 30日後にデータは完全に削除されます。
               </p>
             </div>
             <div className="mb-4 p-3 bg-gray-700 rounded-lg">
-              <p className="text-sm text-gray-400 mb-1">タイトル: {selectedRequest.title}</p>
+              <p className="text-base text-gray-400 mb-1">タイトル: {selectedRequest.title}</p>
               <p className="text-gray-300">{selectedRequest.reason}</p>
             </div>
             <div className="flex justify-end gap-2">
@@ -269,13 +269,13 @@ export default function ApprovalRequestsTab() {
       {selectedRequest && !showApproveConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-800 rounded-lg p-6 max-w-lg w-full">
-            <h3 className="text-xl font-bold text-white mb-4">退会リクエストを却下</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">退会リクエストを却下</h3>
             <div className="mb-4 p-3 bg-gray-700 rounded-lg">
-              <p className="text-sm text-gray-400 mb-1">タイトル: {selectedRequest.title}</p>
+              <p className="text-base text-gray-400 mb-1">タイトル: {selectedRequest.title}</p>
               <p className="text-gray-300">{selectedRequest.reason}</p>
             </div>
             <div className="mb-4">
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-base text-gray-400 mb-2">
                 却下理由 <span className="text-red-400">*</span>
               </label>
               <textarea

@@ -44,7 +44,7 @@ export default function NoticeDetailPage({
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="inline-block w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-gray-400">通知を読み込んでいます...</p>
+            <p className="text-slate-600 dark:text-gray-400">通知を読み込んでいます...</p>
           </div>
         </div>
       </div>
@@ -58,13 +58,13 @@ export default function NoticeDetailPage({
         <div className="max-w-2xl mx-auto">
           <div className="bg-red-900/30 border border-red-700/50 rounded-lg p-6 text-center">
             <div className="text-red-400 text-5xl mb-4">⚠️</div>
-            <h2 className="text-xl font-bold text-white mb-2">エラー</h2>
-            <p className="text-gray-300 mb-4">
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">エラー</h2>
+            <p className="text-slate-700 dark:text-gray-300 mb-4">
               {error || '通知が見つかりませんでした'}
             </p>
             <button
               onClick={() => (window.location.href = '/notice')}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-2 rounded-lg"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white px-6 py-2 rounded-lg"
             >
               通知一覧に戻る
             </button>

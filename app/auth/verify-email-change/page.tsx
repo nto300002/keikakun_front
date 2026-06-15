@@ -52,14 +52,14 @@ function VerifyEmailChangeContent() {
   }, [token, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
-      <div className="max-w-md w-full bg-[#1a1a2e] border border-[#2a2a3e] p-8 rounded-xl shadow-lg text-center">
-        <h1 className="text-2xl font-bold mb-4 text-white">メールアドレス変更</h1>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-gray-900">
+      <div className="max-w-md w-full bg-white dark:bg-[#1a1a2e] border border-slate-200 dark:border-[#2a2a3e] p-8 rounded-xl shadow-lg text-center">
+        <h1 className="text-2xl font-bold mb-4 text-slate-950 dark:text-white">メールアドレス変更</h1>
 
         {status === 'verifying' && (
           <div className="flex flex-col items-center gap-4">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-            <p className="text-gray-400">メールアドレスを変更中...</p>
+            <p className="text-slate-600 dark:text-gray-400">メールアドレスを変更中...</p>
           </div>
         )}
 
@@ -80,7 +80,7 @@ function VerifyEmailChangeContent() {
                 />
               </svg>
               <p className="text-green-500 mb-2 font-semibold">メールアドレスの変更が完了しました</p>
-              <p className="text-gray-400 text-sm mb-4">新しいメールアドレス: {newEmail}</p>
+              <p className="text-slate-600 dark:text-gray-400 text-sm mb-4">新しいメールアドレス: {newEmail}</p>
             </div>
 
             <div className="bg-blue-900/30 border border-blue-700/50 rounded-lg p-4 mb-6">
@@ -90,7 +90,7 @@ function VerifyEmailChangeContent() {
               </p>
             </div>
 
-            <p className="text-gray-500 text-sm mb-4">5秒後にログインページに移動します...</p>
+            <p className="text-slate-500 dark:text-gray-500 text-sm mb-4">5秒後にログインページに移動します...</p>
             <button
               onClick={() => router.push('/auth/login')}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium"
@@ -117,7 +117,7 @@ function VerifyEmailChangeContent() {
                 />
               </svg>
               <p className="text-red-500 mb-2 font-semibold">メールアドレスの変更に失敗しました</p>
-              <p className="text-gray-400 text-sm mb-4">{error}</p>
+              <p className="text-slate-600 dark:text-gray-400 text-sm mb-4">{error}</p>
             </div>
 
             <div className="bg-yellow-900/30 border border-yellow-700/50 rounded-lg p-4 mb-6">
@@ -131,7 +131,7 @@ function VerifyEmailChangeContent() {
 
             <button
               onClick={() => router.push('/auth/login')}
-              className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-medium"
+              className="px-6 py-2 bg-slate-200 text-slate-800 dark:bg-gray-700 dark:text-white rounded-lg hover:bg-slate-300 dark:hover:bg-gray-600 font-medium"
             >
               ログインページに戻る
             </button>
@@ -145,8 +145,8 @@ function VerifyEmailChangeContent() {
 export default function VerifyEmailChangePage() {
   return (
     <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="text-white">読み込み中...</div>
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-gray-900">
+        <div className="text-slate-950 dark:text-white">読み込み中...</div>
       </div>
     }>
       <VerifyEmailChangeContent />

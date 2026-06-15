@@ -8,13 +8,13 @@ interface DeletedOfficeNoticeProps {
 
 export default function DeletedOfficeNotice({ officeName }: DeletedOfficeNoticeProps) {
   return (
-    <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full">
-        <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8 text-center">
+        <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-slate-200 dark:border-gray-700 p-8 text-center">
           {/* アイコン */}
           <div className="flex justify-center mb-6">
             <div className="relative">
-              <FaBuilding className="h-16 w-16 text-gray-500" />
+              <FaBuilding className="h-16 w-16 text-slate-500 dark:text-gray-500" />
               <div className="absolute -bottom-1 -right-1 bg-red-500 rounded-full p-1">
                 <FaExclamationTriangle className="h-5 w-5 text-white" />
               </div>
@@ -22,12 +22,12 @@ export default function DeletedOfficeNotice({ officeName }: DeletedOfficeNoticeP
           </div>
 
           {/* タイトル */}
-          <h1 className="text-2xl font-bold text-white mb-4">
+          <h1 className="text-2xl font-bold text-slate-950 dark:text-white mb-4">
             事務所が退会しました
           </h1>
 
           {/* メッセージ */}
-          <div className="space-y-4 text-gray-400">
+          <div className="space-y-4 text-slate-600 dark:text-gray-400">
             {officeName && (
               <p className="text-lg">
                 <span className="text-white font-medium">{officeName}</span>
@@ -41,8 +41,8 @@ export default function DeletedOfficeNotice({ officeName }: DeletedOfficeNoticeP
           </div>
 
           {/* 補足情報 */}
-          <div className="mt-8 p-4 bg-gray-800/50 rounded-lg">
-            <p className="text-sm text-gray-400">
+          <div className="mt-8 p-4 bg-slate-100 dark:bg-gray-800/50 rounded-lg">
+            <p className="text-sm text-slate-600 dark:text-gray-400">
               ご不明な点がございましたら、サポートまでお問い合わせください。
             </p>
           </div>

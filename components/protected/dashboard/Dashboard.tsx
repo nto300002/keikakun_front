@@ -3,9 +3,6 @@
 import Link from 'next/link';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { BiSort, BiFilterAlt, BiUserPlus, BiFile } from 'react-icons/bi';
-import { FaClipboardList, FaFileAlt, FaEdit, FaTrash } from 'react-icons/fa';
-import { MdRefresh } from 'react-icons/md';
 import { dashboardApi, DashboardParams } from '@/lib/dashboard';
 import { welfareRecipientsApi } from '@/lib/welfare-recipients';
 import { DashboardData } from '@/types/dashboard';
@@ -24,6 +21,8 @@ import { ActionType, ResourceType } from '@/types/employeeActionRequest';
 import { toast } from '@/lib/toast-debug';
 import { ActiveFilters } from './ActiveFilters';
 
+// UI設計意図: 30〜60代の福祉職員向けに、主要情報はtext-base以上、操作はアイコン依存を避けた文字ボタンで表示する。
+// 変更概要: 期限・氏名・操作ボタンを拡大し、期限超過/絞り込み/並び替えを文字で判断できるようにした。
 export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [staff, setStaff] = useState<StaffResponse | null>(null);
@@ -178,6 +177,11 @@ export default function Dashboard() {
     });
   };
 
+  const getSortButtonLabel = (targetSortBy: string) => {
+    if (sortBy !== targetSortBy) return '昇順';
+    return sortOrder === 'asc' ? '降順' : '昇順';
+  };
+
   const handleSearch = useCallback(async (term: string) => {
     setSearchTerm(term);
     // デバウンス処理に委譲するため、ここでは即座にAPIは呼ばない
@@ -214,7 +218,7 @@ export default function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm, sortOrder, sortBy, activeFilters]);
+  }, [searchTerm, sortOrder, sortBy]);
 
   // フィルタ切替ハンドラ（applyFilters を先に宣言していることが前提）
   const handleFilterToggle = useCallback((filterType: 'isOverdue' | 'isUpcoming' | 'hasAssessmentDue', value: boolean) => {
@@ -361,7 +365,7 @@ export default function Dashboard() {
   };
 
   const getStepBadgeStyle = (step: string | null) => {
-    const baseStyle = 'inline-block px-2 py-1 rounded text-xs font-medium';
+    const baseStyle = 'inline-flex items-center px-3 py-1.5 rounded-md text-sm font-semibold';
     let colorStyle = 'bg-gray-600 text-white';
 
     switch (step) {
@@ -443,7 +447,7 @@ export default function Dashboard() {
   const { expiredCount, nearDeadlineCount, assessmentDueCount } = useMemo(() => {
     return serviceRecipients.reduce(
     (counts, sr) => {
-      // 期限切れ処理
+      // 期限超過処理
       const renewalDays = getDaysRemaining(sr.next_renewal_deadline);
       const monitoringDays = getDaysRemaining(sr.monitoring_due_date);
 
@@ -480,14 +484,14 @@ export default function Dashboard() {
 
   if (!dashboardData || !staff) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-900">
+      <div className="flex items-center justify-center h-screen bg-slate-100 dark:bg-gray-900">
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-400"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] text-white animate-in fade-in-0 slide-in-from-bottom-5 duration-300">
+    <div className="min-h-screen bg-slate-100 text-slate-900 animate-in fade-in-0 slide-in-from-bottom-5 duration-300 dark:bg-gradient-to-br dark:from-[#1a1f2e] dark:to-[#0f1419] dark:text-white">
       {/* モニタリング期限設定ボタン:いらない */}
       <main className="pt-20 pb-8 px-4 md:px-6 max-w-[1400px] mr-auto">
         {!staff.is_mfa_enabled && (
@@ -503,7 +507,7 @@ export default function Dashboard() {
               </svg>
               無料お試し期間が過ぎているため利用できません
             </p>
-            <p className="text-red-300 text-sm mt-2">
+            <p className="text-red-300 text-base mt-2">
               新規作成・編集・削除などの操作はご利用いただけません。オーナーの方は管理者設定のプラン登録ページから課金登録を行ってください。
             </p>
           </div>
@@ -511,102 +515,112 @@ export default function Dashboard() {
         <>
             <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
               <div className="flex items-center gap-4">
-                <h1 className="text-2xl font-bold text-white">利用者ダッシュボード</h1>
-                <div className="text-gray-300 text-md">
+                <h1 className="text-2xl font-bold text-slate-950 dark:text-white">利用者ダッシュボード</h1>
+                <div className="text-slate-600 text-md dark:text-gray-300">
                   {getCurrentDate()}
                 </div>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-9 gap-4 mb-6 animate-in slide-in-from-top-4 duration-400 delay-150">
-              <div className="bg-gradient-to-br from-[#3d1f1f] to-[#2a1515] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200 lg:col-span-2">
+              <div className="rounded-lg p-4 border border-orange-300 bg-orange-50 shadow-sm transition-colors duration-200 lg:col-span-2 dark:border-[#2a3441] dark:bg-gradient-to-br dark:from-[#3d1f1f] dark:to-[#2a1515]">
                 <div className="flex items-center justify-between gap-2">
                   <div className="w-8 h-8 bg-[#ff9800]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-[#ff9800] text-sm">⚠️</span>
+                    <span className="text-[#ff9800] text-base">⚠️</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-medium" title="次回更新期限が過ぎた利用者">計画期限切れ</p>
-                    <p className="text-xl font-bold text-white">{expiredCount}<span className="text-sm font-normal ml-1">件</span></p>
+                    <p className="text-slate-950 text-base font-semibold dark:text-white" title="次回更新期限が過ぎた利用者">計画期限超過</p>
+                    <p className="text-2xl md:text-3xl font-bold text-slate-950 dark:text-white">{expiredCount}<span className="text-base font-normal ml-1">件</span></p>
                   </div>
-                  <BiFilterAlt
-                    className={`cursor-pointer flex-shrink-0 ${activeFilters.isOverdue ? 'text-[#ffab40]' : 'text-[#ff9800] hover:text-[#ffab40]'}`}
-                    size={20}
+                  <button
+                    type="button"
+                    className={`min-h-[40px] rounded-md border px-3 py-1.5 text-base font-semibold transition-colors ${
+                      activeFilters.isOverdue
+                        ? 'border-orange-600 bg-orange-100 text-orange-900 dark:border-[#ffab40] dark:bg-[#ff9800]/20 dark:text-[#ffab40]'
+                        : 'border-orange-400 text-orange-800 hover:bg-orange-100 dark:border-[#ff9800]/50 dark:text-[#ff9800] dark:hover:bg-[#ff9800]/10'
+                    }`}
                     onClick={() => handleFilterToggle('isOverdue', !activeFilters.isOverdue)}
-                    title={activeFilters.isOverdue ? "フィルター解除" : "計画期限切れでフィルター"}
-                  />
+                    title={activeFilters.isOverdue ? "フィルター解除" : "計画期限超過でフィルター"}
+                    aria-pressed={activeFilters.isOverdue}
+                  >
+                    {activeFilters.isOverdue ? '解除' : '絞り込み'}
+                  </button>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-[#3d3d1f] to-[#2a2a15] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200 lg:col-span-2">
+              <div className="rounded-lg p-4 border border-yellow-300 bg-yellow-50 shadow-sm transition-colors duration-200 lg:col-span-2 dark:border-[#2a3441] dark:bg-gradient-to-br dark:from-[#3d3d1f] dark:to-[#2a2a15]">
                 <div className="flex items-center justify-between gap-2">
                   <div className="w-8 h-8 bg-[#ffd700]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-[#ffd700] text-sm">📋</span>
+                    <span className="text-[#ffd700] text-base">📋</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-medium" title="次回更新期限まで30日以内の利用者">計画期限間近（30日以内）</p>
-                    <p className="text-xl font-bold text-white">{nearDeadlineCount}<span className="text-sm font-normal ml-1">件</span></p>
+                    <p className="text-slate-950 text-base font-semibold dark:text-white" title="次回更新期限まで30日以内の利用者">計画期限間近（30日以内）</p>
+                    <p className="text-2xl md:text-3xl font-bold text-slate-950 dark:text-white">{nearDeadlineCount}<span className="text-base font-normal ml-1">件</span></p>
                   </div>
-                  <BiFilterAlt
-                    className={`cursor-pointer flex-shrink-0 ${activeFilters.isUpcoming ? 'text-[#ffed4e]' : 'text-[#ffd700] hover:text-[#ffed4e]'}`}
-                    size={20}
+                  <button
+                    type="button"
+                    className={`min-h-[40px] rounded-md border px-3 py-1.5 text-base font-semibold transition-colors ${
+                      activeFilters.isUpcoming
+                        ? 'border-yellow-600 bg-yellow-100 text-yellow-900 dark:border-[#ffed4e] dark:bg-[#ffd700]/20 dark:text-[#ffed4e]'
+                        : 'border-yellow-500 text-yellow-800 hover:bg-yellow-100 dark:border-[#ffd700]/50 dark:text-[#ffd700] dark:hover:bg-[#ffd700]/10'
+                    }`}
                     onClick={() => handleFilterToggle('isUpcoming', !activeFilters.isUpcoming)}
                     title={activeFilters.isUpcoming ? "フィルター解除" : "計画期限間近でフィルター"}
-                  />
+                    aria-pressed={activeFilters.isUpcoming}
+                  >
+                    {activeFilters.isUpcoming ? '解除' : '絞り込み'}
+                  </button>
                 </div>
               </div>
 
               {/* アセスメント開始期限フィルター */}
-              <div className="bg-gradient-to-br from-[#1f2f3d] to-[#15202a] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200 lg:col-span-2">
+              <div className="rounded-lg p-4 border border-cyan-300 bg-cyan-50 shadow-sm transition-colors duration-200 lg:col-span-2 dark:border-[#2a3441] dark:bg-gradient-to-br dark:from-[#1f2f3d] dark:to-[#15202a]">
                 <div className="flex items-center justify-between gap-2">
                   <div className="w-8 h-8 bg-[#00bcd4]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-[#00bcd4] text-sm">📝</span>
+                    <span className="text-[#00bcd4] text-base">📝</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-medium" title="is_latest_statusがアセスメントの利用者">アセスメント未完了</p>
-                    <p className="text-xl font-bold text-white">{assessmentDueCount}<span className="text-sm font-normal ml-1">件</span></p>
+                    <p className="text-slate-950 text-base font-semibold dark:text-white" title="is_latest_statusがアセスメントの利用者">アセスメント未完了</p>
+                    <p className="text-2xl md:text-3xl font-bold text-slate-950 dark:text-white">{assessmentDueCount}<span className="text-base font-normal ml-1">件</span></p>
                   </div>
+                  <button
+                    type="button"
+                    className={`min-h-[40px] rounded-md border px-3 py-1.5 text-base font-semibold transition-colors ${
+                      activeFilters.hasAssessmentDue
+                        ? 'border-cyan-600 bg-cyan-100 text-cyan-900 dark:border-[#4dd0e1] dark:bg-[#00bcd4]/20 dark:text-[#4dd0e1]'
+                        : 'border-cyan-500 text-cyan-800 hover:bg-cyan-100 dark:border-[#00bcd4]/50 dark:text-[#00bcd4] dark:hover:bg-[#00bcd4]/10'
+                    }`}
+                    onClick={() => handleFilterToggle('hasAssessmentDue', !activeFilters.hasAssessmentDue)}
+                    title={activeFilters.hasAssessmentDue ? "フィルター解除" : "アセスメント未完了でフィルター"}
+                    aria-pressed={activeFilters.hasAssessmentDue}
+                  >
+                    {activeFilters.hasAssessmentDue ? '解除' : '絞り込み'}
+                  </button>
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-[#1f2f3d] to-[#15202a] rounded-lg p-4 border border-[#2a3441] transform hover:scale-105 transition-transform duration-200 lg:col-span-3">
+              <div className="rounded-lg p-4 border border-slate-300 bg-white shadow-sm transition-colors duration-200 lg:col-span-3 dark:border-[#2a3441] dark:bg-gradient-to-br dark:from-[#1f2f3d] dark:to-[#15202a]">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <p className="text-white text-xs font-medium">総利用者数</p>
-                    <p className="text-xl font-bold text-white">{dashboardData.current_user_count}<span className="text-sm font-normal ml-1">名</span></p>
+                    <p className="text-slate-950 text-base font-semibold dark:text-white">総利用者数</p>
+                    <p className="text-2xl md:text-3xl font-bold text-slate-950 dark:text-white">{dashboardData.current_user_count}<span className="text-base font-normal ml-1">名</span></p>
                     {/* フィルタリング時は検索結果数も表示 */}
                     {dashboardData.filtered_count !== undefined && dashboardData.filtered_count !== dashboardData.current_user_count && (
-                      <p className="text-sm text-[#00bcd4] mt-1">
+                      <p className="text-base text-cyan-700 mt-1 dark:text-[#00bcd4]">
                         検索結果: <span className="font-semibold">{dashboardData.filtered_count}名</span>
                       </p>
                     )}
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
-                    {/* {canEdit && (
-                      <button
-                        type="button"
-                        data-testid="add-recipient-stats-button"
-                        aria-label="新規利用者を追加"
-                        onClick={() => router.push('/recipients/new')}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            router.push('/recipients/new');
-                          }
-                        }}
-                        className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-2 py-1.5 rounded-lg text-xs font-medium transition-colors duration-200 hidden md:flex items-center gap-1"
-                      >
-                        <BiUserPlus className="h-3.5 w-3.5" />
-                        <span className="lg:hidden">追加</span>
-                      </button>
-                    )} */}
                     <div className="relative">
                       <input
                         type="text"
-                        placeholder="検索"
+                        placeholder="氏名・ふりがなで検索"
                         value={searchTerm}
                         onChange={(e) => handleSearch(e.target.value)}
-                        className="bg-[#0f1419] border border-[#2a3441] rounded-lg px-3 py-2 text-sm text-white placeholder-gray-400 w-48 focus:outline-none focus:border-[#00bcd4]"
+                        className="bg-white border border-slate-400 rounded-lg px-4 pr-10 py-2 text-base text-slate-900 placeholder-slate-500 w-full md:w-72 min-h-[44px] focus:outline-none focus:border-cyan-600 dark:bg-[#0f1419] dark:border-[#2a3441] dark:text-white dark:placeholder-gray-400 dark:focus:border-[#00bcd4]"
                       />
-                      <span className="absolute right-3 top-2.5 text-[#00bcd4] text-sm">🔍</span>
+                      <span className="absolute right-3 top-2.5 text-cyan-700 text-base dark:text-[#00bcd4]">🔍</span>
                     </div>
                   </div>
                 </div>
@@ -622,9 +636,8 @@ export default function Dashboard() {
                           router.push('/recipients/new');
                         }
                       }}
-                      className="bg-[#10b981] hover:bg-[#0f9f6e] font-bold text-gray-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 w-full flex items-center justify-center gap-2"
+                      className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-base font-semibold transition-colors duration-200 w-full min-h-[44px] flex items-center justify-center gap-2"
                     >
-                      <BiUserPlus className="h-4 w-4" />
                       <span>利用者追加</span>
                     </button>
                   </div>
@@ -644,10 +657,10 @@ export default function Dashboard() {
             />
 
             <TableLoadingOverlay isLoading={isLoading}>
-              <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441] shadow-xl animate-in slide-in-from-bottom-4 duration-400 delay-300">
-                <div className="px-6 py-4 border-b border-[#2a3441]">
+              <div className="bg-white rounded-lg border border-slate-300 shadow-xl animate-in slide-in-from-bottom-4 duration-400 delay-300 dark:bg-[#0f1419cc] dark:border-[#2a3441]">
+                <div className="px-6 py-4 border-b border-slate-300 dark:border-[#2a3441]">
                   <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-semibold text-white">利用者一覧</h2>
+                    <h2 className="text-xl font-semibold text-slate-950 dark:text-white">利用者一覧</h2>
                     <div className="flex items-center gap-2">
                       {canEdit && (
                         <button
@@ -656,9 +669,9 @@ export default function Dashboard() {
                           aria-label="新規利用者を追加"
                           title="利用者追加"
                           onClick={() => router.push('/recipients/new')}
-                          className="bg-[#10b981] hover:bg-[#0f9f6e] text-white p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                          className="bg-[#10b981] hover:bg-[#0f9f6e] text-white min-h-[44px] px-4 py-2 rounded-lg text-base font-semibold transition-colors duration-200 flex items-center justify-center"
                         >
-                          <BiUserPlus className="h-5 w-5" />
+                          利用者追加
                         </button>
                       )}
                       <button
@@ -667,17 +680,17 @@ export default function Dashboard() {
                         aria-label="PDF一覧を表示"
                         title="PDF一覧"
                         onClick={() => router.push('/pdf-list')}
-                        className="bg-[#6366f1] hover:bg-[#4f46e5] text-white p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                        className="bg-[#6366f1] hover:bg-[#4f46e5] text-white min-h-[44px] px-4 py-2 rounded-lg text-base font-semibold transition-colors duration-200 flex items-center justify-center"
                       >
-                        <BiFile className="h-5 w-5" />
+                        PDF一覧
                       </button>
                       <button
                         onClick={handleResetDisplay}
                         aria-label="表示リセット"
                         title="表示リセット"
-                        className="bg-gray-500 hover:bg-[#4b5563] text-white p-2.5 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                        className="bg-slate-600 hover:bg-slate-700 text-white min-h-[44px] px-4 py-2 rounded-lg text-base font-semibold transition-colors duration-200 flex items-center justify-center dark:bg-gray-500 dark:hover:bg-[#4b5563]"
                       >
-                        <MdRefresh className="h-5 w-5" />
+                        表示リセット
                       </button>
                     </div>
                   </div>
@@ -685,38 +698,43 @@ export default function Dashboard() {
 
                 <div className="hidden md:block overflow-x-auto">
                   <table className="w-full">
-                    <thead className="bg-[#0f1419cc]">
+                    <thead className="bg-slate-100 dark:bg-[#0f1419cc]">
                       <tr>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-[15%]">
+                        <th className="px-4 py-3 text-left text-base font-semibold text-slate-700 w-[15%] dark:text-gray-300">
                           <div className="flex items-center gap-2">
                             次回更新日
-                            <BiSort
-                              className="text-gray-100 hover:text-gray-300 cursor-pointer"
-                              size={16}
+                            <button
+                              type="button"
+                              aria-label={`次回更新日を${getSortButtonLabel('next_renewal_deadline')}で並び替え`}
+                              className="rounded border border-slate-400 px-2 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-200 dark:border-gray-500 dark:text-gray-100 dark:hover:bg-gray-700"
                               onClick={handleNextRenewalSortClick}
-                            />
+                            >
+                              {getSortButtonLabel('next_renewal_deadline')}
+                            </button>
                           </div>
                         </th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/4">
+                        <th className="px-4 py-3 text-left text-base font-semibold text-slate-700 w-1/4 dark:text-gray-300">
                           <div className="flex items-center gap-2">
                             氏名
-                            <BiSort
-                              className="text-gray-100 hover:text-gray-300 cursor-pointer"
-                              size={16}
+                            <button
+                              type="button"
+                              aria-label={`氏名を${getSortButtonLabel('name_phonetic')}で並び替え`}
+                              className="rounded border border-slate-400 px-2 py-1 text-sm font-semibold text-slate-700 hover:bg-slate-200 dark:border-gray-500 dark:text-gray-100 dark:hover:bg-gray-700"
                               onClick={handleNameSortClick}
-                            />
+                            >
+                              {getSortButtonLabel('name_phonetic')}
+                            </button>
                           </div>
                         </th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-1/4">
+                        <th className="px-4 py-3 text-left text-base font-semibold text-slate-700 w-1/4 dark:text-gray-300">
                           <SmartDropdown
                             trigger={
-                              <div className="flex items-center gap-2 cursor-pointer">
-                                計画の進捗
-                                <BiFilterAlt
-                                  className="text-gray-100 hover:text-gray-300 cursor-pointer"
-                                  size={16}
-                                />
-                              </div>
+                              <button
+                                type="button"
+                                className="flex items-center gap-2 rounded border border-slate-400 px-2 py-1 text-base font-semibold text-slate-700 hover:bg-slate-200 dark:border-gray-500 dark:text-gray-100 dark:hover:bg-gray-700"
+                              >
+                                計画の進捗で絞り込み
+                              </button>
                             }
                           >
                             <DropdownMenuItem onClick={() => handleStatusFilter('assessment')}>
@@ -736,15 +754,15 @@ export default function Dashboard() {
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem onClick={() => handleStatusFilter(null)}>
-                              <span className="text-gray-400">フィルターをクリア</span>
+                              <span className="text-slate-600 dark:text-gray-400">フィルターをクリア</span>
                             </DropdownMenuItem>
                           </SmartDropdown>
                         </th>
-                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-300 w-[15%]">
+                        <th className="px-4 py-3 text-left text-base font-semibold text-slate-700 w-[15%] dark:text-gray-300">
                           アセスメント開始期限
                         </th>
-                        <th className="px-4 py-3 text-right text-sm font-medium text-gray-300 w-1/5">
-                          詳細なアクション
+                        <th className="px-4 py-3 text-left text-base font-semibold text-slate-700 w-[22%] min-w-[260px] dark:text-gray-300">
+                          利用者情報の変更
                         </th>
                       </tr>
                     </thead>
@@ -752,18 +770,18 @@ export default function Dashboard() {
                       {serviceRecipients.map((recipient, index) => (
                         <tr 
                           key={recipient.id} 
-                          className={`border-b border-[#2a3441] hover:bg-[#2a3f5f40] transition-colors duration-150 ${
-                            index % 2 === 1 ? 'bg-[#1a1f2e20]' : 'bg-transparent'
+                          className={`border-b border-slate-200 hover:bg-slate-100 transition-colors duration-150 dark:border-[#2a3441] dark:hover:bg-[#2a3f5f40] ${
+                            index % 2 === 1 ? 'bg-slate-50 dark:bg-[#1a1f2e20]' : 'bg-transparent'
                           }`}
                         >
                           <td className="px-4 py-4">
-                            <div className="text-white text-sm">
+                            <div className="text-slate-900 text-base font-medium dark:text-white">
                               {recipient.next_renewal_deadline ? new Date(recipient.next_renewal_deadline).toLocaleDateString('ja-JP', {year: 'numeric', month: '2-digit', day: '2-digit'}).replace(/\//g, '/') : '-'}
                             </div>
-                            <div className={`text-xs mt-1 ${getDaysRemainingColor(getDaysRemaining(recipient.next_renewal_deadline))}`}>
+                            <div className={`text-base font-semibold mt-1 ${getDaysRemainingColor(getDaysRemaining(recipient.next_renewal_deadline))}`}>
                               {recipient.latest_step && recipient.next_renewal_deadline ? (
                                 getDaysRemaining(recipient.next_renewal_deadline) < 0
-                                  ? `期限切れ ${Math.abs(getDaysRemaining(recipient.next_renewal_deadline))}日`
+                                  ? `期限超過 ${Math.abs(getDaysRemaining(recipient.next_renewal_deadline))}日`
                                   : `残り${getDaysRemaining(recipient.next_renewal_deadline)}日`
                               ) : '-'}
                             </div>
@@ -773,15 +791,15 @@ export default function Dashboard() {
                             {canEdit ? (
                               <Link href={`/recipients/${recipient.id}`} className="block">
                                 <div className="cursor-pointer hover:underline">
-                                  <div className="text-white font-bold text-base">
+                                  <div className="text-slate-950 text-lg md:text-xl font-bold dark:text-white">
                                     {recipient.full_name}
                                   </div>
-                                  <div className="text-gray-200 text-xs mt-1">{recipient.furigana}</div>
+                                  <div className="text-slate-600 text-sm mt-1 dark:text-gray-300">{recipient.furigana}</div>
                                 </div>
                               </Link>
                             ) : (
                               <div>
-                                <div className="text-white font-bold text-base">
+                                <div className="text-slate-950 text-lg md:text-xl font-bold dark:text-white">
                                   {recipient.last_name}
                                 </div>
                               </div>
@@ -790,8 +808,7 @@ export default function Dashboard() {
 
                           <td className="px-4 py-4">
                             <div className="flex flex-col items-start gap-1">
-                              <div className="text-gray-300 text-sm">第{recipient.current_cycle_number}回</div>
-                              <div className="text-xs text-gray-300">next</div>
+                              <div className="text-slate-700 text-base font-medium dark:text-gray-300">第{recipient.current_cycle_number}回</div>
                               <span className={getStepBadgeStyle(recipient.latest_step)}>
                                 {getStepText(recipient.latest_step)}
                               </span>
@@ -800,74 +817,56 @@ export default function Dashboard() {
 
                           <td className="px-4 py-4">
                             {recipient.next_plan_start_days_remaining !== null && recipient.next_plan_start_days_remaining !== undefined ? (
-                              <div className={`text-sm ${
+                              <div className={`text-base font-semibold ${
                                 recipient.next_plan_start_days_remaining < 0
                                   ? 'text-red-400'
                                   : recipient.next_plan_start_days_remaining <= 3
                                     ? 'text-orange-400'
-                                    : 'text-gray-300'
+                                    : 'text-slate-700 dark:text-gray-300'
                               }`}>
                                 {recipient.next_plan_start_days_remaining < 0
-                                  ? `期限切れ ${Math.abs(recipient.next_plan_start_days_remaining)}日`
+                                  ? `期限超過 ${Math.abs(recipient.next_plan_start_days_remaining)}日`
                                   : `残り${recipient.next_plan_start_days_remaining}日`
                                 }
                               </div>
                             ) : (
-                              <div className="text-gray-500 text-sm">-</div>
+                              <div className="text-gray-500 text-base">-</div>
                             )}
                           </td>
                           
-                          <td className="px-4 py-4 text-right">
+                          <td className="px-4 py-4 text-left min-w-[260px]">
                             {canEdit ? (
-                              <div className="flex justify-end items-center gap-3">
-                                {/* アセスメント */}
-                                <Link href={`/recipients/${recipient.id}`}>
-                                  <div className="relative group">
-                                    <button
-                                      type="button"
-                                      aria-label="アセスメント"
-                                      className="p-2 text-gray-400 hover:bg-gray-700 rounded-md transition-colors"
-                                    >
-                                      <FaClipboardList className="w-5 h-5" />
-                                    </button>
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                                      アセスメント
-                                    </div>
-                                  </div>
-                                </Link>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div className="flex flex-col gap-2">
+                                  {/* アセスメント */}
+                                  <Link
+                                    href={`/recipients/${recipient.id}`}
+                                    className="min-h-[44px] rounded-md border border-slate-400 px-3 py-2 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-100 inline-flex items-center justify-center text-center whitespace-nowrap dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700"
+                                  >
+                                    アセスメント
+                                  </Link>
 
-                                {/* 個別支援計画 */}
-                                <Link href={`/support_plan/${recipient.id}`}>
-                                  <div className="relative group">
-                                    <button
-                                      type="button"
-                                      aria-label="個別支援計画"
-                                      className="p-2 text-gray-400 hover:bg-gray-700 rounded-md transition-colors"
-                                    >
-                                      <FaFileAlt className="w-5 h-5" />
-                                    </button>
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none z-10">
-                                      個別支援計画
-                                    </div>
-                                  </div>
-                                </Link>
+                                  {/* 個別支援計画 */}
+                                  <Link
+                                    href={`/support_plan/${recipient.id}`}
+                                    className="min-h-[44px] rounded-md border border-slate-400 px-3 py-2 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-100 inline-flex items-center justify-center text-center whitespace-nowrap dark:border-gray-600 dark:text-gray-100 dark:hover:bg-gray-700"
+                                  >
+                                    支援計画
+                                  </Link>
+                                </div>
 
-                                {/* 編集 */}
-                                <Link href={`/recipients/${recipient.id}/edit`}>
-                                  <div className="relative group">
-                                    <button
-                                      type="button"
-                                      data-testid={`edit-recipient-${recipient.id}`}
-                                      aria-label={`${recipient.full_name}の情報を編集`}
-                                      className="p-2 text-green-400 hover:text-green-600 rounded-md transition-colors"
-                                    >
-                                      <FaEdit className="w-5 h-5" />
-                                    </button>
-                                  </div>
-                                </Link>
+                                <div className="flex flex-col gap-2">
+                                  {/* 編集 */}
+                                  <Link
+                                    href={`/recipients/${recipient.id}/edit`}
+                                    data-testid={`edit-recipient-${recipient.id}`}
+                                    aria-label={`${recipient.full_name}の情報を編集`}
+                                    className="min-h-[44px] rounded-md border border-green-600/70 px-3 py-2 text-base font-semibold text-green-700 transition-colors hover:bg-green-50 inline-flex items-center justify-center text-center whitespace-nowrap dark:border-green-500/70 dark:text-green-300 dark:hover:bg-green-900/30"
+                                  >
+                                    編集
+                                  </Link>
 
-                                {/* 削除 */}
-                                <div className="relative group">
+                                  {/* 削除 */}
                                   <button
                                     type="button"
                                     data-testid={`delete-recipient-${recipient.id}`}
@@ -878,14 +877,14 @@ export default function Dashboard() {
                                         handleDeleteRecipient(recipient.id, recipient.full_name);
                                       }
                                     }}
-                                    className="p-2 text-red-600 hover:text-red-800 rounded-md transition-colors"
+                                    className="min-h-[44px] rounded-md border border-red-600/70 px-3 py-2 text-base font-semibold text-red-700 transition-colors hover:bg-red-50 whitespace-nowrap dark:border-red-500/70 dark:text-red-300 dark:hover:bg-red-900/30"
                                   >
-                                    <FaTrash className="w-5 h-5" />
+                                    削除
                                   </button>
                                 </div>
                               </div>
                             ) : (
-                              <div className="text-gray-500 text-sm">-</div>
+                              <div className="text-gray-500 text-base">-</div>
                             )}
                           </td>
                         </tr>
@@ -898,40 +897,40 @@ export default function Dashboard() {
                   {serviceRecipients.map((recipient) => (
                     <div 
                       key={recipient.id} 
-                      className={`border-b border-[#2a3441] p-4 hover:bg-[#2a3f5f40] transition-colors duration-150`}
+                      className="border-b border-slate-200 p-4 hover:bg-slate-100 transition-colors duration-150 dark:border-[#2a3441] dark:hover:bg-[#2a3f5f40]"
                     >
                       <div className="space-y-3">
-                        <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-2 gap-4 text-base">
                           <div>
-                            <div className="text-gray-300 text-xs mb-1">次回更新日</div>
-                            <div className="text-white">
+                            <div className="text-slate-700 text-base font-semibold mb-1 dark:text-gray-300">次回更新日</div>
+                            <div className="text-slate-900 text-base font-medium dark:text-white">
                               {recipient.next_renewal_deadline ? new Date(recipient.next_renewal_deadline).toLocaleDateString('ja-JP', {month: '2-digit', day: '2-digit'}) : '-'}
                             </div>
-                            <div className={`text-xs ${getDaysRemainingColor(getDaysRemaining(recipient.next_renewal_deadline))}`}>
+                            <div className={`text-base font-semibold ${getDaysRemainingColor(getDaysRemaining(recipient.next_renewal_deadline))}`}>
                               {recipient.latest_step && recipient.next_renewal_deadline ? (
                                 getDaysRemaining(recipient.next_renewal_deadline) < 0
-                                  ? `期限切れ ${Math.abs(getDaysRemaining(recipient.next_renewal_deadline))}日`
+                                  ? `期限超過 ${Math.abs(getDaysRemaining(recipient.next_renewal_deadline))}日`
                                   : `残り${getDaysRemaining(recipient.next_renewal_deadline)}日`
                               ) : '-'}
                             </div>
                           </div>
                           <div>
-                            <div className="text-gray-300 text-xs mb-1">アセスメント開始期限</div>
+                            <div className="text-slate-700 text-base font-semibold mb-1 dark:text-gray-300">アセスメント開始期限</div>
                             {recipient.next_plan_start_days_remaining !== null && recipient.next_plan_start_days_remaining !== undefined ? (
-                              <div className={`text-sm ${
+                              <div className={`text-base font-semibold ${
                                 recipient.next_plan_start_days_remaining < 0
                                   ? 'text-red-400'
                                   : recipient.next_plan_start_days_remaining <= 3
                                     ? 'text-orange-400'
-                                    : 'text-white'
+                                    : 'text-slate-900 dark:text-white'
                               }`}>
                                 {recipient.next_plan_start_days_remaining < 0
-                                  ? `期限切れ ${Math.abs(recipient.next_plan_start_days_remaining)}日`
+                                  ? `期限超過 ${Math.abs(recipient.next_plan_start_days_remaining)}日`
                                   : `残り${recipient.next_plan_start_days_remaining}日`
                                 }
                               </div>
                             ) : (
-                              <div className="text-gray-500 text-sm">-</div>
+                              <div className="text-gray-500 text-base">-</div>
                             )}
                           </div>
                         </div>
@@ -939,24 +938,23 @@ export default function Dashboard() {
                         {canEdit ? (
                           <Link href={`/recipients/${recipient.id}`}>
                             <div>
-                              <div className="text-white font-bold text-base">
+                              <div className="text-slate-950 text-lg font-bold dark:text-white">
                                 {recipient.full_name}
                               </div>
-                              <div className="text-gray-200 text-xs">{recipient.furigana}</div>
+                              <div className="text-slate-600 text-sm dark:text-gray-300">{recipient.furigana}</div>
                             </div>
                           </Link>
                         ) : (
                           <div>
-                            <div className="text-white font-bold text-base">
+                            <div className="text-slate-950 text-lg font-bold dark:text-white">
                               {recipient.last_name}
                             </div>
                           </div>
                         )}
 
                         <div className="flex items-center justify-between">
-                          <span className="text-gray-300 text-sm">第{recipient.current_cycle_number}回</span>
+                          <span className="text-slate-700 text-base font-medium dark:text-gray-300">第{recipient.current_cycle_number}回</span>
                           <div className="text-right">
-                            <div className="text-xs text-gray-3000">next</div>
                             <span className={getStepBadgeStyle(recipient.latest_step)}>
                               {getStepText(recipient.latest_step)}
                             </span>
@@ -964,16 +962,16 @@ export default function Dashboard() {
                         </div>
 
                         {canEdit ? (
-                          <div className="flex justify-center items-center gap-3">
+                          <div className="grid grid-cols-2 gap-2">
                             {/* アセスメント */}
                             <button
                               type="button"
                               title="アセスメント"
                               aria-label="アセスメント"
                               onClick={() => router.push(`/recipients/${recipient.id}`)}
-                              className="p-3 text-gray-400 hover:bg-gray-700 rounded-md transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                              className="px-3 py-2 text-slate-800 hover:bg-slate-100 rounded-md border border-slate-400 transition-colors min-h-[44px] flex items-center justify-center text-base font-semibold dark:text-gray-100 dark:hover:bg-gray-700 dark:border-gray-600"
                             >
-                              <FaClipboardList className="w-6 h-6" />
+                              アセスメント
                             </button>
 
                             {/* 個別支援計画 */}
@@ -982,9 +980,9 @@ export default function Dashboard() {
                               title="個別支援計画"
                               aria-label="個別支援計画"
                               onClick={() => router.push(`/support_plan/${recipient.id}`)}
-                              className="p-3 text-gray-400 hover:bg-gray-700 rounded-md transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                              className="px-3 py-2 text-slate-800 hover:bg-slate-100 rounded-md border border-slate-400 transition-colors min-h-[44px] flex items-center justify-center text-base font-semibold dark:text-gray-100 dark:hover:bg-gray-700 dark:border-gray-600"
                             >
-                              <FaFileAlt className="w-6 h-6" />
+                              支援計画
                             </button>
 
                             {/* 編集 */}
@@ -999,9 +997,9 @@ export default function Dashboard() {
                                   router.push(`/recipients/${recipient.id}/edit`);
                                 }
                               }}
-                              className="p-3 text-gray-600 hover:text-gray-800 rounded-md transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                              className="px-3 py-2 text-green-700 hover:bg-green-50 rounded-md border border-green-600/70 transition-colors min-h-[44px] flex items-center justify-center text-base font-semibold dark:text-green-300 dark:hover:bg-green-900/30 dark:border-green-500/70"
                             >
-                              <FaEdit className="w-6 h-6" />
+                              編集
                             </button>
 
                             {/* 削除 */}
@@ -1016,13 +1014,13 @@ export default function Dashboard() {
                                   handleDeleteRecipient(recipient.id, recipient.full_name);
                                 }
                               }}
-                              className="p-3 text-red-600 hover:text-red-800 rounded-md transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                              className="px-3 py-2 text-red-700 hover:bg-red-50 rounded-md border border-red-600/70 transition-colors min-h-[44px] flex items-center justify-center text-base font-semibold dark:text-red-300 dark:hover:bg-red-900/30 dark:border-red-500/70"
                             >
-                              <FaTrash className="w-6 h-6" />
+                              削除
                             </button>
                           </div>
                         ) : (
-                          <div className="text-center text-gray-500 text-sm py-4">-</div>
+                          <div className="text-center text-gray-500 text-base py-4">-</div>
                         )}
                       </div>
                     </div>

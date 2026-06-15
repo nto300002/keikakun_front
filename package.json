@@ -51,6 +51,11 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.10"
+    }
+  },
   "lavamoat": {
     "allowScripts": {
       "@next/swc-darwin-arm64": true,

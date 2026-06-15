@@ -63,21 +63,21 @@ export default function WithdrawalModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white font-semibold border border-slate-300 rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
         <div className="flex items-center gap-3 mb-4">
           <div className="bg-red-500/20 p-3 rounded-full">
             <FaExclamationTriangle className="w-6 h-6 text-red-400" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-white">退会申請</h3>
-            <p className="text-sm text-gray-400">{officeName}</p>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">退会申請</h3>
+            <p className="text-base font-semibold text-slate-600 dark:text-gray-400">{officeName}</p>
           </div>
         </div>
 
         {/* 警告メッセージ */}
         <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
-          <p className="text-red-400 text-sm font-medium mb-2">注意事項</p>
-          <ul className="text-red-300 text-sm space-y-1 list-disc list-inside">
+          <p className="text-red-400 text-base font-semibold mb-2">注意事項</p>
+          <ul className="text-red-700 text-base font-semibold space-y-1 list-disc list-inside dark:text-red-300">
             <li>退会申請後、アプリ管理者による承認が必要です</li>
             <li>承認されると事務所データは論理削除されます</li>
             <li>論理削除から30日後にデータは完全に削除されます</li>
@@ -87,13 +87,13 @@ export default function WithdrawalModal({
 
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-4">
-            <p className="text-red-400 text-sm">{error}</p>
+            <p className="text-red-400 text-base font-semibold">{error}</p>
           </div>
         )}
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">
+            <label className="block text-base font-semibold text-slate-600 dark:text-gray-400 mb-2">
               タイトル <span className="text-red-400">*</span>
             </label>
             <input
@@ -101,26 +101,26 @@ export default function WithdrawalModal({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="例: 事業終了に伴う退会申請"
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               disabled={isSubmitting}
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">
+            <label className="block text-base font-semibold text-slate-600 dark:text-gray-400 mb-2">
               退会理由 <span className="text-red-400">*</span>
             </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="退会の理由を詳しくお知らせください..."
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-500 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               disabled={isSubmitting}
             />
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">
+            <label className="block text-base font-semibold text-slate-600 dark:text-gray-400 mb-2">
               確認のため「退会申請」と入力してください <span className="text-red-400">*</span>
             </label>
             <input
@@ -128,7 +128,7 @@ export default function WithdrawalModal({
               value={confirmText}
               onChange={(e) => setConfirmText(e.target.value)}
               placeholder="退会申請"
-              className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
               disabled={isSubmitting}
             />
           </div>
@@ -138,14 +138,14 @@ export default function WithdrawalModal({
           <button
             onClick={handleClose}
             disabled={isSubmitting}
-            className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+            className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
           >
             キャンセル
           </button>
           <button
             onClick={handleSubmit}
             disabled={isSubmitting || !title.trim() || !reason.trim() || confirmText !== '退会申請'}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? '送信中...' : '退会を申請する'}
           </button>

@@ -17,6 +17,7 @@ interface ActiveFiltersProps {
 /**
  * 選択中のフィルター条件をチップ形式で表示するコンポーネント
  * 各チップから個別に条件を解除でき、「すべてクリア」で一括解除も可能
+ * UI設計意図: 小さなチップを避け、text-sm以上と広めの解除ボタンで視認性と押しやすさを確保する。
  */
 export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
   activeFilters,
@@ -38,9 +39,9 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
   }
 
   return (
-    <div className="bg-[#1a1f2e]/60 rounded-lg p-3 mb-4 border border-[#2a3441] animate-in slide-in-from-top-2 duration-200">
+    <div className="bg-white rounded-lg p-3 mb-4 border border-slate-300 shadow-sm animate-in slide-in-from-top-2 duration-200 dark:bg-[#1a1f2e]/60 dark:border-[#2a3441]">
       <div className="flex items-center flex-wrap gap-2">
-        <span className="text-gray-300 text-sm font-medium mr-1">絞り込み中:</span>
+        <span className="text-slate-700 text-base font-semibold mr-1 dark:text-gray-300">絞り込み中:</span>
 
         {/* 検索ワード */}
         {searchTerm && (
@@ -50,10 +51,10 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
           />
         )}
 
-        {/* 計画期限切れ */}
+        {/* 計画期限超過 */}
         {activeFilters.isOverdue && (
           <FilterChip
-            label="計画期限切れ"
+            label="計画期限超過"
             onRemove={() => onFilterRemove('isOverdue')}
             color="red"
           />
@@ -89,7 +90,7 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
         {/* すべてクリアボタン */}
         <button
           onClick={onClearAll}
-          className="ml-auto text-xs text-gray-400 bg-gray-200 hover:text-white transition-colors duration-150 border border-gray-600 hover:border-gray-400 rounded px-2 py-1"
+          className="ml-auto min-h-[40px] text-sm font-semibold text-slate-700 bg-transparent hover:text-slate-950 transition-colors duration-150 border border-slate-400 hover:border-slate-600 rounded px-3 py-1.5 dark:text-gray-200 dark:hover:text-white dark:border-gray-500 dark:hover:border-gray-300"
         >
           すべてクリア
         </button>
@@ -109,18 +110,18 @@ interface FilterChipProps {
 
 const FilterChip: React.FC<FilterChipProps> = ({ label, onRemove, color = 'blue' }) => {
   const colorStyles = {
-    blue: 'bg-gray-200 text-[#00bcd4] border-[#00bcd4]/30',
-    red: 'bg-gray-200 text-[#ff9800] border-[#ff9800]/30',
-    yellow: 'bg-gray-200 text-[#ffd700] border-[#ffd700]/30',
-    purple: 'bg-gray-200 text-[#9c27b0] border-[#9c27b0]/30',
+    blue: 'bg-cyan-50 text-cyan-800 border-cyan-300 dark:bg-gray-200 dark:text-[#00bcd4] dark:border-[#00bcd4]/30',
+    red: 'bg-orange-50 text-orange-800 border-orange-300 dark:bg-gray-200 dark:text-[#ff9800] dark:border-[#ff9800]/30',
+    yellow: 'bg-yellow-50 text-yellow-800 border-yellow-300 dark:bg-gray-200 dark:text-[#b88700] dark:border-[#ffd700]/30',
+    purple: 'bg-purple-50 text-purple-800 border-purple-300 dark:bg-gray-200 dark:text-[#9c27b0] dark:border-[#9c27b0]/30',
   };
 
   return (
-    <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${colorStyles[color]} transition-all duration-150 hover:brightness-110`}>
+    <div className={`inline-flex items-center gap-2 px-3 py-1.5 min-h-[36px] rounded-md border text-sm font-semibold ${colorStyles[color]} transition-all duration-150 hover:brightness-110`}>
       <span>{label}</span>
       <button
         onClick={onRemove}
-        className="hover:text-white transition-colors duration-150"
+        className="min-h-[32px] min-w-[32px] hover:text-slate-950 transition-colors duration-150 dark:hover:text-white"
         aria-label={`${label} フィルターを解除`}
         title="解除"
       >

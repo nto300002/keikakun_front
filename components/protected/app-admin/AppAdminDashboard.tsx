@@ -44,26 +44,26 @@ export default function AppAdminDashboard({ staff }: AppAdminDashboardProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-200">
+    <div className="min-h-screen bg-gray-900 text-gray-200 font-semibold">
       {/* ヘッダー */}
       <header className="bg-gray-800 border-b border-purple-500/30 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <MdAdminPanelSettings className="h-8 w-8 text-purple-500" />
             <div>
-              <h1 className="text-xl font-bold text-white">アプリ管理コンソール</h1>
-              <p className="text-sm text-gray-400">ケイカくん管理者向けダッシュボード</p>
+              <h1 className="text-3xl font-bold text-white">アプリ管理コンソール</h1>
+              <p className="text-base font-semibold text-gray-300">ケイカくん管理者向けダッシュボード</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-sm text-white">{staff.full_name}</p>
-              <p className="text-xs text-purple-400">アプリ管理者</p>
+              <p className="text-base font-semibold text-white">{staff.full_name}</p>
+              <p className="text-base font-semibold text-purple-400">アプリ管理者</p>
             </div>
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg text-base font-semibold transition-colors disabled:opacity-50"
             >
               <MdLogout className="w-5 h-5" />
               {isLoggingOut ? 'ログアウト中...' : 'ログアウト'}
@@ -79,7 +79,7 @@ export default function AppAdminDashboard({ staff }: AppAdminDashboardProps) {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-6 py-3 font-medium whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-2 px-6 py-3 text-base font-semibold whitespace-nowrap transition-colors ${
                 activeTab === tab.id
                   ? 'bg-gray-900 text-purple-400 border-b-2 border-purple-500'
                   : 'text-gray-400 hover:text-white hover:bg-gray-700/50'

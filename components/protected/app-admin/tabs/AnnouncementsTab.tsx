@@ -79,7 +79,7 @@ export default function AnnouncementsTab() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">お知らせ</h2>
+        <h2 className="text-3xl font-bold">お知らせ</h2>
         <div className="flex gap-2">
           <button
             onClick={() => setShowForm(!showForm)}
@@ -114,10 +114,10 @@ export default function AnnouncementsTab() {
       {/* 新規作成フォーム */}
       {showForm && (
         <div className="bg-gray-800 rounded-lg border border-purple-500/30 p-6 mb-6">
-          <h3 className="text-lg font-bold text-white mb-4">新規お知らせを作成</h3>
+          <h3 className="text-xl font-bold text-white mb-4">新規お知らせを作成</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-base text-gray-400 mb-2">
                 タイトル <span className="text-red-400">*</span>
               </label>
               <input
@@ -129,7 +129,7 @@ export default function AnnouncementsTab() {
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-2">
+              <label className="block text-base text-gray-400 mb-2">
                 本文 <span className="text-red-400">*</span>
               </label>
               <textarea
@@ -166,7 +166,7 @@ export default function AnnouncementsTab() {
       {/* お知らせ履歴 */}
       <div className="bg-gray-800 rounded-lg border border-gray-700">
         <div className="p-4 border-b border-gray-700">
-          <h3 className="text-lg font-medium text-white">送信履歴</h3>
+          <h3 className="text-xl font-semibold text-white">送信履歴</h3>
         </div>
         {isLoading ? (
           <div className="p-8 text-center">
@@ -185,13 +185,13 @@ export default function AnnouncementsTab() {
                   <FaBullhorn className="w-5 h-5 text-purple-400 mt-1 flex-shrink-0" />
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-medium text-white">{announcement.title}</h4>
-                      <span className="text-xs text-gray-400">
+                      <h4 className="font-semibold text-white">{announcement.title}</h4>
+                      <span className="text-base text-gray-400">
                         {formatDate(announcement.created_at)}
                       </span>
                     </div>
-                    <p className="text-gray-300 text-sm whitespace-pre-wrap">{announcement.content}</p>
-                    <p className="text-xs text-gray-400 mt-2">
+                    <p className="text-gray-300 text-base whitespace-pre-wrap">{announcement.content}</p>
+                    <p className="text-base text-gray-400 mt-2">
                       送信者: {announcement.sender_name}
                     </p>
                   </div>
@@ -205,7 +205,7 @@ export default function AnnouncementsTab() {
       {/* ページネーション */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 text-base">
             全 {total} 件中 {currentPage * ITEMS_PER_PAGE + 1} - {Math.min((currentPage + 1) * ITEMS_PER_PAGE, total)} 件を表示
           </p>
           <div className="flex gap-2">

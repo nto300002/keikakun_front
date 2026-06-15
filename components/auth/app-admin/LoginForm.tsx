@@ -77,21 +77,21 @@ export default function AppAdminLoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <div className="flex justify-center mb-4">
             <MdAdminPanelSettings className="h-16 w-16 text-purple-500" />
           </div>
-          <h2 className="text-3xl font-bold text-white mb-2">
+          <h2 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
             アプリ管理者ログイン
           </h2>
-          <p className="text-gray-400">
+          <p className="text-slate-600 dark:text-gray-400">
             ケイカくん管理コンソールにアクセス
           </p>
         </div>
 
-        <div className="bg-[#2A2A2A] rounded-lg border border-purple-500/30 p-8">
+        <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-purple-500/30 p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {errors.root && (
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm">
@@ -100,14 +100,14 @@ export default function AppAdminLoginForm() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                 メールアドレス <span className="text-red-400">*</span>
               </label>
               <input
                 id="email"
                 type="email"
                 {...register('email')}
-                className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 placeholder="admin@keikakun.com"
               />
               {errors.email && (
@@ -116,7 +116,7 @@ export default function AppAdminLoginForm() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                 パスワード <span className="text-red-400">*</span>
               </label>
               <div className="relative">
@@ -124,12 +124,12 @@ export default function AppAdminLoginForm() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   {...register('password')}
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-10"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-10"
                   placeholder="パスワードを入力してください"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-gray-300"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <AiOutlineEyeInvisible className="h-5 w-5" /> : <AiOutlineEye className="h-5 w-5" />}
@@ -141,7 +141,7 @@ export default function AppAdminLoginForm() {
             </div>
 
             <div>
-              <label htmlFor="passphrase" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="passphrase" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                 合言葉 <span className="text-red-400">*</span>
               </label>
               <div className="relative">
@@ -149,12 +149,12 @@ export default function AppAdminLoginForm() {
                   id="passphrase"
                   type={showPassphrase ? "text" : "password"}
                   {...register('passphrase')}
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-10"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent pr-10"
                   placeholder="合言葉を入力してください"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-gray-300"
                   onClick={() => setShowPassphrase(!showPassphrase)}
                 >
                   {showPassphrase ? <AiOutlineEyeInvisible className="h-5 w-5" /> : <AiOutlineEye className="h-5 w-5" />}
@@ -175,7 +175,7 @@ export default function AppAdminLoginForm() {
           </form>
 
           <div className="mt-6 text-center">
-            <a href="/auth/login" className="text-gray-400 hover:text-gray-300 text-sm">
+            <a href="/auth/login" className="text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-gray-300 text-sm">
               一般ユーザーログインはこちら
             </a>
           </div>

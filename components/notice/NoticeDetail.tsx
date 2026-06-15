@@ -33,9 +33,9 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
         return {
           icon: '✓',
           color: 'green',
-          bgColor: 'bg-green-900/30',
-          borderColor: 'border-green-700/50',
-          textColor: 'text-green-400',
+          bgColor: 'bg-green-50 dark:bg-green-900/30',
+          borderColor: 'border-green-200 dark:border-green-700/50',
+          textColor: 'text-green-700 dark:text-green-400',
           badgeColor: 'bg-green-600',
         };
       case NoticeType.ROLE_CHANGE_REJECTED:
@@ -43,9 +43,9 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
         return {
           icon: '✗',
           color: 'red',
-          bgColor: 'bg-red-900/30',
-          borderColor: 'border-red-700/50',
-          textColor: 'text-red-400',
+          bgColor: 'bg-red-50 dark:bg-red-900/30',
+          borderColor: 'border-red-200 dark:border-red-700/50',
+          textColor: 'text-red-700 dark:text-red-400',
           badgeColor: 'bg-red-600',
         };
       case NoticeType.ROLE_CHANGE_PENDING:
@@ -53,9 +53,9 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
         return {
           icon: '⏱',
           color: 'yellow',
-          bgColor: 'bg-yellow-900/30',
-          borderColor: 'border-yellow-700/50',
-          textColor: 'text-yellow-400',
+          bgColor: 'bg-yellow-50 dark:bg-yellow-900/30',
+          borderColor: 'border-yellow-200 dark:border-yellow-700/50',
+          textColor: 'text-yellow-700 dark:text-yellow-400',
           badgeColor: 'bg-yellow-600',
         };
       case NoticeType.ROLE_CHANGE_REQUEST_SENT:
@@ -63,18 +63,18 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
         return {
           icon: '📤',
           color: 'blue',
-          bgColor: 'bg-blue-900/30',
-          borderColor: 'border-blue-700/50',
-          textColor: 'text-blue-400',
+          bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+          borderColor: 'border-blue-200 dark:border-blue-700/50',
+          textColor: 'text-blue-700 dark:text-blue-400',
           badgeColor: 'bg-blue-600',
         };
       default:
         return {
           icon: 'ℹ',
           color: 'blue',
-          bgColor: 'bg-blue-900/30',
-          borderColor: 'border-blue-700/50',
-          textColor: 'text-blue-400',
+          bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+          borderColor: 'border-blue-200 dark:border-blue-700/50',
+          textColor: 'text-blue-700 dark:text-blue-400',
           badgeColor: 'bg-blue-600',
         };
     }
@@ -167,22 +167,22 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
       <div className="mb-6">
         <button
           onClick={() => router.back()}
-          className="text-gray-400 hover:text-white mb-4 flex items-center gap-2"
+          className="text-slate-600 hover:text-slate-900 mb-4 flex items-center gap-2 text-lg font-semibold dark:text-gray-400 dark:hover:text-white"
         >
           ← 通知一覧に戻る
         </button>
         <div className="flex items-center gap-3 mb-2">
           <span className={`text-4xl ${style.textColor}`}>{style.icon}</span>
-          <h1 className="text-3xl font-bold text-white">{notice.title}</h1>
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white">{notice.title}</h1>
         </div>
         <div className="flex items-center gap-3 mt-4">
           <span
-            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold text-white ${style.badgeColor}`}
+            className={`inline-block px-4 py-2 rounded-full text-base font-bold text-white ${style.badgeColor}`}
           >
             {getNoticeLabel()}
           </span>
           {notice.is_read && (
-            <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-gray-600 text-gray-300">
+            <span className="inline-block px-4 py-2 rounded-full text-base font-bold bg-slate-100 text-slate-700 dark:bg-gray-600 dark:text-gray-300">
               既読
             </span>
           )}
@@ -195,20 +195,20 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
       >
         {/* 通知内容 */}
         <div className="mb-6">
-          <h2 className="text-lg font-semibold text-white mb-4">通知内容</h2>
-          <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700/50">
-            <p className="text-gray-200 text-base leading-relaxed whitespace-pre-wrap">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">通知内容</h2>
+          <div className="bg-white/70 dark:bg-gray-800/50 rounded-lg p-6 border border-slate-200 dark:border-gray-700/50">
+            <p className="text-slate-700 dark:text-gray-200 text-lg font-semibold leading-relaxed whitespace-pre-wrap">
               {notice.content}
             </p>
           </div>
         </div>
 
         {/* メタ情報 */}
-        <div className="border-t border-gray-700/50 pt-6">
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="border-t border-slate-200 dark:border-gray-700/50 pt-6">
+          <div className="grid grid-cols-2 gap-4 text-base font-semibold">
             <div>
-              <span className="text-gray-400">通知日時</span>
-              <p className="text-gray-200 mt-1">
+              <span className="text-slate-600 dark:text-gray-400">通知日時</span>
+              <p className="text-slate-700 dark:text-gray-200 mt-1 text-lg font-bold">
                 {new Date(notice.created_at).toLocaleString('ja-JP', {
                   year: 'numeric',
                   month: '2-digit',
@@ -220,8 +220,8 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
             </div>
             {notice.updated_at && notice.updated_at !== notice.created_at && (
               <div>
-                <span className="text-gray-400">更新日時</span>
-                <p className="text-gray-200 mt-1">
+                <span className="text-slate-600 dark:text-gray-400">更新日時</span>
+                <p className="text-slate-700 dark:text-gray-200 mt-1 text-lg font-bold">
                   {new Date(notice.updated_at).toLocaleString('ja-JP', {
                     year: 'numeric',
                     month: '2-digit',
@@ -237,20 +237,20 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
 
         {/* 承認/却下アクション（承認待ちの通知のみ） */}
         {isPendingNotice && requestId && (
-          <div className="mt-6 border-t border-gray-700/50 pt-6">
-            <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg p-6">
-              <p className="text-yellow-400 text-sm font-semibold mb-2 flex items-center gap-2">
+          <div className="mt-6 border-t border-slate-200 dark:border-gray-700/50 pt-6">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 dark:bg-yellow-900/20 dark:border-yellow-700/50">
+              <p className="text-yellow-700 text-lg font-bold mb-2 flex items-center gap-2 dark:text-yellow-400">
                 <span className="text-xl">⚠️</span>
                 承認待ち
               </p>
-              <p className="text-gray-300 text-sm mb-4">
+              <p className="text-slate-700 dark:text-gray-300 text-lg font-semibold mb-4">
                 このリクエストを承認または却下してください
               </p>
               <div className="flex gap-3">
                 <button
                   onClick={handleApprove}
                   disabled={isProcessing}
-                  className="flex-1 bg-[#2ecc71] hover:bg-[#27ae60] text-white px-6 py-3 rounded-lg text-base font-bold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#2ecc71] hover:bg-[#27ae60] text-white px-6 py-4 rounded-lg text-lg font-bold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isProcessing ? (
                     <>
@@ -267,7 +267,7 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
                 <button
                   onClick={handleReject}
                   disabled={isProcessing}
-                  className="flex-1 bg-transparent border-2 border-[#e74c3c] text-[#e74c3c] hover:bg-[#e74c3c20] px-6 py-3 rounded-lg text-base font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 bg-transparent border-2 border-[#e74c3c] text-[#e74c3c] hover:bg-[#e74c3c20] px-6 py-4 rounded-lg text-lg font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isProcessing ? (
                     <>

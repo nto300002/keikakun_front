@@ -35,44 +35,44 @@ export default function NoticeCard({
         return {
           icon: '✓',
           color: 'green',
-          bgColor: 'bg-green-900/30',
-          borderColor: 'border-green-700/50',
-          textColor: 'text-green-400',
+          bgColor: 'bg-green-50 dark:bg-green-900/30',
+          borderColor: 'border-green-200 dark:border-green-700/50',
+          textColor: 'text-green-700 dark:text-green-400',
         };
       case NoticeType.ROLE_CHANGE_REJECTED:
       case NoticeType.EMPLOYEE_ACTION_REJECTED:
         return {
           icon: '✗',
           color: 'red',
-          bgColor: 'bg-red-900/30',
-          borderColor: 'border-red-700/50',
-          textColor: 'text-red-400',
+          bgColor: 'bg-red-50 dark:bg-red-900/30',
+          borderColor: 'border-red-200 dark:border-red-700/50',
+          textColor: 'text-red-700 dark:text-red-400',
         };
       case NoticeType.ROLE_CHANGE_PENDING:
       case NoticeType.EMPLOYEE_ACTION_PENDING:
         return {
           icon: '⏱',
           color: 'yellow',
-          bgColor: 'bg-yellow-900/30',
-          borderColor: 'border-yellow-700/50',
-          textColor: 'text-yellow-400',
+          bgColor: 'bg-yellow-50 dark:bg-yellow-900/30',
+          borderColor: 'border-yellow-200 dark:border-yellow-700/50',
+          textColor: 'text-yellow-700 dark:text-yellow-400',
         };
       case NoticeType.ROLE_CHANGE_REQUEST_SENT:
       case NoticeType.EMPLOYEE_ACTION_REQUEST_SENT:
         return {
           icon: '📤',
           color: 'blue',
-          bgColor: 'bg-blue-900/30',
-          borderColor: 'border-blue-700/50',
-          textColor: 'text-blue-400',
+          bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+          borderColor: 'border-blue-200 dark:border-blue-700/50',
+          textColor: 'text-blue-700 dark:text-blue-400',
         };
       default:
         return {
           icon: 'ℹ',
           color: 'blue',
-          bgColor: 'bg-blue-900/30',
-          borderColor: 'border-blue-700/50',
-          textColor: 'text-blue-400',
+          bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+          borderColor: 'border-blue-200 dark:border-blue-700/50',
+          textColor: 'text-blue-700 dark:text-blue-400',
         };
     }
   };
@@ -102,19 +102,19 @@ export default function NoticeCard({
             <div className="flex items-center gap-2 mb-2">
               <Link
                 href={`/notice/${notice.id}`}
-                className="text-white font-bold text-lg hover:text-blue-400 transition-colors cursor-pointer"
+                className="text-slate-900 font-bold text-xl hover:text-blue-600 transition-colors cursor-pointer dark:text-white dark:hover:text-blue-400"
               >
                 {notice.title}
               </Link>
               {!notice.is_read && (
-                <span className="px-2 py-1 rounded-full text-xs font-bold bg-blue-600 text-white">
+                <span className="px-3 py-1 rounded-full text-sm font-bold bg-blue-600 text-white">
                   NEW
                 </span>
               )}
             </div>
             {/* 通知タイプラベル */}
             <div className="mb-2">
-              <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${style.textColor} bg-gray-800/50`}>
+              <span className={`inline-block px-3 py-1 rounded text-sm font-bold ${style.textColor} bg-white/70 dark:bg-gray-800/50`}>
                 {isPendingNotice
                   ? noticeType === NoticeType.ROLE_CHANGE_PENDING
                     ? '権限変更リクエスト'
@@ -135,13 +135,13 @@ export default function NoticeCard({
 
       {/* 通知内容 */}
       <div className="mb-4 pl-11">
-        <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
-          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap line-clamp-3">
+        <div className="bg-white/70 rounded-lg p-4 border border-slate-200 dark:bg-gray-800/30 dark:border-gray-700/50">
+          <p className="text-slate-700 text-lg font-semibold leading-relaxed whitespace-pre-wrap line-clamp-3 dark:text-gray-300">
             {notice.content}
           </p>
         </div>
         <div className="mt-3">
-          <p className="text-gray-500 text-xs">
+          <p className="text-slate-500 text-base font-semibold dark:text-gray-500">
             {new Date(notice.created_at).toLocaleString('ja-JP', {
               year: 'numeric',
               month: '2-digit',
@@ -158,16 +158,16 @@ export default function NoticeCard({
         {/* 承認/却下ボタン（承認待ちの通知のみ） */}
         {isPendingNotice && requestId && onApprove && onReject && (
           <div className="flex gap-3 w-full">
-            <div className="flex-1 bg-yellow-900/20 border border-yellow-700/50 rounded-lg p-3 mb-3">
-              <p className="text-yellow-400 text-xs font-semibold mb-2">⚠️ 承認待ち</p>
-              <p className="text-gray-400 text-xs mb-3">
+            <div className="flex-1 bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3 dark:bg-yellow-900/20 dark:border-yellow-700/50">
+              <p className="text-yellow-700 text-base font-bold mb-2 dark:text-yellow-400">⚠️ 承認待ち</p>
+              <p className="text-slate-600 text-base font-semibold mb-3 dark:text-gray-400">
                 このリクエストを承認または却下してください
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => onApprove(requestId!, noticeType, notice.id)}
                   disabled={isProcessing}
-                  className="flex-1 bg-[#2ecc71] hover:bg-[#27ae60] text-white px-4 py-2.5 rounded-lg text-sm font-bold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 bg-[#2ecc71] hover:bg-[#27ae60] text-white px-5 py-3 rounded-lg text-base font-bold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isProcessing ? (
                     <>
@@ -181,7 +181,7 @@ export default function NoticeCard({
                 <button
                   onClick={() => onReject(requestId!, noticeType, notice.id)}
                   disabled={isProcessing}
-                  className="flex-1 bg-transparent border-2 border-[#e74c3c] text-[#e74c3c] hover:bg-[#e74c3c20] px-4 py-2.5 rounded-lg text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 bg-transparent border-2 border-[#e74c3c] text-[#e74c3c] hover:bg-[#e74c3c20] px-5 py-3 rounded-lg text-base font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isProcessing ? (
                     <>
@@ -201,7 +201,7 @@ export default function NoticeCard({
         {!notice.is_read && (
           <button
             onClick={() => onMarkAsRead(notice.id)}
-            className="bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-6 py-3 rounded-lg text-base font-bold transition-colors dark:bg-gray-700/50 dark:hover:bg-gray-600/70 dark:text-gray-300"
           >
             既読にする
           </button>

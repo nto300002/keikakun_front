@@ -63,7 +63,7 @@ export default function AuditLogTab() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold">監査ログ</h2>
+        <h2 className="text-3xl font-bold">監査ログ</h2>
         <div className="flex gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
@@ -88,7 +88,7 @@ export default function AuditLogTab() {
         <div className="bg-gray-800 rounded-lg p-4 mb-6 border border-gray-700">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm text-gray-400 mb-1">ターゲット種別</label>
+              <label className="block text-base text-gray-400 mb-1">ターゲット種別</label>
               <select
                 value={filters.target_type || ''}
                 onChange={(e) => setFilters({ ...filters, target_type: e.target.value || undefined })}
@@ -101,7 +101,7 @@ export default function AuditLogTab() {
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">アクション</label>
+              <label className="block text-base text-gray-400 mb-1">アクション</label>
               <select
                 value={filters.action || ''}
                 onChange={(e) => setFilters({ ...filters, action: e.target.value || undefined })}
@@ -117,7 +117,7 @@ export default function AuditLogTab() {
               </select>
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">開始日</label>
+              <label className="block text-base text-gray-400 mb-1">開始日</label>
               <input
                 type="date"
                 value={filters.start_date || ''}
@@ -169,36 +169,36 @@ export default function AuditLogTab() {
             <table className="w-full">
               <thead className="bg-gray-700">
                 <tr>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium">日時</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium">実行者</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium">アクション</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium">対象</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium">事務所</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-medium">詳細</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">日時</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">実行者</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">アクション</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">対象</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">事務所</th>
+                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">詳細</th>
                 </tr>
               </thead>
               <tbody>
                 {logs.map((log) => (
                   <tr key={log.id} className="border-t border-gray-700 hover:bg-gray-700/50">
-                    <td className="py-3 px-4 text-gray-300 text-sm whitespace-nowrap">
+                    <td className="py-3 px-4 text-gray-300 text-base whitespace-nowrap">
                       {formatDate(log.created_at)}
                     </td>
                     <td className="py-3 px-4">
                       <div>
                         <p className="text-white">{log.actor_name}</p>
-                        <p className="text-xs text-gray-400">{log.actor_role}</p>
+                        <p className="text-base text-gray-400">{log.actor_role}</p>
                       </div>
                     </td>
-                    <td className={`py-3 px-4 font-mono text-sm ${getActionColor(log.action)}`}>
+                    <td className={`py-3 px-4 font-mono text-base ${getActionColor(log.action)}`}>
                       {log.action}
                     </td>
-                    <td className="py-3 px-4 text-gray-300 text-sm">
+                    <td className="py-3 px-4 text-gray-300 text-base">
                       {log.target_type}
                     </td>
-                    <td className="py-3 px-4 text-gray-300 text-sm">
+                    <td className="py-3 px-4 text-gray-300 text-base">
                       {log.office_name || '-'}
                     </td>
-                    <td className="py-3 px-4 text-gray-400 text-sm max-w-xs truncate">
+                    <td className="py-3 px-4 text-gray-400 text-base max-w-xs truncate">
                       {JSON.stringify(log.details)}
                     </td>
                   </tr>
@@ -212,7 +212,7 @@ export default function AuditLogTab() {
       {/* ページネーション */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-gray-400 text-sm">
+          <p className="text-gray-400 text-base">
             全 {total} 件中 {currentPage * ITEMS_PER_PAGE + 1} - {Math.min((currentPage + 1) * ITEMS_PER_PAGE, total)} 件を表示
           </p>
           <div className="flex gap-2">

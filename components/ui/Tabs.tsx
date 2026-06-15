@@ -26,7 +26,7 @@ export default function Tabs({ tabs, activeTab, onTabChange, className = '' }: T
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
               className={`
-                px-6 py-3 text-sm font-medium transition-colors whitespace-nowrap
+                px-6 py-3 text-base font-semibold transition-colors whitespace-nowrap
                 border-b-2 -mb-px
                 ${
                   activeTab === tab.id

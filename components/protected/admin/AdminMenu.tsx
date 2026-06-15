@@ -37,7 +37,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [deleteSuccess, setDeleteSuccess] = useState<string | null>(null);
 
-  // MFA management state
+  // ２段階認証 management state
   const [mfaError, setMfaError] = useState<string | null>(null);
   const [mfaSuccess, setMfaSuccess] = useState<string | null>(null);
   const [mfaSetupData, setMfaSetupData] = useState<{
@@ -58,7 +58,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
   const [deleteStaffError, setDeleteStaffError] = useState<string | null>(null);
   const [deleteStaffSuccess, setDeleteStaffSuccess] = useState<string | null>(null);
 
-  // Bulk MFA operations state
+  // Bulk ２段階認証 operations state
   const [isBulkMfaProcessing, setIsBulkMfaProcessing] = useState<boolean>(false);
   const [bulkMfaError, setBulkMfaError] = useState<string | null>(null);
   const [bulkMfaSuccess, setBulkMfaSuccess] = useState<string | null>(null);
@@ -234,13 +234,13 @@ export default function AdminMenu({ office }: AdminMenuProps) {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'owner':
-        return 'bg-purple-600';
+        return 'border-purple-500 text-purple-700 dark:text-purple-300';
       case 'manager':
-        return 'bg-blue-600';
+        return 'border-blue-500 text-blue-700 dark:text-blue-300';
       case 'employee':
-        return 'bg-green-600';
+        return 'border-green-500 text-green-700 dark:text-green-300';
       default:
-        return 'bg-gray-600';
+        return 'border-slate-400 text-slate-700 dark:text-slate-300';
     }
   };
 
@@ -288,7 +288,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
     }
   };
 
-  // 事務所スタッフのMFA有効化
+  // 事務所スタッフの２段階認証有効化
   const handleStaffMfaEnable = async (targetStaff: StaffResponse) => {
     setStaffMfaTogglingId(targetStaff.id);
     setMfaError(null);
@@ -296,9 +296,9 @@ export default function AdminMenu({ office }: AdminMenuProps) {
 
     try {
       const response = await authApi.enableStaffMfa(targetStaff.id);
-      setMfaSuccess(`${targetStaff.full_name}さんのMFAを有効化しました。`);
+      setMfaSuccess(`${targetStaff.full_name}さんの２段階認証を有効化しました。`);
 
-      // MFA設定データを保存してモーダル表示
+      // ２段階認証設定データを保存してモーダル表示
       setMfaSetupData({
         qr_code_uri: response.qr_code_uri,
         secret_key: response.secret_key,
@@ -314,16 +314,16 @@ export default function AdminMenu({ office }: AdminMenuProps) {
       const errorMessage =
         err?.response?.data?.detail ||
         err?.message ||
-        'MFA有効化に失敗しました。';
+        '２段階認証の有効化に失敗しました。';
       setMfaError(errorMessage);
     } finally {
       setStaffMfaTogglingId(null);
     }
   };
 
-  // 事務所スタッフのMFA無効化
+  // 事務所スタッフの２段階認証無効化
   const handleStaffMfaDisable = async (targetStaff: StaffResponse) => {
-    if (!window.confirm(`本当に${targetStaff.full_name}さんのMFAを無効化しますか？セキュリティが低下します。`)) {
+    if (!window.confirm(`本当に${targetStaff.full_name}さんの２段階認証を無効化しますか？セキュリティが低下します。`)) {
       return;
     }
 
@@ -333,7 +333,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
 
     try {
       await authApi.disableStaffMfa(targetStaff.id);
-      setMfaSuccess(`${targetStaff.full_name}さんのMFAを無効化しました。`);
+      setMfaSuccess(`${targetStaff.full_name}さんの２段階認証を無効化しました。`);
 
       // スタッフ一覧を再取得
       const staffs = await officeApi.getOfficeStaffs();
@@ -343,7 +343,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
       const errorMessage =
         err?.response?.data?.detail ||
         err?.message ||
-        'MFA無効化に失敗しました。';
+        '２段階認証の無効化に失敗しました。';
       setMfaError(errorMessage);
     } finally {
       setStaffMfaTogglingId(null);
@@ -418,9 +418,9 @@ export default function AdminMenu({ office }: AdminMenuProps) {
     }
   };
 
-  // 全スタッフのMFA一括有効化
+  // 全スタッフの２段階認証一括有効化
   const handleBulkEnableMfa = async () => {
-    if (!window.confirm('事務所の全スタッフのMFAを一括で有効化しますか？\n各スタッフのQRコードとリカバリーコードが生成されます。')) {
+    if (!window.confirm('事務所の全スタッフの２段階認証を一括で有効化しますか？\n各スタッフのQRコードとリカバリーコードが生成されます。')) {
       return;
     }
 
@@ -430,7 +430,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
 
     try {
       const response = await authApi.enableAllOfficeMfa();
-      setBulkMfaSuccess(`${response.enabled_count}名のスタッフのMFAを有効化しました。`);
+      setBulkMfaSuccess(`${response.enabled_count}名のスタッフの２段階認証を有効化しました。`);
       setBulkMfaResultData(response);
       setShowBulkMfaResultModal(true);
 
@@ -442,16 +442,16 @@ export default function AdminMenu({ office }: AdminMenuProps) {
       const errorMessage =
         err?.response?.data?.detail ||
         err?.message ||
-        'MFA一括有効化に失敗しました。';
+        '２段階認証の一括有効化に失敗しました。';
       setBulkMfaError(errorMessage);
     } finally {
       setIsBulkMfaProcessing(false);
     }
   };
 
-  // 全スタッフのMFA一括無効化
+  // 全スタッフの２段階認証一括無効化
   const handleBulkDisableMfa = async () => {
-    if (!window.confirm('事務所の全スタッフのMFAを一括で無効化しますか？\nセキュリティが低下します。')) {
+    if (!window.confirm('事務所の全スタッフの２段階認証を一括で無効化しますか？\nセキュリティが低下します。')) {
       return;
     }
 
@@ -461,7 +461,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
 
     try {
       const response = await authApi.disableAllOfficeMfa();
-      setBulkMfaSuccess(`${response.disabled_count}名のスタッフのMFAを無効化しました。`);
+      setBulkMfaSuccess(`${response.disabled_count}名のスタッフの２段階認証を無効化しました。`);
       setBulkMfaResultData(response);
 
       // スタッフ一覧を再取得
@@ -472,7 +472,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
       const errorMessage =
         err?.response?.data?.detail ||
         err?.message ||
-        'MFA一括無効化に失敗しました。';
+        '２段階認証の一括無効化に失敗しました。';
       setBulkMfaError(errorMessage);
     } finally {
       setIsBulkMfaProcessing(false);
@@ -542,40 +542,40 @@ export default function AdminMenu({ office }: AdminMenuProps) {
   const getConnectionStatusColor = (status: CalendarConnectionStatus) => {
     switch (status) {
       case CalendarConnectionStatus.CONNECTED:
-        return 'text-green-400 bg-green-900/50 border-green-500';
+        return 'text-green-700 bg-green-50 border-green-200 dark:text-green-400 dark:bg-green-900/50 dark:border-green-500';
       case CalendarConnectionStatus.NOT_CONNECTED:
-        return 'text-gray-400 bg-gray-700 border-gray-600';
+        return 'text-slate-600 bg-slate-100 border-slate-300 dark:text-gray-400 dark:bg-gray-700 dark:border-gray-600';
       case CalendarConnectionStatus.ERROR:
-        return 'text-red-400 bg-red-900/50 border-red-500';
+        return 'text-red-700 bg-red-50 border-red-200 dark:text-red-400 dark:bg-red-900/50 dark:border-red-500';
       case CalendarConnectionStatus.SYNCING:
-        return 'text-blue-400 bg-blue-900/50 border-blue-500';
+        return 'text-blue-700 bg-blue-50 border-blue-200 dark:text-blue-400 dark:bg-blue-900/50 dark:border-blue-500';
       default:
-        return 'text-gray-400 bg-gray-700 border-gray-600';
+        return 'text-slate-600 bg-slate-100 border-slate-300 dark:text-gray-400 dark:bg-gray-700 dark:border-gray-600';
     }
   };
 
   return (
-    <div className="flex h-screen bg-gray-900 text-gray-200">
+    <div className="flex h-screen font-semibold bg-slate-100 text-slate-900 dark:bg-gray-900 dark:text-gray-200">
       {/* メニュー */}
       <div className="flex-1 flex flex-col">
-        <div className="bg-gray-800 border-b border-gray-700">
+        <div className="bg-white border-b border-slate-300 dark:bg-gray-800 dark:border-gray-700">
           <div className="flex">
             <button
               onClick={() => setActiveTab('office')}
-              className={`px-6 py-3 font-medium ${
+              className={`px-6 py-3 font-semibold ${
                 activeTab === 'office'
-                  ? 'bg-gray-900 text-white border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-white text-slate-950 border-b-2 border-blue-500 dark:bg-gray-900 dark:text-white'
+                  : 'text-slate-600 hover:text-slate-950 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
               事業所
             </button>
             <button
               onClick={() => setActiveTab('integration')}
-              className={`px-6 py-3 font-medium flex items-center gap-2 ${
+              className={`px-6 py-3 font-semibold flex items-center gap-2 ${
                 activeTab === 'integration'
-                  ? 'bg-gray-900 text-white border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-white text-slate-950 border-b-2 border-blue-500 dark:bg-gray-900 dark:text-white'
+                  : 'text-slate-600 hover:text-slate-950 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -588,10 +588,10 @@ export default function AdminMenu({ office }: AdminMenuProps) {
             </button>
             <button
               onClick={() => setActiveTab('plan')}
-              className={`px-6 py-3 font-medium ${
+              className={`px-6 py-3 font-semibold ${
                 activeTab === 'plan'
-                  ? 'bg-gray-900 text-white border-b-2 border-blue-500'
-                  : 'text-gray-400 hover:text-white'
+                  ? 'bg-white text-slate-950 border-b-2 border-blue-500 dark:bg-gray-900 dark:text-white'
+                  : 'text-slate-600 hover:text-slate-950 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
               プラン
@@ -605,38 +605,38 @@ export default function AdminMenu({ office }: AdminMenuProps) {
             <div>
               <h2 className="text-2xl font-bold mb-4">事業所設定</h2>
 
-              {/* MFA成功メッセージ */}
+              {/* ２段階認証成功メッセージ */}
               {mfaSuccess && (
                 <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                  <p className="text-green-400 text-sm">{mfaSuccess}</p>
+                  <p className="text-green-400 text-base">{mfaSuccess}</p>
                 </div>
               )}
 
-              {/* MFAエラーメッセージ */}
+              {/* ２段階認証エラーメッセージ */}
               {mfaError && (
                 <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                  <p className="text-red-400 text-sm font-semibold">エラー</p>
-                  <p className="text-red-400 text-sm mt-1">{mfaError}</p>
+                  <p className="text-red-400 text-base font-semibold">エラー</p>
+                  <p className="text-red-400 text-base font-semibold mt-1">{mfaError}</p>
                 </div>
               )}
 
               {/* スタッフ削除成功メッセージ */}
               {deleteStaffSuccess && (
                 <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                  <p className="text-green-400 text-sm">{deleteStaffSuccess}</p>
+                  <p className="text-green-400 text-base">{deleteStaffSuccess}</p>
                 </div>
               )}
 
               {/* スタッフ削除エラーメッセージ */}
               {deleteStaffError && (
                 <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                  <p className="text-red-400 text-sm font-semibold">エラー</p>
-                  <p className="text-red-400 text-sm mt-1">{deleteStaffError}</p>
+                  <p className="text-red-400 text-base font-semibold">エラー</p>
+                  <p className="text-red-400 text-base font-semibold mt-1">{deleteStaffError}</p>
                 </div>
               )}
 
               {/* オフィス情報カード */}
-              <div className="bg-gray-800 p-6 rounded-lg mb-6">
+              <div className="bg-white p-6 rounded-lg mb-6 border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-semibold">事業所情報</h3>
                   <button
@@ -649,12 +649,12 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <p className="text-gray-400 text-sm">事業所名</p>
-                    <p className="text-white font-medium">{office?.name || '未設定'}</p>
+                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">事業所名</p>
+                    <p className="text-slate-900 font-semibold dark:text-white">{office?.name || '未設定'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">事業所種別</p>
-                    <p className="text-white font-medium">
+                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">事業所種別</p>
+                    <p className="text-slate-900 font-semibold dark:text-white">
                       {office?.office_type === 'transition_to_employment' && '移行支援'}
                       {office?.office_type === 'type_A_office' && '就労A型'}
                       {office?.office_type === 'type_B_office' && '就労B型'}
@@ -662,49 +662,49 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">住所</p>
-                    <p className="text-white font-medium">{office?.address || '未設定'}</p>
+                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">住所</p>
+                    <p className="text-slate-900 font-semibold dark:text-white">{office?.address || '未設定'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">電話番号</p>
-                    <p className="text-white font-medium">{office?.phone_number || '未設定'}</p>
+                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">電話番号</p>
+                    <p className="text-slate-900 font-semibold dark:text-white">{office?.phone_number || '未設定'}</p>
                   </div>
                   <div>
-                    <p className="text-gray-400 text-sm">メールアドレス</p>
-                    <p className="text-white font-medium">{office?.email || '未設定'}</p>
+                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">メールアドレス</p>
+                    <p className="text-slate-900 font-semibold dark:text-white">{office?.email || '未設定'}</p>
                   </div>
                 </div>
               </div>
 
               {/* スタッフ管理セクション */}
-              <div className="bg-gray-800 p-6 rounded-lg mb-6">
+              <div className="bg-white p-6 rounded-lg mb-6 border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <h3 className="text-xl font-semibold">事務所スタッフ管理</h3>
-                    <span className="text-gray-400 text-sm">
+                    <span className="text-slate-600 text-base font-semibold dark:text-gray-400">
                       {officeStaffs.length}名
                     </span>
 
                     {/* QRコード紛失時のヘルプツールチップ */}
                     <div className="group relative">
-                      <button className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1 transition-colors">
+                      <button className="text-blue-400 hover:text-blue-300 text-base font-semibold flex items-center gap-1 transition-colors">
                         <AiOutlineQuestionCircle className="h-5 w-5" />
                         <span className="underline">QRコードを紛失した場合</span>
                       </button>
 
                       {/* ツールチップ */}
-                      <div className="absolute left-0 top-full mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-slate-300 dark:bg-gray-900 dark:border-gray-700 rounded-lg p-4 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                         <div className="flex items-start gap-2">
                           <AiOutlineQuestionCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
                           <div>
-                            <p className="text-sm font-semibold text-white mb-2">QRコード紛失時の対処法</p>
-                            <ol className="text-sm text-gray-300 space-y-2 list-decimal list-inside">
-                              <li>対象スタッフのMFAを一度無効化する</li>
-                              <li>再度MFAを有効化する</li>
+                            <p className="text-base font-semibold text-slate-900 dark:text-white mb-2">QRコード紛失時の対処法</p>
+                            <ol className="text-base text-slate-700 dark:text-gray-300 space-y-2 list-decimal list-inside">
+                              <li>対象スタッフの２段階認証を一度無効化する</li>
+                              <li>再度２段階認証を有効化する</li>
                               <li>新しいQRコードとシークレットキーが発行される</li>
                               <li>スタッフに新しいQRコードを共有する</li>
                             </ol>
-                            <p className="text-xs text-gray-400 mt-3">
+                            <p className="text-sm font-medium text-slate-500 dark:text-gray-400 mt-3">
                               ⚠️ 無効化すると、既存のTOTPアプリの設定は使用できなくなります。
                             </p>
                           </div>
@@ -716,7 +716,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                     <button
                       onClick={handleBulkEnableMfa}
                       disabled={isBulkMfaProcessing || isLoadingStaffs}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-base font-semibold disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                     >
                       {isBulkMfaProcessing ? (
                         <>
@@ -729,14 +729,14 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                       ) : (
                         <>
                           <MdCheckCircle className="w-5 h-5" />
-                          全員MFA有効化
+                          全員２段階認証有効化
                         </>
                       )}
                     </button>
                     <button
                       onClick={handleBulkDisableMfa}
                       disabled={isBulkMfaProcessing || isLoadingStaffs}
-                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-base font-semibold disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                     >
                       {isBulkMfaProcessing ? (
                         <>
@@ -749,45 +749,45 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                       ) : (
                         <>
                           <MdCancel className="w-5 h-5" />
-                          全員MFA無効化
+                          全員２段階認証無効化
                         </>
                       )}
                     </button>
                   </div>
                 </div>
 
-                {/* バルクMFA操作エラーメッセージ */}
+                {/* バルク２段階認証操作エラーメッセージ */}
                 {bulkMfaError && (
                   <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                    <p className="text-red-400 text-sm font-semibold">エラー</p>
-                    <p className="text-red-400 text-sm mt-1">{bulkMfaError}</p>
+                    <p className="text-red-400 text-base font-semibold">エラー</p>
+                    <p className="text-red-400 text-base font-semibold mt-1">{bulkMfaError}</p>
                   </div>
                 )}
 
-                {/* バルクMFA操作成功メッセージ */}
+                {/* バルク２段階認証操作成功メッセージ */}
                 {bulkMfaSuccess && !showBulkMfaResultModal && (
                   <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                    <p className="text-green-400 text-sm font-semibold">成功</p>
-                    <p className="text-green-400 text-sm mt-1">{bulkMfaSuccess}</p>
+                    <p className="text-green-400 text-base font-semibold">成功</p>
+                    <p className="text-green-400 text-base font-semibold mt-1">{bulkMfaSuccess}</p>
                   </div>
                 )}
 
                 {/* ローディング中 */}
                 {isLoadingStaffs && (
-                  <div className="p-4 bg-gray-700 rounded-lg flex items-center">
+                  <div className="p-4 bg-slate-100 border border-slate-300 rounded-lg flex dark:bg-gray-700 dark:border-gray-600 items-center">
                     <svg className="animate-spin h-5 w-5 text-blue-400 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <p className="text-gray-400 text-sm">スタッフ一覧を読み込み中...</p>
+                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">スタッフ一覧を読み込み中...</p>
                   </div>
                 )}
 
                 {/* エラー表示 */}
                 {loadStaffsError && !isLoadingStaffs && (
                   <div className="p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                    <p className="text-red-400 text-sm font-semibold">読み込みエラー</p>
-                    <p className="text-red-400 text-sm mt-1">{loadStaffsError}</p>
+                    <p className="text-red-400 text-base font-semibold">読み込みエラー</p>
+                    <p className="text-red-400 text-base font-semibold mt-1">{loadStaffsError}</p>
                   </div>
                 )}
 
@@ -798,33 +798,33 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                   <div className="overflow-x-auto">
                     <table className="w-full">
                       <thead>
-                        <tr className="border-b border-gray-700">
-                          <th className="text-left py-3 px-4 text-gray-400 font-medium">氏名</th>
-                          <th className="text-left py-3 px-4 text-gray-400 font-medium">メールアドレス</th>
-                          <th className="text-left py-3 px-4 text-gray-400 font-medium">役割</th>
-                          <th className="text-left py-3 px-4 text-gray-400 font-medium">
+                        <tr className="border-b border-slate-300 dark:border-gray-700">
+                          <th className="text-left py-3 px-4 text-slate-600 dark:text-gray-400 font-semibold">氏名</th>
+                          <th className="text-left py-3 px-4 text-slate-600 dark:text-gray-400 font-semibold">メールアドレス</th>
+                          <th className="text-left py-3 px-4 text-slate-600 dark:text-gray-400 font-semibold">役割</th>
+                          <th className="text-left py-3 px-4 text-slate-600 dark:text-gray-400 font-semibold">
                             <div className="flex items-center gap-2">
-                              MFA状態/変更
+                              ２段階認証状態/変更
                               <div className="relative group/help">
                                 <button
                                   type="button"
-                                  className="w-4 h-4 rounded-full bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 flex items-center justify-center text-xs font-bold transition-colors"
-                                  title="MFAについて"
+                                  className="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-gray-700/50 dark:hover:bg-gray-600/70 dark:text-gray-300 flex items-center justify-center text-sm font-bold transition-colors"
+                                  title="２段階認証について"
                                 >
                                   ?
                                 </button>
                                 {/* ツールチップ */}
-                                <div className="absolute left-0 top-full mt-2 w-80 bg-gray-900 border border-gray-700 rounded-lg p-4 shadow-xl opacity-0 invisible group-hover/help:opacity-100 group-hover/help:visible transition-all duration-200 z-50">
+                                <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-slate-300 dark:bg-gray-900 dark:border-gray-700 rounded-lg p-4 shadow-xl opacity-0 invisible group-hover/help:opacity-100 group-hover/help:visible transition-all duration-200 z-50">
                                   <div className="flex items-start gap-2">
                                     <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     <div>
-                                      <p className="text-sm font-semibold text-white mb-2">MFA（多要素認証）とは</p>
-                                      <p className="text-sm text-gray-300 leading-relaxed mb-3">
-                                        MFA（Multi-Factor Authentication）は、パスワードに加えて、スマートフォンアプリで生成される6桁の認証コードを使用する2段階認証です。
+                                      <p className="text-base font-semibold text-slate-900 dark:text-white mb-2">２段階認証とは</p>
+                                      <p className="text-base text-slate-700 dark:text-gray-300 leading-relaxed mb-3">
+                                        ２段階認証は、パスワードに加えて、スマートフォンアプリで生成される6桁の認証コードを使用する認証方式です。
                                       </p>
-                                      <ul className="text-sm text-gray-300 space-y-1 list-disc list-inside">
+                                      <ul className="text-base text-slate-700 dark:text-gray-300 space-y-1 list-disc list-inside">
                                         <li>セキュリティが大幅に向上します</li>
                                         <li>Google Authenticatorなどのアプリが必要です</li>
                                         <li>ログイン時に追加の認証コード入力が必要になります</li>
@@ -835,7 +835,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                               </div>
                             </div>
                           </th>
-                          <th className="text-left py-3 px-4 text-gray-400 font-medium">スタッフ削除</th>
+                          <th className="text-left py-3 px-4 text-slate-600 dark:text-gray-400 font-semibold">スタッフ削除</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -844,23 +844,23 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                           const remainingDays = isDeleted ? calculateRemainingDays(s.deleted_at) : 0;
 
                           return (
-                            <tr key={s.id} className={`border-b border-gray-700 hover:bg-gray-700/50 ${isDeleted ? 'opacity-50' : ''}`}>
+                            <tr key={s.id} className={`border-b border-slate-300 dark:border-gray-700 hover:bg-slate-100 dark:hover:bg-gray-700/50 ${isDeleted ? 'opacity-50' : ''}`}>
                               <td className="py-3 px-4">
                                 <div className="flex items-center gap-2">
-                                  <span className={isDeleted ? 'text-gray-500 line-through' : 'text-white'}>
+                                  <span className={isDeleted ? 'text-slate-500 dark:text-gray-500 line-through' : 'text-slate-900 dark:text-white'}>
                                     {s.full_name}
                                   </span>
                                   {isDeleted && (
-                                    <span className="px-2 py-1 rounded-lg text-xs font-semibold bg-red-900/50 text-red-400 border border-red-500">
+                                    <span className="px-2 py-1 rounded-lg text-sm font-semibold bg-red-900/50 text-red-400 border border-red-500">
                                       削除済み - 残り{remainingDays}日で完全削除
                                     </span>
                                   )}
                                 </div>
                               </td>
-                              <td className="py-3 px-4 text-gray-300">{s.email}</td>
+                              <td className="py-3 px-4 text-slate-700 dark:text-gray-300">{s.email}</td>
                               <td className="py-3 px-4">
                                 <span
-                                  className={`px-2 py-1 rounded text-xs font-medium ${getRoleBadgeColor(s.role)}`}
+                                  className={`inline-flex min-w-20 justify-center rounded border px-3 py-1 text-base font-semibold ${getRoleBadgeColor(s.role)}`}
                                 >
                                   {getRoleLabel(s.role)}
                                 </span>
@@ -868,10 +868,10 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-2 group">
                                 <span
-                                  className={`px-3 py-1 rounded-lg text-sm font-semibold border flex items-center gap-1 ${
+                                  className={`inline-flex min-w-20 justify-center rounded border px-3 py-1 text-base font-semibold items-center gap-1 ${
                                     s.is_mfa_enabled
-                                      ? 'bg-green-900/50 text-green-400 border-green-500'
-                                      : 'bg-gray-700 text-gray-400 border-gray-600'
+                                      ? 'border-green-500 text-green-700 dark:text-green-300'
+                                      : 'border-slate-400 text-slate-600 dark:border-gray-500 dark:text-gray-300'
                                   }`}
                                 >
                                   {s.is_mfa_enabled ? (
@@ -890,7 +890,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                                   <button
                                     onClick={() => handleStaffMfaDisable(s)}
                                     disabled={staffMfaTogglingId === s.id || isDeleted}
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-base font-semibold disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
                                   >
                                     {staffMfaTogglingId === s.id ? (
                                       <>
@@ -908,7 +908,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                                   <button
                                     onClick={() => handleStaffMfaEnable(s)}
                                     disabled={staffMfaTogglingId === s.id || isDeleted}
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-base font-semibold disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
                                   >
                                     {staffMfaTogglingId === s.id ? (
                                       <>
@@ -927,12 +927,12 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                             </td>
                               <td className="py-3 px-4">
                                 {isDeleted ? (
-                                  <span className="text-gray-500 text-sm">削除済み</span>
+                                  <span className="text-slate-500 dark:text-gray-500 text-base">削除済み</span>
                                 ) : (
                                   <button
                                     onClick={() => handleStaffDelete(s)}
                                     disabled={staffDeletingId === s.id}
-                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
+                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-base font-semibold disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
                                   >
                                     {staffDeletingId === s.id ? (
                                       <>
@@ -961,7 +961,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
               </div>
 
               {/* 退会セクション */}
-              <div className="bg-gray-800 p-6 rounded-lg mt-6 border border-red-500/30">
+              <div className="bg-white p-6 rounded-lg mt-6 border border-red-300 shadow-sm dark:bg-gray-800 dark:border-red-500/30">
                 <div className="flex items-center gap-3 mb-4">
                   <MdExitToApp className="w-6 h-6 text-red-400" />
                   <h3 className="text-xl font-semibold text-red-400">退会</h3>
@@ -969,11 +969,11 @@ export default function AdminMenu({ office }: AdminMenuProps) {
 
                 {withdrawalSuccess && (
                   <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                    <p className="text-green-400 text-sm">{withdrawalSuccess}</p>
+                    <p className="text-green-400 text-base">{withdrawalSuccess}</p>
                   </div>
                 )}
 
-                <p className="text-gray-400 mb-4 text-sm">
+                <p className="text-slate-600 mb-4 dark:text-gray-400 text-base">
                   事務所を退会すると、事務所データと全スタッフのアカウントが削除されます。
                   退会申請後、アプリ管理者による承認が必要です。
                 </p>
@@ -993,9 +993,9 @@ export default function AdminMenu({ office }: AdminMenuProps) {
             <div>
               <h2 className="text-2xl font-bold mb-4">連携</h2>
 
-              <div className="bg-gray-800 p-6 rounded-lg">
+              <div className="bg-white p-6 rounded-lg border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
                 <h3 className="text-xl font-semibold mb-4">Google カレンダー</h3>
-                <p className="text-gray-400 mb-4">
+                <p className="text-slate-600 mb-4 dark:text-gray-400">
                   Google Calendarへの通知はGoogle Consoleから設定します 詳しくは下記を参照してください
                 </p>
 
@@ -1012,27 +1012,27 @@ export default function AdminMenu({ office }: AdminMenuProps) {
 
                 {/* ローディング中 */}
                 {isLoadingCalendar && (
-                  <div className="mb-4 p-4 bg-gray-700 rounded-lg flex items-center">
+                  <div className="mb-4 p-4 bg-slate-100 border border-slate-300 rounded-lg flex dark:bg-gray-700 dark:border-gray-600 items-center">
                     <svg className="animate-spin h-5 w-5 text-blue-400 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <p className="text-gray-400 text-sm">設定を読み込み中...</p>
+                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">設定を読み込み中...</p>
                   </div>
                 )}
 
                 {/* カレンダー設定読み込みエラー */}
                 {loadCalendarError && (
                   <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                    <p className="text-red-400 text-sm font-semibold">設定の読み込みエラー</p>
-                    <p className="text-red-400 text-sm mt-1">{loadCalendarError}</p>
+                    <p className="text-red-400 text-base font-semibold">設定の読み込みエラー</p>
+                    <p className="text-red-400 text-base font-semibold mt-1">{loadCalendarError}</p>
                   </div>
                 )}
 
                 {/* 既存のカレンダー設定情報 */}
                 {existingCalendar && !isLoadingCalendar && (
-                  <div className="mb-6 p-4 bg-gray-700 rounded-lg">
-                    <h4 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                  <div className="mb-6 p-4 bg-slate-100 border border-slate-300 rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                    <h4 className="text-xl font-semibold mb-3 flex items-center gap-2">
                       <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
@@ -1040,39 +1040,39 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                     </h4>
                     <div className="space-y-3">
                       <div>
-                        <p className="text-gray-400 text-sm">接続ステータス</p>
-                        <span className={`inline-block mt-1 px-3 py-1 rounded-lg text-sm font-semibold border ${getConnectionStatusColor(existingCalendar.connection_status)}`}>
+                        <p className="text-slate-600 text-base font-semibold dark:text-gray-400">接続ステータス</p>
+                        <span className={`inline-block mt-1 px-3 py-1 rounded-lg text-base font-semibold border ${getConnectionStatusColor(existingCalendar.connection_status)}`}>
                           {getConnectionStatusLabel(existingCalendar.connection_status)}
                         </span>
                       </div>
                       {existingCalendar.google_calendar_id && (
                         <div>
-                          <p className="text-gray-400 text-sm">カレンダー ID</p>
-                          <p className="text-white font-mono text-sm mt-1 break-all">{existingCalendar.google_calendar_id}</p>
+                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400">カレンダー ID</p>
+                          <p className="text-slate-900 font-mono text-base font-semibold dark:text-white mt-1 break-all">{existingCalendar.google_calendar_id}</p>
                         </div>
                       )}
                       {existingCalendar.service_account_email && (
                         <div>
-                          <p className="text-gray-400 text-sm">サービスアカウント</p>
-                          <p className="text-white font-mono text-sm mt-1 break-all">{existingCalendar.service_account_email}</p>
+                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400">サービスアカウント</p>
+                          <p className="text-slate-900 font-mono text-base font-semibold dark:text-white mt-1 break-all">{existingCalendar.service_account_email}</p>
                         </div>
                       )}
                       {existingCalendar.calendar_name && (
                         <div>
-                          <p className="text-gray-400 text-sm">カレンダー名</p>
-                          <p className="text-white text-sm mt-1">{existingCalendar.calendar_name}</p>
+                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400">カレンダー名</p>
+                          <p className="text-slate-900 text-base font-semibold dark:text-white mt-1">{existingCalendar.calendar_name}</p>
                         </div>
                       )}
                       {existingCalendar.last_sync_at && (
                         <div>
-                          <p className="text-gray-400 text-sm">最終同期日時</p>
-                          <p className="text-white text-sm mt-1">{new Date(existingCalendar.last_sync_at).toLocaleString('ja-JP')}</p>
+                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400">最終同期日時</p>
+                          <p className="text-slate-900 text-base font-semibold dark:text-white mt-1">{new Date(existingCalendar.last_sync_at).toLocaleString('ja-JP')}</p>
                         </div>
                       )}
                       {existingCalendar.last_error_message && (
                         <div>
-                          <p className="text-red-400 text-sm font-semibold">最後のエラー</p>
-                          <p className="text-red-300 text-sm mt-1">{existingCalendar.last_error_message}</p>
+                          <p className="text-red-400 text-base font-semibold">最後のエラー</p>
+                          <p className="text-red-300 text-base font-semibold mt-1">{existingCalendar.last_error_message}</p>
                         </div>
                       )}
                     </div>
@@ -1082,40 +1082,40 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                 {/* アップロードエラー */}
                 {uploadError && (
                   <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                    <p className="text-red-400 text-sm font-semibold">アップロードエラー</p>
-                    <p className="text-red-400 text-sm mt-1">{uploadError}</p>
+                    <p className="text-red-400 text-base font-semibold">アップロードエラー</p>
+                    <p className="text-red-400 text-base font-semibold mt-1">{uploadError}</p>
                   </div>
                 )}
 
                 {/* アップロード成功 */}
                 {uploadSuccess && (
                   <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                    <p className="text-green-400 text-sm">{uploadSuccess}</p>
+                    <p className="text-green-400 text-base">{uploadSuccess}</p>
                   </div>
                 )}
 
                 {/* 削除エラー */}
                 {deleteError && (
                   <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                    <p className="text-red-400 text-sm font-semibold">削除エラー</p>
-                    <p className="text-red-400 text-sm mt-1">{deleteError}</p>
+                    <p className="text-red-400 text-base font-semibold">削除エラー</p>
+                    <p className="text-red-400 text-base font-semibold mt-1">{deleteError}</p>
                   </div>
                 )}
 
                 {/* 削除成功 */}
                 {deleteSuccess && (
                   <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                    <p className="text-green-400 text-sm">{deleteSuccess}</p>
+                    <p className="text-green-400 text-base">{deleteSuccess}</p>
                   </div>
                 )}
 
                 <div className="space-y-4">
-                  <h4 className="text-lg font-semibold mb-3">
+                  <h4 className="text-xl font-semibold mb-3">
                     {existingCalendar ? '設定を更新' : '新規設定'}
                   </h4>
 
                   <div>
-                    <label className="block text-gray-400 text-sm mb-2">
+                    <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">
                       カレンダー ID <span className="text-red-400">*</span>
                     </label>
                     <input
@@ -1123,30 +1123,30 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                       value={calendarId}
                       onChange={(e) => setCalendarId(e.target.value)}
                       placeholder="example@group.calendar.google.com"
-                      className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white placeholder-gray-500"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 placeholder-slate-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
                     />
-                    <p className="mt-1 text-xs text-gray-500">
+                    <p className="mt-1 text-sm font-medium text-slate-500 dark:text-gray-500">
                       Googleカレンダーの設定から取得できます
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-gray-400 text-sm mb-2">
+                    <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">
                       サービスアカウント JSON ファイル <span className="text-red-400">*</span>
                     </label>
                     <input
                       type="file"
                       accept=".json"
                       onChange={handleFileChange}
-                      className="w-full text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                      className="w-full text-slate-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
                     />
                     {calendarFile && (
-                      <p className="mt-2 text-sm text-green-400">
+                      <p className="mt-2 text-base font-semibold text-green-400">
                         選択済み: {calendarFile.name}
                       </p>
                     )}
                     {existingCalendar && !calendarFile && (
-                      <p className="mt-1 text-xs text-gray-500">
+                      <p className="mt-1 text-sm font-medium text-slate-500 dark:text-gray-500">
                         既存の認証情報が設定されています。変更する場合のみファイルを選択してください。
                       </p>
                     )}
@@ -1175,9 +1175,9 @@ export default function AdminMenu({ office }: AdminMenuProps) {
 
                 {/* 連携解除セクション */}
                 {existingCalendar && (
-                  <div className="mt-8 pt-6 border-t border-gray-700">
-                    <h4 className="text-lg font-semibold mb-3 text-red-400">カレンダー連携解除</h4>
-                    <p className="text-gray-400 text-sm mb-4">
+                  <div className="mt-8 pt-6 border-t border-slate-300 dark:border-gray-700">
+                    <h4 className="text-xl font-semibold mb-3 text-red-400">カレンダー連携解除</h4>
+                    <p className="text-slate-600 text-base font-semibold dark:text-slate-600 mb-4 dark:text-gray-400">
                       カレンダー連携を解除すると、今後のイベント同期が停止されます。この操作は元に戻せません。
                     </p>
 
@@ -1214,7 +1214,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                           <button
                             onClick={() => setShowDeleteConfirm(false)}
                             disabled={isDeleting}
-                            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg disabled:cursor-not-allowed"
+                            className="bg-slate-200 hover:bg-slate-300 text-slate-900 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-white px-4 py-2 rounded-lg disabled:cursor-not-allowed"
                           >
                             キャンセル
                           </button>
@@ -1232,19 +1232,19 @@ export default function AdminMenu({ office }: AdminMenuProps) {
         </div>
       </div>
 
-      {/* MFA設定情報モーダル */}
+      {/* ２段階認証設定情報モーダル */}
       {showMfaSetupModal && mfaSetupData && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-2xl font-bold mb-4 text-white">MFA設定情報</h3>
-            <p className="text-gray-400 mb-6">
+          <div className="bg-white rounded-lg p-6 font-medium border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">２段階認証設定情報</h3>
+            <p className="text-slate-600 mb-6 dark:text-gray-400">
               以下の情報をスタッフに安全な方法で共有してください。この情報は一度しか表示されません。
             </p>
 
             {/* QRコード */}
-            <div className="mb-6 p-4 bg-gray-700 rounded-lg">
-              <h4 className="text-lg font-semibold mb-3 text-white">QRコード</h4>
-              <p className="text-gray-400 text-sm mb-3">
+            <div className="mb-6 p-4 bg-slate-100 border border-slate-300 rounded-lg dark:bg-gray-700 dark:border-gray-600">
+              <h4 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">QRコード</h4>
+              <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-3">
                 Google AuthenticatorなどのTOTPアプリで以下のQRコードをスキャンしてください。
               </p>
               <div className="bg-white p-4 rounded-lg inline-block">
@@ -1257,26 +1257,26 @@ export default function AdminMenu({ office }: AdminMenuProps) {
             </div>
 
             {/* シークレットキー */}
-            <div className="mb-6 p-4 bg-gray-700 rounded-lg">
-              <h4 className="text-lg font-semibold mb-3 text-white">シークレットキー（手動入力用）</h4>
-              <p className="text-gray-400 text-sm mb-3">
+            <div className="mb-6 p-4 bg-slate-100 border border-slate-300 rounded-lg dark:bg-gray-700 dark:border-gray-600">
+              <h4 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">シークレットキー（手動入力用）</h4>
+              <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-3">
                 QRコードをスキャンできない場合は、以下のキーを手動で入力してください。
               </p>
-              <div className="bg-gray-900 p-3 rounded font-mono text-sm text-white break-all">
+              <div className="bg-slate-100 border border-slate-300 p-3 rounded font-mono text-base text-slate-900 dark:text-white break-all">
                 {mfaSetupData.secret_key}
               </div>
             </div>
 
             {/* リカバリーコード */}
-            <div className="mb-6 p-4 bg-gray-700 rounded-lg">
-              <h4 className="text-lg font-semibold mb-3 text-white">リカバリーコード</h4>
-              <p className="text-gray-400 text-sm mb-3">
+            <div className="mb-6 p-4 bg-slate-100 border border-slate-300 rounded-lg dark:bg-gray-700 dark:border-gray-600">
+              <h4 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">リカバリーコード</h4>
+              <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-3">
                 デバイスを紛失した場合に使用できるバックアップコードです。安全な場所に保管してください。
               </p>
-              <div className="bg-gray-900 p-4 rounded">
+              <div className="bg-slate-100 border border-slate-300 p-4 rounded">
                 <div className="grid grid-cols-2 gap-2">
                   {mfaSetupData.recovery_codes.map((code, index) => (
-                    <div key={index} className="font-mono text-sm text-white">
+                    <div key={index} className="font-mono text-base text-slate-900 dark:text-white">
                       {code}
                     </div>
                   ))}
@@ -1305,34 +1305,34 @@ export default function AdminMenu({ office }: AdminMenuProps) {
       {/* オフィス編集モーダル */}
       {showOfficeEditModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-2xl font-bold mb-4 text-white">事業所情報を編集</h3>
+          <div className="bg-white rounded-lg p-6 font-medium border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">事業所情報を編集</h3>
 
             {/* エラーメッセージ */}
             {saveOfficeError && (
               <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                <p className="text-red-400 text-sm font-semibold">エラー</p>
-                <p className="text-red-400 text-sm mt-1">{saveOfficeError}</p>
+                <p className="text-red-400 text-base font-semibold">エラー</p>
+                <p className="text-red-400 text-base font-semibold mt-1">{saveOfficeError}</p>
               </div>
             )}
 
             {/* 成功メッセージ */}
             {saveOfficeSuccess && (
               <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                <p className="text-green-400 text-sm">{saveOfficeSuccess}</p>
+                <p className="text-green-400 text-base">{saveOfficeSuccess}</p>
               </div>
             )}
 
             <div className="space-y-4">
               <div>
-                <label className="block text-gray-400 text-sm mb-2">
+                <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">
                   事業所名 <span className="text-red-400">*</span>
                 </label>
                 <input
                   type="text"
                   value={officeName}
                   onChange={(e) => setOfficeName(e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="事業所名を入力"
                   required
                   minLength={1}
@@ -1342,11 +1342,11 @@ export default function AdminMenu({ office }: AdminMenuProps) {
               </div>
 
               <div>
-                <label className="block text-gray-400 text-sm mb-2">事業所種別</label>
+                <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">事業所種別</label>
                 <select
                   value={officeType}
                   onChange={(e) => setOfficeType(e.target.value as OfficeTypeValue)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:border-blue-500"
                   disabled={isSavingOffice}
                 >
                   <option value="transition_to_employment">移行支援</option>
@@ -1356,12 +1356,12 @@ export default function AdminMenu({ office }: AdminMenuProps) {
               </div>
 
               <div>
-                <label className="block text-gray-400 text-sm mb-2">住所</label>
+                <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">住所</label>
                 <input
                   type="text"
                   value={officeAddress}
                   onChange={(e) => setOfficeAddress(e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="例: 東京都渋谷区1-2-3"
                   maxLength={500}
                   disabled={isSavingOffice}
@@ -1369,28 +1369,28 @@ export default function AdminMenu({ office }: AdminMenuProps) {
               </div>
 
               <div>
-                <label className="block text-gray-400 text-sm mb-2">電話番号</label>
+                <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">電話番号</label>
                 <input
                   type="tel"
                   value={officePhoneNumber}
                   onChange={(e) => setOfficePhoneNumber(e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="例: 03-1234-5678"
                   pattern="\d{2,4}-\d{2,4}-\d{4}"
                   disabled={isSavingOffice}
                 />
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-sm font-medium text-slate-500 dark:text-gray-500">
                   形式: 03-1234-5678（ハイフン区切り）
                 </p>
               </div>
 
               <div>
-                <label className="block text-gray-400 text-sm mb-2">メールアドレス</label>
+                <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">メールアドレス</label>
                 <input
                   type="email"
                   value={officeEmail}
                   onChange={(e) => setOfficeEmail(e.target.value)}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:border-blue-500"
                   placeholder="例: info@example.com"
                   disabled={isSavingOffice}
                 />
@@ -1402,7 +1402,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
               <button
                 onClick={() => setShowOfficeEditModal(false)}
                 disabled={isSavingOffice}
-                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-slate-200 hover:bg-slate-300 text-slate-900 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 キャンセル
               </button>
@@ -1428,36 +1428,36 @@ export default function AdminMenu({ office }: AdminMenuProps) {
         </div>
       )}
 
-      {/* バルクMFA有効化結果モーダル */}
+      {/* バルク２段階認証有効化結果モーダル */}
       {showBulkMfaResultModal && bulkMfaResultData?.staff_mfa_data && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-700">
-              <h2 className="text-2xl font-bold text-white">MFA一括有効化結果</h2>
+          <div className="bg-white rounded-lg border border-slate-300 shadow-xl dark:bg-gray-800 dark:border-gray-700 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-slate-300 dark:border-gray-700">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">２段階認証一括有効化結果</h2>
               <p className="text-green-400 mt-2">
-                {bulkMfaResultData.enabled_count}名のスタッフのMFAを有効化しました
+                {bulkMfaResultData.enabled_count}名のスタッフの２段階認証を有効化しました
               </p>
             </div>
 
             <div className="p-6">
               <div className="mb-4 p-4 bg-yellow-900/50 border border-yellow-500 rounded-lg">
-                <p className="text-yellow-400 text-sm font-semibold">重要</p>
-                <p className="text-yellow-400 text-sm mt-1">
+                <p className="text-yellow-400 text-base font-semibold">重要</p>
+                <p className="text-yellow-400 text-base font-semibold mt-1">
                   以下の情報を各スタッフに安全な方法で伝えてください。QRコードをスキャンしてTOTPアプリに登録し、リカバリーコードは安全な場所に保管してください。
                 </p>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-6 font-medium">
                 {bulkMfaResultData.staff_mfa_data.map((staffData, index) => (
-                  <div key={staffData.staff_id} className="bg-gray-700 p-4 rounded-lg">
-                    <h3 className="text-lg font-semibold text-white mb-3">
+                  <div key={staffData.staff_id} className="bg-slate-100 border border-slate-300 p-4 rounded-lg dark:bg-gray-700 dark:border-gray-600">
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
                       {index + 1}. {staffData.staff_name}
                     </h3>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {/* QRコード */}
                       <div>
-                        <p className="text-gray-400 text-sm mb-2">QRコード</p>
+                        <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">QRコード</p>
                         <div className="bg-white p-4 rounded-lg inline-block">
                           <QRCodeCanvas
                             value={staffData.qr_code_uri}
@@ -1470,18 +1470,18 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                       {/* シークレットキーとリカバリーコード */}
                       <div>
                         <div className="mb-4">
-                          <p className="text-gray-400 text-sm mb-2">シークレットキー</p>
-                          <code className="block bg-gray-900 text-green-400 p-2 rounded text-xs break-all">
+                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">シークレットキー</p>
+                          <code className="block bg-slate-900 text-green-300 p-2 rounded text-sm break-all dark:bg-gray-900 dark:text-green-400">
                             {staffData.secret_key}
                           </code>
                         </div>
 
                         <div>
-                          <p className="text-gray-400 text-sm mb-2">リカバリーコード（10個）</p>
-                          <div className="bg-gray-900 p-3 rounded max-h-40 overflow-y-auto">
+                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">リカバリーコード（10個）</p>
+                          <div className="bg-slate-900 border border-slate-700 p-3 rounded max-h-40 overflow-y-auto dark:bg-gray-900 dark:border-transparent">
                             <div className="grid grid-cols-2 gap-2">
                               {staffData.recovery_codes.map((code, codeIndex) => (
-                                <code key={codeIndex} className="text-green-400 text-xs">
+                                <code key={codeIndex} className="text-green-400 text-sm">
                                   {code}
                                 </code>
                               ))}
@@ -1496,7 +1496,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
             </div>
 
             {/* ボタン */}
-            <div className="p-6 border-t border-gray-700 flex justify-end">
+            <div className="p-6 border-t border-slate-300 dark:border-gray-700 flex justify-end">
               <button
                 onClick={() => {
                   setShowBulkMfaResultModal(false);

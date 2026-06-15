@@ -111,11 +111,11 @@ export default function ResetPasswordForm() {
   // トークン検証中
   if (isVerifyingToken) {
     return (
-      <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10B981] mx-auto"></div>
-            <p className="mt-4 text-gray-400">トークンを確認中...</p>
+            <p className="mt-4 text-slate-600 dark:text-gray-400">トークンを確認中...</p>
           </div>
         </div>
       </div>
@@ -125,18 +125,18 @@ export default function ResetPasswordForm() {
   // トークンが無効
   if (!isTokenValid) {
     return (
-      <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-white mb-2">
+            <h2 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
               トークンエラー
             </h2>
-            <p className="text-gray-400">
+            <p className="text-slate-600 dark:text-gray-400">
               トークンが無効または期限切れです
             </p>
           </div>
 
-          <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
+          <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-slate-200 dark:border-gray-700 p-8">
             <div className="space-y-6">
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
                 <p className="text-red-400 text-sm">{tokenError}</p>
@@ -151,7 +151,7 @@ export default function ResetPasswordForm() {
 
               <button
                 onClick={() => router.push('/auth/login')}
-                className="w-full bg-gray-600 hover:bg-gray-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
+                className="w-full bg-slate-200 text-slate-800 hover:bg-slate-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500 font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
               >
                 ログイン画面に戻る
               </button>
@@ -164,25 +164,25 @@ export default function ResetPasswordForm() {
 
   // パスワードリセットフォーム
   return (
-    <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-white mb-2">
+          <h2 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
             新しいパスワードを設定
           </h2>
-          <p className="text-gray-400">
+          <p className="text-slate-600 dark:text-gray-400">
             新しいパスワードを入力してください
           </p>
         </div>
 
-        <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
+        <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-slate-200 dark:border-gray-700 p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-              <p className="text-gray-300 text-sm">
+              <p className="text-slate-700 dark:text-gray-300 text-sm">
                 <strong>パスワード要件（全て必須）:</strong>
               </p>
-              <ul className="text-gray-300 text-sm mt-2 space-y-1 list-disc list-inside">
+              <ul className="text-slate-700 dark:text-gray-300 text-sm mt-2 space-y-1 list-disc list-inside">
                 <li>8文字以上</li>
                 <li>小文字を含む (a-z)</li>
                 <li>大文字を含む (A-Z)</li>
@@ -192,7 +192,7 @@ export default function ResetPasswordForm() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                 新しいパスワード <span className="text-red-400">*</span>
               </label>
               <div className="relative">
@@ -203,13 +203,13 @@ export default function ResetPasswordForm() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent pr-10"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent pr-10"
                   placeholder="新しいパスワードを入力"
                   disabled={isLoading}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-gray-300"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <AiOutlineEyeInvisible className="h-5 w-5" /> : <AiOutlineEye className="h-5 w-5" />}
@@ -218,7 +218,7 @@ export default function ResetPasswordForm() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                 パスワード確認 <span className="text-red-400">*</span>
               </label>
               <div className="relative">
@@ -229,13 +229,13 @@ export default function ResetPasswordForm() {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent pr-10"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent pr-10"
                   placeholder="もう一度入力してください"
                   disabled={isLoading}
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-gray-300"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? <AiOutlineEyeInvisible className="h-5 w-5" /> : <AiOutlineEye className="h-5 w-5" />}

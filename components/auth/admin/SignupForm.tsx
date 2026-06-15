@@ -77,24 +77,24 @@ export default function AdminSignupForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0C1421] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] font-semibold py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         {/* ... header ... */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
             管理者アカウント作成
           </h1>
-          <p className="text-gray-400">
+          <p className="text-slate-600 dark:text-gray-400">
             ケイカくんへようこそ。まずは管理者アカウントを作成してください。
           </p>
         </div>
 
         <StepWizard steps={steps} />
 
-        <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
+        <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-slate-200 dark:border-gray-700 p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {errors.root && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm">
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-base">
                 {errors.root.message}
               </div>
             )}
@@ -102,43 +102,43 @@ export default function AdminSignupForm() {
             {/* 名前フィールド (姓・名) */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="last_name" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="last_name" className="block text-base font-semibold text-slate-700 dark:text-gray-300 mb-2">
                   姓 <span className="text-red-400">*</span>
                 </label>
                 <input
                   id="last_name"
                   type="text"
                   {...register('last_name')}
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   placeholder="山田"
                 />
-                {errors.last_name && <p className="text-red-400 text-sm mt-1">{errors.last_name.message}</p>}
+                {errors.last_name && <p className="text-red-400 text-base mt-1">{errors.last_name.message}</p>}
               </div>
               <div>
-                <label htmlFor="first_name" className="block text-sm font-medium text-gray-300 mb-2">
+                <label htmlFor="first_name" className="block text-base font-semibold text-slate-700 dark:text-gray-300 mb-2">
                   名 <span className="text-red-400">*</span>
                 </label>
                 <input
                   id="first_name"
                   type="text"
                   {...register('first_name')}
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                   placeholder="太郎"
                 />
-                {errors.first_name && <p className="text-red-400 text-sm mt-1">{errors.first_name.message}</p>}
+                {errors.first_name && <p className="text-red-400 text-base mt-1">{errors.first_name.message}</p>}
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-base font-semibold text-slate-700 dark:text-gray-300 mb-2">
                 メールアドレス <span className="text-red-400">*</span>
               </label>
-              <input id="email" type="email" {...register('email')} className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="admin@example.com" />
-              {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>}
+              <input id="email" type="email" {...register('email')} className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="admin@example.com" />
+              {errors.email && <p className="text-red-400 text-base mt-1">{errors.email.message}</p>}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-base font-semibold text-slate-700 dark:text-gray-300 mb-2">
                 パスワード <span className="text-red-400">*</span>
               </label>
               <div className="relative">
@@ -146,30 +146,30 @@ export default function AdminSignupForm() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   {...register('password')}
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent pr-10"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent pr-10"
                   placeholder="パスワードを入力してください"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-gray-300"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <AiOutlineEyeInvisible className="h-5 w-5" /> : <AiOutlineEye className="h-5 w-5" />}
                 </button>
               </div>
-              {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>}
-              <p className="text-xs text-gray-500 mt-1">
+              {errors.password && <p className="text-red-400 text-base mt-1">{errors.password.message}</p>}
+              <p className="text-sm text-slate-500 dark:text-gray-500 mt-1">
                 8文字以上で、英字大小文字・数字・記号（!@#$%^&*(),.?&quot;:{}|&lt;&gt;）を全て組み合わせてください
               </p>
             </div>
 
             {/* ... confirm password ... */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="confirmPassword" className="block text-base font-semibold text-slate-700 dark:text-gray-300 mb-2">
                 パスワード（確認） <span className="text-red-400">*</span>
               </label>
-              <input id="confirmPassword" type="password" {...register('confirmPassword')} className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="パスワードを再入力してください" />
-              {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword.message}</p>}
+              <input id="confirmPassword" type="password" {...register('confirmPassword')} className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent" placeholder="パスワードを再入力してください" />
+              {errors.confirmPassword && <p className="text-red-400 text-base mt-1">{errors.confirmPassword.message}</p>}
             </div>
 
             {/* 利用規約・プライバシーポリシーへの同意 */}
@@ -190,9 +190,9 @@ export default function AdminSignupForm() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-400 text-sm">
+            <p className="text-slate-600 dark:text-gray-400 text-base">
               すでにアカウントをお持ちの方は
-              <a href="/auth/admin/login" className="text-[#10B981] hover:text-[#0F9F6E] underline ml-1">
+              <a href="/auth/admin/login" className="font-semibold text-[#10B981] hover:text-[#0F9F6E] underline ml-1">
                 こちらからログイン
               </a>
             </p>

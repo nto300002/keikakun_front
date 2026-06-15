@@ -9,8 +9,8 @@ import MonitoringDeadlineModal from './MonitoringDeadlineModal';
 import Breadcrumb, { BreadcrumbItem } from '@/components/ui/Breadcrumb';
 import { welfareRecipientsApi, WelfareRecipient } from '@/lib/welfare-recipients';
 import { supportPlanApi, PlanCycle } from '@/lib/support-plan';
-import CalendarLinkButton from '@/components/ui/google/CalendarLinkButton';
 import { toast } from '@/lib/toast-debug';
+import { SUPPORT_PLAN_STEP_LABELS } from './stepLabels';
 
 
 export default function SupportPlan() {
@@ -89,7 +89,7 @@ export default function SupportPlan() {
     }
 
     // 未完了（通常）
-    return <FaRegSquare className="text-gray-400" size={24} />;
+    return <FaRegSquare className="text-slate-500 dark:text-gray-400" size={24} />;
   };
 
   const getDeadlineWarning = (daysRemaining: number | null) => {
@@ -203,7 +203,7 @@ export default function SupportPlan() {
   // ローディング中
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-gradient-to-br dark:from-[#1a1f2e] dark:to-[#0f1419] flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-400"></div>
       </div>
     );
@@ -212,9 +212,9 @@ export default function SupportPlan() {
   // エラー時
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] flex items-center justify-center p-4">
-        <div className="bg-[#ef4444]/10 border border-[#ef4444] rounded-lg p-6 max-w-md">
-          <p className="text-[#ef4444] text-center">⚠️ {error}</p>
+      <div className="min-h-screen bg-slate-50 dark:bg-gradient-to-br dark:from-[#1a1f2e] dark:to-[#0f1419] flex items-center justify-center p-4">
+        <div className="bg-red-50 border border-red-500 rounded-lg p-6 max-w-md dark:bg-[#ef4444]/10">
+          <p className="text-red-600 text-center font-semibold dark:text-[#ef4444]">⚠️ {error}</p>
         </div>
       </div>
     );
@@ -242,8 +242,21 @@ export default function SupportPlan() {
     { label: fullName, current: true },
   ];
 
+  const renderColumnLabel = (label: string) => {
+    const [mainLabel, subLabel] = label.split(' ');
+    return subLabel ? (
+      <>
+        {mainLabel}
+        <br />
+        {subLabel}
+      </>
+    ) : (
+      label
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#1a1f2e] to-[#0f1419] text-white p-4 md:p-6">
+    <div className="min-h-screen bg-slate-50 text-slate-900 p-4 md:p-6 dark:bg-gradient-to-br dark:from-[#1a1f2e] dark:to-[#0f1419] dark:text-white">
       {/* パンくずリスト */}
       <div className="max-w-[1400px] mx-auto">
         <Breadcrumb items={breadcrumbItems} />
@@ -253,7 +266,7 @@ export default function SupportPlan() {
       <div className="max-w-[1400px] mx-auto mb-8">
         {/* 期限警告バナー */}
         {renewalWarning && (
-          <div className={`${renewalWarning.color === 'text-[#ef4444]' ? 'bg-[#ef4444]/10 border-[#ef4444]' : 'bg-[#f59e0b]/10 border-[#f59e0b]'} border rounded-lg p-4 mb-4`}>
+          <div className={`${renewalWarning.color === 'text-[#ef4444]' ? 'bg-red-50 border-red-500 dark:bg-[#ef4444]/10 dark:border-[#ef4444]' : 'bg-amber-50 border-amber-500 dark:bg-[#f59e0b]/10 dark:border-[#f59e0b]'} border rounded-lg p-4 mb-4`}>
             <div className="flex items-center gap-3">
               {renewalDaysRemaining !== null && renewalDaysRemaining < 0 ? (
                 <MdWarning className="text-red-500" size={32} />
@@ -261,27 +274,22 @@ export default function SupportPlan() {
                 <MdNotifications className="text-orange-500" size={32} />
               )}
               <div>
-                <p className={`${renewalWarning.color} font-medium`}>個別支援計画の更新期限</p>
-                <p className={`${renewalWarning.color} text-sm mt-1`}>{renewalWarning.text}</p>
+                <p className={`${renewalWarning.color === 'text-[#ef4444]' ? 'text-red-600 dark:text-[#ef4444]' : 'text-amber-700 dark:text-[#f59e0b]'} font-semibold`}>個別支援計画の更新期限</p>
+                <p className={`${renewalWarning.color === 'text-[#ef4444]' ? 'text-red-600 dark:text-[#ef4444]' : 'text-amber-700 dark:text-[#f59e0b]'} text-base font-semibold mt-1`}>{renewalWarning.text}</p>
               </div>
             </div>
           </div>
         )}
 
-        <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441] p-6 mb-6">
+        <div className="bg-white rounded-lg border border-slate-300 p-6 mb-6 shadow-sm dark:bg-[#0f1419cc] dark:border-[#2a3441]">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-white mb-2">
+              <h1 className="text-2xl font-bold text-slate-900 mb-2 dark:text-white">
                 {fullName}
               </h1>
-              <p className="text-[#9ca3af] text-sm">
+              <p className="text-slate-600 text-base font-semibold dark:text-[#9ca3af]">
                 フリガナ: {furigana}
               </p>
-            </div>
-
-            <div className="flex flex-col md:flex-row gap-3">
-              {/* 非MVP: モニタリング期限設定 */}
-              <CalendarLinkButton />
             </div>
           </div>
         </div>
@@ -291,27 +299,27 @@ export default function SupportPlan() {
       <div className="max-w-[1400px] mx-auto">
         {/* デスクトップ表示 */}
         <div className="hidden md:block overflow-x-auto">
-          <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441]">
+          <div className="bg-white rounded-lg border border-slate-300 shadow-sm dark:bg-[#0f1419cc] dark:border-[#2a3441]">
             <table className="w-full table-fixed">
-              <thead className="bg-[#1a1f2e]">
+              <thead className="bg-slate-100 dark:bg-[#1a1f2e]">
                 <tr>
-                  <th className="w-[6.5%] px-4 py-3 text-center text-sm font-medium text-[#9ca3af] border-r border-[#2a3441]">
+                  <th className="w-[6.5%] px-4 py-3 text-center text-base font-semibold text-slate-600 border-r border-slate-300 dark:text-[#9ca3af] dark:border-[#2a3441]">
                     回数
                   </th>
-                  <th className="w-[18.7%] px-4 py-3 text-center text-sm font-medium text-[#9ca3af] border-r border-[#2a3441]">
-                    アセスメント
+                  <th className="w-[18.7%] px-4 py-3 text-center text-base font-semibold text-slate-600 border-r border-slate-300 dark:text-[#9ca3af] dark:border-[#2a3441]">
+                    {renderColumnLabel(SUPPORT_PLAN_STEP_LABELS.assessment)}
                   </th>
-                  <th className="w-[18.7%] px-4 py-3 text-center text-sm font-medium text-[#9ca3af] border-r border-[#2a3441]">
-                    個別支援計画書<br />原案
+                  <th className="w-[18.7%] px-4 py-3 text-center text-base font-semibold text-slate-600 border-r border-slate-300 dark:text-[#9ca3af] dark:border-[#2a3441]">
+                    {renderColumnLabel(SUPPORT_PLAN_STEP_LABELS.draft_plan)}
                   </th>
-                  <th className="w-[18.7%] px-4 py-3 text-center text-sm font-medium text-[#9ca3af] border-r border-[#2a3441]">
-                    担当者会議
+                  <th className="w-[18.7%] px-4 py-3 text-center text-base font-semibold text-slate-600 border-r border-slate-300 dark:text-[#9ca3af] dark:border-[#2a3441]">
+                    {renderColumnLabel(SUPPORT_PLAN_STEP_LABELS.staff_meeting)}
                   </th>
-                  <th className="w-[18.7%] px-4 py-3 text-center text-sm font-medium text-[#9ca3af] border-r border-[#2a3441]">
-                    個別支援計画書<br />本案
+                  <th className="w-[18.7%] px-4 py-3 text-center text-base font-semibold text-slate-600 border-r border-slate-300 dark:text-[#9ca3af] dark:border-[#2a3441]">
+                    {renderColumnLabel(SUPPORT_PLAN_STEP_LABELS.final_plan_signed)}
                   </th>
-                  <th className="w-[18.7%] px-4 py-3 text-center text-sm font-medium text-[#9ca3af]">
-                    モニタリング
+                  <th className="w-[18.7%] px-4 py-3 text-center text-base font-semibold text-slate-600 dark:text-[#9ca3af]">
+                    {renderColumnLabel(SUPPORT_PLAN_STEP_LABELS.monitoring)}
                   </th>
                 </tr>
               </thead>
@@ -328,21 +336,23 @@ export default function SupportPlan() {
                     : null;
 
                   return (
-                    <tr key={cycle.id} className="border-t border-[#2a3441] hover:bg-[#2a3f5f40] transition-colors">
-                      <td className="px-4 py-6 text-center border-r border-[#2a3441]">
-                        <div className="text-3xl font-bold text-white">{cycle.cycle_number}</div>
+                    <tr key={cycle.id} className="border-t border-slate-300 hover:bg-slate-50 dark:border-[#2a3441] dark:hover:bg-[#2a3f5f40] transition-colors">
+                      <td className="px-4 py-6 text-center border-r border-slate-300 dark:border-[#2a3441]">
+                        <div className="whitespace-nowrap text-xl font-bold text-slate-900 dark:text-white">
+                          第{cycle.cycle_number}回
+                        </div>
                       </td>
 
                       {/* アセスメント列 */}
                       <td
-                        className="px-4 py-6 text-center border-r border-[#2a3441] cursor-pointer hover:bg-[#4f46e5]/20"
+                        className="px-4 py-6 text-center border-r border-slate-300 dark:border-[#2a3441] cursor-pointer hover:bg-indigo-50 dark:hover:bg-[#4f46e5]/20"
                         onClick={() => handleCellClick(cycle, 'assessment')}
                       >
                         <div className="flex flex-col items-center gap-2">
                           <div className="flex justify-center items-center">
                             {getStepIcon(assessmentStatus?.completed || false, daysRemaining || undefined)}
                           </div>
-                          <span className="text-xs text-[#9ca3af]">
+                          <span className="text-base font-semibold text-slate-600 dark:text-[#9ca3af]">
                             {assessmentStatus?.completed_at
                               ? new Date(assessmentStatus.completed_at).toLocaleDateString('ja-JP')
                               : '未完了'}
@@ -352,7 +362,7 @@ export default function SupportPlan() {
                               href={assessmentStatus.pdf_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-[#00bcd4] hover:underline"
+                              className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline"
                               onClick={(e) => e.stopPropagation()}
                             >
                               📄 PDF
@@ -362,14 +372,14 @@ export default function SupportPlan() {
                       </td>
 
                       <td
-                        className="px-4 py-6 text-center border-r border-[#2a3441] cursor-pointer hover:bg-[#4f46e5]/20"
+                        className="px-4 py-6 text-center border-r border-slate-300 dark:border-[#2a3441] cursor-pointer hover:bg-indigo-50 dark:hover:bg-[#4f46e5]/20"
                         onClick={() => handleCellClick(cycle, 'draft_plan')}
                       >
                         <div className="flex flex-col items-center gap-2">
                           <div className="flex justify-center items-center">
                             {getStepIcon(draftStatus?.completed || false)}
                           </div>
-                          <span className="text-xs text-[#9ca3af]">
+                          <span className="text-base font-semibold text-slate-600 dark:text-[#9ca3af]">
                             {draftStatus?.completed_at
                               ? new Date(draftStatus.completed_at).toLocaleDateString('ja-JP')
                               : '未完了'}
@@ -379,7 +389,7 @@ export default function SupportPlan() {
                               href={draftStatus.pdf_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-[#00bcd4] hover:underline"
+                              className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline"
                               onClick={(e) => e.stopPropagation()}
                             >
                               📄 PDF
@@ -389,14 +399,14 @@ export default function SupportPlan() {
                       </td>
 
                       <td
-                        className="px-4 py-6 text-center border-r border-[#2a3441] cursor-pointer hover:bg-[#4f46e5]/20"
+                        className="px-4 py-6 text-center border-r border-slate-300 dark:border-[#2a3441] cursor-pointer hover:bg-indigo-50 dark:hover:bg-[#4f46e5]/20"
                         onClick={() => handleCellClick(cycle, 'staff_meeting')}
                       >
                         <div className="flex flex-col items-center gap-2">
                           <div className="flex justify-center items-center">
                             {getStepIcon(meetingStatus?.completed || false)}
                           </div>
-                          <span className="text-xs text-[#9ca3af]">
+                          <span className="text-base font-semibold text-slate-600 dark:text-[#9ca3af]">
                             {meetingStatus?.completed_at
                               ? new Date(meetingStatus.completed_at).toLocaleDateString('ja-JP')
                               : '未完了'}
@@ -406,7 +416,7 @@ export default function SupportPlan() {
                               href={meetingStatus.pdf_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-[#00bcd4] hover:underline"
+                              className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline"
                               onClick={(e) => e.stopPropagation()}
                             >
                               📄 PDF
@@ -416,14 +426,14 @@ export default function SupportPlan() {
                       </td>
 
                       <td
-                        className="px-4 py-6 text-center border-r border-[#2a3441] cursor-pointer hover:bg-[#4f46e5]/20"
+                        className="px-4 py-6 text-center border-r border-slate-300 dark:border-[#2a3441] cursor-pointer hover:bg-indigo-50 dark:hover:bg-[#4f46e5]/20"
                         onClick={() => handleCellClick(cycle, 'final_plan_signed')}
                       >
                         <div className="flex flex-col items-center gap-2">
                           <div className="flex justify-center items-center">
                             {getStepIcon(finalStatus?.completed || false)}
                           </div>
-                          <span className="text-xs text-[#9ca3af]">
+                          <span className="text-base font-semibold text-slate-600 dark:text-[#9ca3af]">
                             {finalStatus?.completed_at
                               ? new Date(finalStatus.completed_at).toLocaleDateString('ja-JP')
                               : '未完了'}
@@ -433,7 +443,7 @@ export default function SupportPlan() {
                               href={finalStatus.pdf_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-[#00bcd4] hover:underline"
+                              className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline"
                               onClick={(e) => e.stopPropagation()}
                             >
                               📄 PDF
@@ -444,14 +454,14 @@ export default function SupportPlan() {
 
                       {/* モニタリング列 */}
                       <td
-                        className="px-4 py-6 text-center cursor-pointer hover:bg-[#4f46e5]/20"
+                        className="px-4 py-6 text-center cursor-pointer hover:bg-indigo-50 dark:hover:bg-[#4f46e5]/20"
                         onClick={() => handleCellClick(cycle, 'monitoring')}
                       >
                         <div className="flex flex-col items-center gap-2">
                           <div className="flex justify-center items-center">
                             {getStepIcon(monitoringStatus?.completed || false)}
                           </div>
-                          <span className="text-xs text-[#9ca3af]">
+                          <span className="text-base font-semibold text-slate-600 dark:text-[#9ca3af]">
                             {monitoringStatus?.completed_at
                               ? new Date(monitoringStatus.completed_at).toLocaleDateString('ja-JP')
                               : '未完了'}
@@ -461,7 +471,7 @@ export default function SupportPlan() {
                               href={monitoringStatus.pdf_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-[#00bcd4] hover:underline"
+                              className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline"
                               onClick={(e) => e.stopPropagation()}
                             >
                               📄 PDF
@@ -487,24 +497,24 @@ export default function SupportPlan() {
             const finalStatus = cycle.statuses.find(s => s.step_type === 'final_plan_signed');
 
             return (
-              <div key={cycle.id} className="bg-[#0f1419cc] rounded-lg border border-[#2a3441] p-4">
-                <div className="text-2xl font-bold text-white mb-4 text-center">
-                  第 {cycle.cycle_number} 回
+              <div key={cycle.id} className="bg-white rounded-lg border border-slate-300 p-4 shadow-sm dark:bg-[#0f1419cc] dark:border-[#2a3441]">
+                <div className="text-2xl font-bold text-slate-900 dark:text-white mb-4 text-center">
+                  第{cycle.cycle_number}回
                 </div>
 
                 <div className="space-y-3">
                   {/* アセスメント */}
                   <div
-                    className="bg-[#1a1f2e] rounded-lg p-3 cursor-pointer hover:bg-[#2a3f5f40]"
+                    className="bg-slate-100 rounded-lg p-3 cursor-pointer hover:bg-slate-200 dark:bg-[#1a1f2e] dark:hover:bg-[#2a3f5f40]"
                     onClick={() => handleCellClick(cycle, 'assessment')}
                   >
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-[#9ca3af]">アセスメント</span>
+                      <span className="text-base font-semibold text-slate-700 dark:text-[#9ca3af]">{SUPPORT_PLAN_STEP_LABELS.assessment}</span>
                       <div className="flex items-center">
                         {getStepIcon(assessmentStatus?.completed || false)}
                       </div>
                     </div>
-                    <div className="text-xs text-[#6b7280] mt-1">
+                    <div className="text-base font-semibold text-slate-600 dark:text-[#6b7280] mt-1">
                       {assessmentStatus?.completed_at
                         ? new Date(assessmentStatus.completed_at).toLocaleDateString('ja-JP')
                         : '未完了'}
@@ -514,7 +524,7 @@ export default function SupportPlan() {
                         href={assessmentStatus.pdf_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-[#00bcd4] hover:underline mt-1 inline-block"
+                        className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline mt-1 inline-block"
                         onClick={(e) => e.stopPropagation()}
                       >
                         📄 PDF
@@ -522,18 +532,18 @@ export default function SupportPlan() {
                     )}
                   </div>
 
-                  {/* 個別支援計画書作成 */}
+                  {/* 個別支援計画書 原案 */}
                   <div
-                    className="bg-[#1a1f2e] rounded-lg p-3 cursor-pointer hover:bg-[#2a3f5f40]"
+                    className="bg-slate-100 rounded-lg p-3 cursor-pointer hover:bg-slate-200 dark:bg-[#1a1f2e] dark:hover:bg-[#2a3f5f40]"
                     onClick={() => handleCellClick(cycle, 'draft_plan')}
                   >
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-[#9ca3af]">個別支援計画書作成</span>
+                      <span className="text-base font-semibold text-slate-700 dark:text-[#9ca3af]">{SUPPORT_PLAN_STEP_LABELS.draft_plan}</span>
                       <div className="flex items-center">
                         {getStepIcon(draftStatus?.completed || false)}
                       </div>
                     </div>
-                    <div className="text-xs text-[#6b7280] mt-1">
+                    <div className="text-base font-semibold text-slate-600 dark:text-[#6b7280] mt-1">
                       {draftStatus?.completed_at
                         ? new Date(draftStatus.completed_at).toLocaleDateString('ja-JP')
                         : '未完了'}
@@ -543,7 +553,7 @@ export default function SupportPlan() {
                         href={draftStatus.pdf_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-[#00bcd4] hover:underline mt-1 inline-block"
+                        className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline mt-1 inline-block"
                         onClick={(e) => e.stopPropagation()}
                       >
                         📄 PDF
@@ -553,16 +563,16 @@ export default function SupportPlan() {
 
                   {/* 担当者会議 */}
                   <div
-                    className="bg-[#1a1f2e] rounded-lg p-3 cursor-pointer hover:bg-[#2a3f5f40]"
+                    className="bg-slate-100 rounded-lg p-3 cursor-pointer hover:bg-slate-200 dark:bg-[#1a1f2e] dark:hover:bg-[#2a3f5f40]"
                     onClick={() => handleCellClick(cycle, 'staff_meeting')}
                   >
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-[#9ca3af]">担当者会議</span>
+                      <span className="text-base font-semibold text-slate-700 dark:text-[#9ca3af]">{SUPPORT_PLAN_STEP_LABELS.staff_meeting}</span>
                       <div className="flex items-center">
                         {getStepIcon(meetingStatus?.completed || false)}
                       </div>
                     </div>
-                    <div className="text-xs text-[#6b7280] mt-1">
+                    <div className="text-base font-semibold text-slate-600 dark:text-[#6b7280] mt-1">
                       {meetingStatus?.completed_at
                         ? new Date(meetingStatus.completed_at).toLocaleDateString('ja-JP')
                         : '未完了'}
@@ -572,7 +582,7 @@ export default function SupportPlan() {
                         href={meetingStatus.pdf_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-[#00bcd4] hover:underline mt-1 inline-block"
+                        className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline mt-1 inline-block"
                         onClick={(e) => e.stopPropagation()}
                       >
                         📄 PDF
@@ -580,18 +590,18 @@ export default function SupportPlan() {
                     )}
                   </div>
 
-                  {/* 個別支援計画書完成 */}
+                  {/* 個別支援計画書 本案 */}
                   <div
-                    className="bg-[#1a1f2e] rounded-lg p-3 cursor-pointer hover:bg-[#2a3f5f40]"
+                    className="bg-slate-100 rounded-lg p-3 cursor-pointer hover:bg-slate-200 dark:bg-[#1a1f2e] dark:hover:bg-[#2a3f5f40]"
                     onClick={() => handleCellClick(cycle, 'final_plan_signed')}
                   >
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-[#9ca3af]">個別支援計画書完成</span>
+                      <span className="text-base font-semibold text-slate-700 dark:text-[#9ca3af]">{SUPPORT_PLAN_STEP_LABELS.final_plan_signed}</span>
                       <div className="flex items-center">
                         {getStepIcon(finalStatus?.completed || false)}
                       </div>
                     </div>
-                    <div className="text-xs text-[#6b7280] mt-1">
+                    <div className="text-base font-semibold text-slate-600 dark:text-[#6b7280] mt-1">
                       {finalStatus?.completed_at
                         ? new Date(finalStatus.completed_at).toLocaleDateString('ja-JP')
                         : '未完了'}
@@ -601,7 +611,7 @@ export default function SupportPlan() {
                         href={finalStatus.pdf_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-[#00bcd4] hover:underline mt-1 inline-block"
+                        className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline mt-1 inline-block"
                         onClick={(e) => e.stopPropagation()}
                       >
                         📄 PDF
@@ -611,16 +621,16 @@ export default function SupportPlan() {
 
                   {/* モニタリング */}
                   <div
-                    className="bg-[#1a1f2e] rounded-lg p-3 cursor-pointer hover:bg-[#2a3f5f40]"
+                    className="bg-slate-100 rounded-lg p-3 cursor-pointer hover:bg-slate-200 dark:bg-[#1a1f2e] dark:hover:bg-[#2a3f5f40]"
                     onClick={() => handleCellClick(cycle, 'monitoring')}
                   >
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-[#9ca3af]">モニタリング</span>
+                      <span className="text-base font-semibold text-slate-700 dark:text-[#9ca3af]">{SUPPORT_PLAN_STEP_LABELS.monitoring}</span>
                       <div className="flex items-center">
                         {getStepIcon(monitoringStatus?.completed || false)}
                       </div>
                     </div>
-                    <div className="text-xs text-[#6b7280] mt-1">
+                    <div className="text-base font-semibold text-slate-600 dark:text-[#6b7280] mt-1">
                       {monitoringStatus?.completed_at
                         ? new Date(monitoringStatus.completed_at).toLocaleDateString('ja-JP')
                         : '未完了'}
@@ -630,7 +640,7 @@ export default function SupportPlan() {
                         href={monitoringStatus.pdf_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs text-[#00bcd4] hover:underline mt-1 inline-block"
+                        className="text-base font-semibold text-cyan-600 dark:text-[#00bcd4] hover:underline mt-1 inline-block"
                         onClick={(e) => e.stopPropagation()}
                       >
                         📄 PDF

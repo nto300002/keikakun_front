@@ -126,18 +126,18 @@ export default function DateDrumPicker({
   };
 
   const selectClassName = `
-    px-3 py-2 bg-[#1a1f2e] border rounded-lg text-white
+    px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white
     focus:outline-none focus:ring-2 focus:ring-[#10b981]
     appearance-none cursor-pointer
     disabled:opacity-50 disabled:cursor-not-allowed
-    ${error ? 'border-red-500' : 'border-[#2a3441]'}
+    ${error ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'}
   `;
 
   return (
     <div className="grid grid-cols-3 gap-2">
       {/* 年 */}
       <div>
-        <label className="block text-xs text-gray-400 mb-1">年</label>
+        <label className="block text-sm font-semibold text-slate-600 dark:text-gray-400 mb-1">年</label>
         <select
           value={year}
           onChange={(e) => handleYearChange(e.target.value)}
@@ -154,7 +154,7 @@ export default function DateDrumPicker({
 
       {/* 月 */}
       <div>
-        <label className="block text-xs text-gray-400 mb-1">月</label>
+        <label className="block text-sm font-semibold text-slate-600 dark:text-gray-400 mb-1">月</label>
         <select
           value={month}
           onChange={(e) => handleMonthChange(e.target.value)}
@@ -172,7 +172,7 @@ export default function DateDrumPicker({
 
       {/* 日 */}
       <div>
-        <label className="block text-xs text-gray-400 mb-1">日</label>
+        <label className="block text-sm font-semibold text-slate-600 dark:text-gray-400 mb-1">日</label>
         <select
           value={day}
           onChange={(e) => handleDayChange(e.target.value)}

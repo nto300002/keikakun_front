@@ -20,17 +20,17 @@ export default function MessageCard({
       return {
         icon: '🚨',
         color: 'red',
-        bgColor: 'bg-red-900/30',
-        borderColor: 'border-red-700/50',
-        textColor: 'text-red-400',
+        bgColor: 'bg-red-50 dark:bg-red-900/30',
+        borderColor: 'border-red-200 dark:border-red-700/50',
+        textColor: 'text-red-700 dark:text-red-400',
       };
     } else if (priority === MessagePriority.HIGH) {
       return {
         icon: '⚠️',
         color: 'orange',
-        bgColor: 'bg-orange-900/30',
-        borderColor: 'border-orange-700/50',
-        textColor: 'text-orange-400',
+        bgColor: 'bg-orange-50 dark:bg-orange-900/30',
+        borderColor: 'border-orange-200 dark:border-orange-700/50',
+        textColor: 'text-orange-700 dark:text-orange-400',
       };
     }
 
@@ -40,41 +40,41 @@ export default function MessageCard({
         return {
           icon: '💬',
           color: 'blue',
-          bgColor: 'bg-blue-900/30',
-          borderColor: 'border-blue-700/50',
-          textColor: 'text-blue-400',
+          bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+          borderColor: 'border-blue-200 dark:border-blue-700/50',
+          textColor: 'text-blue-700 dark:text-blue-400',
         };
       case MessageType.ANNOUNCEMENT:
         return {
           icon: '📢',
           color: 'purple',
-          bgColor: 'bg-purple-900/30',
-          borderColor: 'border-purple-700/50',
-          textColor: 'text-purple-400',
+          bgColor: 'bg-purple-50 dark:bg-purple-900/30',
+          borderColor: 'border-purple-200 dark:border-purple-700/50',
+          textColor: 'text-purple-700 dark:text-purple-400',
         };
       case MessageType.SYSTEM:
         return {
           icon: '⚙️',
           color: 'gray',
-          bgColor: 'bg-gray-900/30',
-          borderColor: 'border-gray-700/50',
-          textColor: 'text-gray-400',
+          bgColor: 'bg-slate-50 dark:bg-gray-900/30',
+          borderColor: 'border-slate-200 dark:border-gray-700/50',
+          textColor: 'text-slate-600 dark:text-gray-400',
         };
       case MessageType.INQUIRY:
         return {
           icon: '❓',
           color: 'teal',
-          bgColor: 'bg-teal-900/30',
-          borderColor: 'border-teal-700/50',
-          textColor: 'text-teal-400',
+          bgColor: 'bg-teal-50 dark:bg-teal-900/30',
+          borderColor: 'border-teal-200 dark:border-teal-700/50',
+          textColor: 'text-teal-700 dark:text-teal-400',
         };
       default:
         return {
           icon: 'ℹ️',
           color: 'blue',
-          bgColor: 'bg-blue-900/30',
-          borderColor: 'border-blue-700/50',
-          textColor: 'text-blue-400',
+          bgColor: 'bg-blue-50 dark:bg-blue-900/30',
+          borderColor: 'border-blue-200 dark:border-blue-700/50',
+          textColor: 'text-blue-700 dark:text-blue-400',
         };
     }
   };
@@ -125,16 +125,16 @@ export default function MessageCard({
           <span className={`text-3xl ${style.textColor}`}>{style.icon}</span>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-                {message.title}  
+                <span className="text-slate-900 font-bold text-xl dark:text-white">{message.title}</span>
               {!message.is_read && (
-                <span className="px-2 py-1 rounded-full text-xs font-bold bg-blue-600 text-white">
+                <span className="px-3 py-1 rounded-full text-sm font-bold bg-blue-600 text-white">
                   NEW
                 </span>
               )}
               {(message.priority === MessagePriority.HIGH ||
                 message.priority === MessagePriority.URGENT) && (
                 <span
-                  className={`px-2 py-1 rounded-full text-xs font-bold ${
+                  className={`px-3 py-1 rounded-full text-sm font-bold ${
                     message.priority === MessagePriority.URGENT
                       ? 'bg-red-600 text-white'
                       : 'bg-orange-600 text-white'
@@ -147,12 +147,12 @@ export default function MessageCard({
             {/* メッセージタイプラベルと送信者情報 */}
             <div className="flex items-center gap-2 mb-2">
               <span
-                className={`inline-block px-2 py-1 rounded text-xs font-semibold ${style.textColor} bg-gray-800/50`}
+                  className={`inline-block px-3 py-1 rounded text-sm font-bold ${style.textColor} bg-white/70 dark:bg-gray-800/50`}
               >
                 {getMessageTypeLabel(message.message_type)}
               </span>
               {message.sender && (
-                <span className="text-gray-400 text-xs">
+                <span className="text-slate-600 text-base font-semibold dark:text-gray-400">
                   送信者: {message.sender.last_name} {message.sender.first_name}
                 </span>
               )}
@@ -163,13 +163,13 @@ export default function MessageCard({
 
       {/* メッセージ内容 */}
       <div className="mb-4 pl-11">
-        <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
-          <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap line-clamp-3">
+        <div className="bg-white/70 rounded-lg p-4 border border-slate-200 dark:bg-gray-800/30 dark:border-gray-700/50">
+          <p className="text-slate-700 text-lg font-semibold leading-relaxed whitespace-pre-wrap line-clamp-3 dark:text-gray-300">
             {message.content}
           </p>
         </div>
         <div className="mt-3 flex items-center justify-between">
-          <p className="text-gray-500 text-xs">
+          <p className="text-slate-500 text-base font-semibold dark:text-gray-500">
             {new Date(message.created_at).toLocaleString('ja-JP', {
               year: 'numeric',
               month: '2-digit',
@@ -179,7 +179,7 @@ export default function MessageCard({
             })}
           </p>
           {message.is_read && message.read_at && (
-            <p className="text-gray-500 text-xs">
+            <p className="text-slate-500 text-base font-semibold dark:text-gray-500">
               既読: {new Date(message.read_at).toLocaleString('ja-JP', {
                 month: '2-digit',
                 day: '2-digit',
@@ -197,7 +197,7 @@ export default function MessageCard({
         {!message.is_read && (
           <button
             onClick={() => onMarkAsRead(message.message_id)}
-            className="bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-6 py-3 rounded-lg text-base font-bold transition-colors dark:bg-gray-700/50 dark:hover:bg-gray-600/70 dark:text-gray-300"
           >
             既読にする
           </button>
@@ -207,7 +207,7 @@ export default function MessageCard({
         {onArchive && (
           <button
             onClick={() => onArchive(message.message_id, !message.is_archived)}
-            className="bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 px-5 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-6 py-3 rounded-lg text-base font-bold transition-colors dark:bg-gray-700/50 dark:hover:bg-gray-600/70 dark:text-gray-300"
           >
             {message.is_archived ? 'アーカイブ解除' : 'アーカイブ'}
           </button>

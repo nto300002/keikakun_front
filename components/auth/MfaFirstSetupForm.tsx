@@ -78,9 +78,9 @@ function MfaFirstSetupFormComponent() {
 
     if (error && !qrCodeUri) {
         return (
-            <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+            <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
                 <div className="max-w-md w-full space-y-8">
-                    <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
+                    <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-slate-200 dark:border-gray-700 p-8">
                         <div className="text-red-400 text-center whitespace-pre-wrap">{error}</div>
                     </div>
                 </div>
@@ -89,37 +89,37 @@ function MfaFirstSetupFormComponent() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
             <div className="max-w-md w-full space-y-8">
                 {/* Header */}
                 <div className="text-center">
-                    <h2 className="text-3xl font-bold text-white mb-2">
+                    <h2 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
                         MFA初回設定
                     </h2>
-                    <p className="text-gray-400">
+                    <p className="text-slate-600 dark:text-gray-400">
                         {message}
                     </p>
                 </div>
 
-                <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
+                <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-slate-200 dark:border-gray-700 p-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="flex flex-col items-center">
-                            <p className="text-gray-300 mb-4 text-center">
+                            <p className="text-slate-700 dark:text-gray-300 mb-4 text-center">
                                 認証アプリ（Google Authenticatorなど）で以下のQRコードをスキャンしてください。
                             </p>
                             {qrCodeUri && (
-                                <div className="p-4 bg-white border border-gray-600 rounded-lg">
+                                <div className="p-4 bg-white border border-slate-300 dark:border-gray-600 rounded-lg">
                                     <QRCodeCanvas value={qrCodeUri} size={200} />
                                 </div>
                             )}
-                            <p className="mt-4 text-sm text-gray-400">または、以下のキーを手動で入力してください。</p>
-                            <p className="mt-2 text-sm font-mono p-2 bg-[#1A1A1A] border border-gray-600 rounded text-white">
+                            <p className="mt-4 text-sm text-slate-600 dark:text-gray-400">または、以下のキーを手動で入力してください。</p>
+                            <p className="mt-2 text-sm font-mono p-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded text-slate-950 dark:text-white">
                                 {secretKey}
                             </p>
                         </div>
 
                         <div>
-                            <label htmlFor="totp-code" className="block text-sm font-medium text-gray-300 mb-2">
+                            <label htmlFor="totp-code" className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
                                 認証アプリに表示された6桁のコード <span className="text-red-400">*</span>
                             </label>
                             <input
@@ -127,7 +127,7 @@ function MfaFirstSetupFormComponent() {
                                 name="totp-code"
                                 type="text"
                                 required
-                                className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                                className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                                 value={totpCode}
                                 onChange={(e) => setTotpCode(e.target.value)}
                                 placeholder="123456"
@@ -153,7 +153,7 @@ function MfaFirstSetupFormComponent() {
                         <div className="mt-4 text-center">
                             <a
                                 href="/auth/login"
-                                className="text-sm text-gray-400 hover:text-gray-300 underline"
+                                className="text-sm text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-gray-300 underline"
                             >
                                 ログイン画面に戻る
                             </a>

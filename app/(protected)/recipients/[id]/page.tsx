@@ -13,6 +13,8 @@ import Tabs from '@/components/ui/Tabs';
 import BasicInfoSection from '@/components/protected/recipients/BasicInfoSection';
 import EmploymentSection from '@/components/protected/recipients/EmploymentSection';
 
+// UI設計意図: 利用者詳細は確認作業が中心のため、氏名・ふりがな・操作ボタンを大きくし、読み間違いと押し間違いを減らす。
+// 変更概要: 見出し/本文/ボタンをtext-base以上にし、編集・削除などの操作領域は44px以上を確保した。
 export default function RecipientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
@@ -127,11 +129,11 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0f1419] to-[#1a2332] p-4 lg:p-8">
+      <div className="min-h-screen bg-slate-100 p-4 lg:p-8 dark:bg-gradient-to-b dark:from-[#0f1419] dark:to-[#1a2332]">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441] p-8 text-center">
+          <div className="bg-white rounded-lg border border-slate-300 p-8 text-center shadow-sm dark:bg-[#0f1419cc] dark:border-[#2a3441]">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-[#10b981]"></div>
-            <p className="mt-4 text-gray-100">読み込み中...</p>
+            <p className="mt-4 text-base font-semibold text-slate-700 dark:text-gray-100">読み込み中...</p>
           </div>
         </div>
       </div>
@@ -140,14 +142,14 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
 
   if (error || !recipient) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#0f1419] to-[#1a2332] p-4 lg:p-8">
+      <div className="min-h-screen bg-slate-100 p-4 lg:p-8 dark:bg-gradient-to-b dark:from-[#0f1419] dark:to-[#1a2332]">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441] p-8 text-center">
+          <div className="bg-white rounded-lg border border-slate-300 p-8 text-center shadow-sm dark:bg-[#0f1419cc] dark:border-[#2a3441]">
             <ExclamationCircleIcon className="w-12 h-12 mx-auto text-red-400 mb-4" />
-            <p className="text-red-400">{error || 'エラーが発生しました。'}</p>
+            <p className="text-base font-semibold text-red-400">{error || 'エラーが発生しました。'}</p>
             <Link
               href="/recipients"
-              className="inline-block mt-4 px-4 py-2 bg-[#2a3441] hover:bg-[#3a4451] text-white rounded-lg transition-colors"
+              className="inline-block mt-4 min-h-[44px] px-4 py-2 bg-slate-600 hover:bg-slate-700 text-base font-semibold text-white rounded-lg transition-colors dark:bg-[#2a3441] dark:hover:bg-[#3a4451]"
             >
               一覧に戻る
             </Link>
@@ -158,7 +160,7 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0f1419] to-[#1a2332] p-4 lg:p-8">
+    <div className="min-h-screen bg-slate-100 p-4 lg:p-8 dark:bg-gradient-to-b dark:from-[#0f1419] dark:to-[#1a2332]">
       <div className="max-w-4xl mx-auto">
         {/* Breadcrumb */}
         <Breadcrumb items={[
@@ -166,20 +168,20 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
           { label: recipient ? `${recipient.last_name} ${recipient.first_name}` : '利用者詳細', current: true }
         ]} />
         {/* Header */}
-        <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441] p-6 mb-6">
+        <div className="bg-white rounded-lg border border-slate-300 p-6 mb-6 shadow-sm dark:bg-[#0f1419cc] dark:border-[#2a3441]">
           <div className="flex justify-between items-start">
             <div className="flex items-center gap-4">
               <Link
                 href="/recipients"
-                className="p-2 text-gray-100 hover:text-white hover:bg-[#2a3441] rounded-lg transition-colors"
+                className="p-2 text-slate-600 hover:text-slate-950 hover:bg-slate-200 rounded-lg transition-colors dark:text-gray-100 dark:hover:text-white dark:hover:bg-[#2a3441]"
               >
                 <ArrowLeftIcon className="w-5 h-5" />
               </Link>
               <div>
-                <h1 className="text-2xl font-bold text-white">
+                <h1 className="text-3xl font-bold text-slate-950 dark:text-white">
                   {recipient.last_name} {recipient.first_name}
                 </h1>
-                <p className="text-gray-100 text-sm mt-1">
+                <p className="text-slate-600 text-base font-semibold mt-1 dark:text-gray-100">
                   {recipient.last_name_furigana} {recipient.first_name_furigana}
                 </p>
               </div>
@@ -190,14 +192,14 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
                 <>
                   <Link
                     href={`/recipients/${resolvedParams.id}/edit`}
-                    className="flex items-center gap-2 px-4 py-2 bg-[#2a3441] hover:bg-[#3a4451] text-white rounded-lg transition-colors"
+                    className="flex min-h-[44px] items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-base font-semibold text-white rounded-lg transition-colors dark:bg-[#2a3441] dark:hover:bg-[#3a4451]"
                   >
                     <PencilIcon className="w-4 h-4" />
                     編集
                   </Link>
                   <button
                     onClick={() => setShowDeleteModal(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 rounded-lg transition-colors"
+                    className="flex min-h-[44px] items-center gap-2 px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-base font-semibold text-red-400 rounded-lg transition-colors"
                   >
                     <TrashIcon className="w-4 h-4" />
                     削除
@@ -208,14 +210,14 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
               {!isLoadingUser && currentUser && isEmployee() && (
                 <>
                   <button
-                    className="flex items-center gap-2 px-4 py-2 bg-[#2a3441]/50 text-gray-100 rounded-lg cursor-default"
+                    className="flex min-h-[44px] items-center gap-2 px-4 py-2 bg-slate-200 text-base font-semibold text-slate-500 rounded-lg cursor-default dark:bg-[#2a3441]/50 dark:text-gray-100"
                     disabled
                   >
                     <DocumentTextIcon className="w-4 h-4" />
                     編集申請
                   </button>
                   <button
-                    className="flex items-center gap-2 px-4 py-2 bg-red-600/10 text-red-600/50 rounded-lg cursor-default"
+                    className="flex min-h-[44px] items-center gap-2 px-4 py-2 bg-red-600/10 text-base font-semibold text-red-600/50 rounded-lg cursor-default"
                     disabled
                   >
                     <DocumentTextIcon className="w-4 h-4" />
@@ -225,7 +227,7 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
               )}
 
               {isLoadingUser && (
-                <div className="text-xs text-gray-500">
+                <div className="text-base font-semibold text-gray-500">
                   ユーザー情報読み込み中...
                 </div>
               )}
@@ -235,8 +237,8 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
 
         {/* アセスメント情報タブ */}
         {!isLoadingAssessment && assessmentData && (
-          <div className="bg-[#0f1419cc] rounded-lg border border-[#2a3441] p-6">
-            <h2 className="text-lg font-semibold text-white mb-6">アセスメント情報</h2>
+          <div className="bg-white rounded-lg border border-slate-300 p-6 shadow-sm dark:bg-[#0f1419cc] dark:border-[#2a3441]">
+            <h2 className="text-2xl font-semibold text-slate-950 mb-6 dark:text-white">アセスメント情報</h2>
             <Tabs
               tabs={[
                 {
@@ -276,23 +278,23 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-[#0f1419] border border-[#2a3441] rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-xl font-semibold text-white mb-2">削除確認</h3>
-            <p className="text-gray-100 mb-6">
+          <div className="bg-white border border-slate-300 rounded-lg p-6 max-w-md w-full shadow-xl dark:bg-[#0f1419] dark:border-[#2a3441]">
+            <h3 className="text-xl font-semibold text-slate-950 mb-2 dark:text-white">削除確認</h3>
+            <p className="text-base font-semibold text-slate-700 mb-6 dark:text-gray-100">
               本当にこの利用者を削除してもよろしいですか？この操作は元に戻せません。
             </p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteModal(false)}
                 disabled={isDeleting}
-                className="px-4 py-2 text-gray-100 hover:text-white transition-colors"
+                className="min-h-[44px] px-4 py-2 text-base font-semibold text-slate-600 hover:text-slate-950 transition-colors dark:text-gray-100 dark:hover:text-white"
               >
                 キャンセル
               </button>
               <button
                 onClick={handleDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-900 text-white rounded-lg transition-colors flex items-center gap-2"
+                className="min-h-[44px] px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-900 text-base font-semibold text-white rounded-lg transition-colors flex items-center gap-2"
               >
                 {isDeleting && (
                   <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>

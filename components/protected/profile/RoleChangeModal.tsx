@@ -72,12 +72,12 @@ export default function RoleChangeModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[#1a1a2e] border border-[#2a2a3e] rounded-xl p-6 w-full max-w-md">
+      <div className="bg-white border border-slate-300 shadow-sm dark:bg-[#1a1a2e] dark:border-[#2a2a3e] rounded-xl p-6 w-full max-w-md">
         <h3 className="text-xl font-bold mb-4">権限変更リクエスト</h3>
 
         {/* エラーメッセージ */}
         {error && (
-          <div className="mb-4 bg-red-900/30 border border-red-700/50 rounded-lg p-3">
+          <div className="mb-4 bg-red-50 border border-red-200 dark:bg-red-900/30 dark:border-red-700/50 rounded-lg p-3">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-2">
                 <svg
@@ -93,7 +93,7 @@ export default function RoleChangeModal({
                     d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <p className="text-red-200 text-sm">{error}</p>
+                <p className="text-red-700 dark:text-red-200 text-sm">{error}</p>
               </div>
               <button
                 onClick={() => setError(null)}
@@ -115,21 +115,21 @@ export default function RoleChangeModal({
         <div className="space-y-4">
           {/* 現在の権限 */}
           <div>
-            <label className="text-gray-400 text-sm block mb-2">現在の権限</label>
-            <div className="bg-[#0f1419] border border-[#2a2a3e] rounded-lg px-4 py-2">
-              <p className="text-white font-medium">{roleLabels[currentRole]}</p>
+            <label className="text-slate-600 dark:text-gray-400 text-sm block mb-2">現在の権限</label>
+            <div className="bg-slate-50 border border-slate-300 rounded-lg px-4 py-2 dark:bg-[#0f1419] dark:border-[#2a2a3e]">
+              <p className="text-slate-900 dark:text-white font-medium">{roleLabels[currentRole]}</p>
             </div>
           </div>
 
           {/* リクエストする権限 */}
           <div>
-            <label className="text-gray-400 text-sm block mb-2">
+            <label className="text-slate-600 dark:text-gray-400 text-sm block mb-2">
               リクエストする権限 <span className="text-red-500">*</span>
             </label>
             <select
               value={requestedRole}
               onChange={(e) => setRequestedRole(e.target.value as StaffRole)}
-              className="w-full bg-[#0f1419] border border-[#2a2a3e] rounded-lg px-4 py-2 text-white focus:outline-none focus:border-blue-500"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 dark:bg-[#0f1419] dark:border-[#2a2a3e] dark:text-white focus:outline-none focus:border-blue-500"
             >
               <option value="">選択してください</option>
               <option value={StaffRole.EMPLOYEE}>従業員</option>
@@ -138,20 +138,20 @@ export default function RoleChangeModal({
                 <option value={StaffRole.OWNER}>管理者</option>
               )}
             </select>
-            <p className="text-gray-500 text-xs mt-1">
+            <p className="text-slate-500 dark:text-gray-500 text-xs mt-1">
               ※ 管理者への変更は、現在マネージャーの場合のみ選択できます
             </p>
           </div>
 
           {/* 理由（任意） */}
           <div>
-            <label className="text-gray-400 text-sm block mb-2">理由（任意）</label>
+            <label className="text-slate-600 dark:text-gray-400 text-sm block mb-2">理由（任意）</label>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={4}
               placeholder="変更を希望する理由を入力してください..."
-              className="w-full bg-[#0f1419] border border-[#2a2a3e] rounded-lg px-4 py-3 text-white placeholder-[#666] focus:outline-none focus:border-blue-500 resize-none"
+              className="w-full bg-white border border-slate-300 rounded-lg px-4 py-3 text-slate-900 dark:bg-[#0f1419] dark:border-[#2a2a3e] dark:text-white placeholder-slate-500 dark:placeholder-[#666] focus:outline-none focus:border-blue-500 resize-none"
             />
           </div>
         </div>
@@ -168,7 +168,7 @@ export default function RoleChangeModal({
           <button
             onClick={handleClose}
             disabled={isLoading}
-            className="flex-1 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50"
+            className="flex-1 bg-slate-600 hover:bg-slate-700 text-white dark:bg-gray-700 dark:hover:bg-gray-600 px-4 py-2 rounded-lg font-medium disabled:opacity-50"
           >
             キャンセル
           </button>

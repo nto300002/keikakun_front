@@ -63,45 +63,45 @@ export default function AdminLoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] font-semibold flex items-center justify-center px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         {/* ... header ... */}
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-white mb-2">
+          <h2 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
             管理者ログイン
           </h2>
-          <p className="text-gray-400">
+          <p className="text-slate-600 dark:text-gray-400">
             ケイカくんにログインして、個別支援計画を管理しましょう
           </p>
         </div>
 
-        <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
+        <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-slate-200 dark:border-gray-700 p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {errors.root && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm">
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-base">
                 {errors.root.message}
               </div>
             )}
 
             {/* ... email input ... */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="email" className="block text-base font-semibold text-slate-700 dark:text-gray-300 mb-2">
                 メールアドレス <span className="text-red-400">*</span>
               </label>
               <input
                 id="email"
                 type="email"
                 {...register('email')}
-                className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
                 placeholder="admin@example.com"
               />
               {errors.email && (
-                <p className="text-red-400 text-sm mt-1">{errors.email.message}</p>
+                <p className="text-red-400 text-base mt-1">{errors.email.message}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
+              <label htmlFor="password" className="block text-base font-semibold text-slate-700 dark:text-gray-300 mb-2">
                 パスワード <span className="text-red-400">*</span>
               </label>
               <div className="relative">
@@ -109,25 +109,25 @@ export default function AdminLoginForm() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   {...register('password')}
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent pr-10"
+                  className="w-full px-3 py-2 bg-white dark:bg-[#1A1A1A] border border-slate-300 dark:border-gray-600 rounded-lg text-slate-950 dark:text-white placeholder-slate-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent pr-10"
                   placeholder="パスワードを入力してください"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-gray-300"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <AiOutlineEyeInvisible className="h-5 w-5" /> : <AiOutlineEye className="h-5 w-5" />}
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-400 text-sm mt-1">{errors.password.message}</p>
+                <p className="text-red-400 text-base mt-1">{errors.password.message}</p>
               )}
             </div>
 
             {/* ... forgot password ... */}
             <div className="text-right">
-              <a href="#" className="text-sm text-[#10B981] hover:text-[#0F9F6E] underline">
+              <a href="#" className="text-base font-semibold text-[#10B981] hover:text-[#0F9F6E] underline">
                 パスワードをお忘れですか？
               </a>
             </div>
@@ -142,9 +142,9 @@ export default function AdminLoginForm() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-400 text-sm">
+            <p className="text-slate-600 dark:text-gray-400 text-base">
               まだアカウントをお持ちでない方は
-              <a href="/auth/admin/signup" className="text-[#10B981] hover:text-[#0F9F6E] underline ml-1">
+              <a href="/auth/admin/signup" className="font-semibold text-[#10B981] hover:text-[#0F9F6E] underline ml-1">
                 こちらからサインアップ
               </a>
             </p>

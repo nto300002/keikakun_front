@@ -58,37 +58,37 @@ export default function PlanTab() {
     switch (status) {
       case BillingStatus.FREE:
         return {
-          color: 'bg-gray-700 text-gray-300 border-gray-600',
+          color: 'bg-slate-100 dark:bg-gray-700 text-slate-700 dark:text-gray-300 border-slate-300 dark:border-gray-600',
           label: '無料トライアル中',
           icon: '🆓',
         };
       case BillingStatus.EARLY_PAYMENT:
         return {
-          color: 'bg-blue-900/50 text-blue-400 border-blue-500',
+          color: 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/50 dark:text-blue-400 dark:border-blue-500',
           label: '課金完了',
           icon: '💳',
         };
       case BillingStatus.ACTIVE:
         return {
-          color: 'bg-green-900/50 text-green-400 border-green-500',
+          color: 'bg-green-50 text-green-700 border-green-200 dark:bg-green-900/50 dark:text-green-400 dark:border-green-500',
           label: '課金設定済み',
           icon: '✅',
         };
       case BillingStatus.PAST_DUE:
         return {
-          color: 'bg-yellow-900/50 text-yellow-400 border-yellow-500',
+          color: 'bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-400 dark:border-yellow-500',
           label: '支払い遅延',
           icon: '⚠️',
         };
       case BillingStatus.CANCELING:
         return {
-          color: 'bg-orange-900/50 text-orange-400 border-orange-500',
+          color: 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/50 dark:text-orange-400 dark:border-orange-500',
           label: 'キャンセル予定',
           icon: '⏳',
         };
       case BillingStatus.CANCELED:
         return {
-          color: 'bg-red-900/50 text-red-400 border-red-500',
+          color: 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/50 dark:text-red-400 dark:border-red-500',
           label: 'キャンセル済み',
           icon: '❌',
         };
@@ -97,13 +97,13 @@ export default function PlanTab() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center p-8">
+      <div className="flex items-center justify-center p-8 font-medium">
         <div className="flex items-center gap-3">
           <svg className="animate-spin h-8 w-8 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p className="text-gray-400">プラン情報を読み込み中...</p>
+          <p className="text-slate-600 dark:text-gray-400">プラン情報を読み込み中...</p>
         </div>
       </div>
     );
@@ -111,7 +111,7 @@ export default function PlanTab() {
 
   if (error) {
     return (
-      <div className="bg-red-900/50 border border-red-500 rounded-lg p-6">
+      <div className="bg-red-50 font-medium border border-red-200 rounded-lg p-6 dark:bg-red-900/50 dark:border-red-500">
         <p className="text-red-400 font-semibold">エラー</p>
         <p className="text-red-300 mt-2">{error}</p>
         <button
@@ -126,8 +126,8 @@ export default function PlanTab() {
 
   if (!billingStatus) {
     return (
-      <div className="bg-gray-700 rounded-lg p-6">
-        <p className="text-gray-400">プラン情報が取得できませんでした。</p>
+      <div className="bg-white rounded-lg p-6 font-medium border border-slate-300 shadow-sm dark:bg-gray-700 dark:border-gray-600">
+        <p className="text-slate-600 dark:text-gray-400">プラン情報が取得できませんでした。</p>
       </div>
     );
   }
@@ -140,12 +140,12 @@ export default function PlanTab() {
   const isEarlyPayment = billingStatus.billing_status === BillingStatus.EARLY_PAYMENT && daysUntilTrialEnd > 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-medium">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">プラン管理</h2>
         <button
           onClick={refreshBillingStatus}
-          className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-2 transition-colors"
+          className="text-blue-400 hover:text-blue-300 text-base font-semibold flex items-center gap-2 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -157,19 +157,19 @@ export default function PlanTab() {
       {/* エラーメッセージ */}
       {errorMessage && (
         <div className="bg-red-900/50 border border-red-500 rounded-lg p-4">
-          <p className="text-red-400 text-sm">{errorMessage}</p>
+          <p className="text-red-400 text-base">{errorMessage}</p>
         </div>
       )}
 
       {/* 現在のプラン情報 */}
-      <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-        <h3 className="text-lg font-semibold mb-4">現在のステータス</h3>
+      <div className="bg-white rounded-lg p-6 font-medium border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+        <h3 className="text-xl font-semibold mb-4">現在のステータス</h3>
 
         <div className="space-y-4">
           {/* 課金ステータス */}
           <div>
-            <p className="text-gray-400 text-sm mb-2">ステータス</p>
-            <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold border ${statusBadge.color}`}>
+            <p className="text-slate-600 dark:text-gray-400 text-base font-semibold mb-2">ステータス</p>
+            <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-base font-semibold border ${statusBadge.color}`}>
               <span>{statusBadge.icon}</span>
               <span>{statusBadge.label}</span>
             </span>
@@ -178,8 +178,8 @@ export default function PlanTab() {
           {/* 課金処理日 */}
           {billingStatus.subscription_start_date && (
             <div>
-              <p className="text-gray-400 text-sm mb-2">課金処理日</p>
-              <p className="text-white font-semibold">
+              <p className="text-slate-600 dark:text-gray-400 text-base font-semibold mb-2">課金処理日</p>
+              <p className="text-slate-900 dark:text-white font-semibold">
                 {new Date(billingStatus.subscription_start_date).toLocaleDateString('ja-JP', {
                   year: 'numeric',
                   month: 'long',
@@ -191,16 +191,16 @@ export default function PlanTab() {
 
           {/* スケジュールされたキャンセル日時 */}
           {billingStatus.scheduled_cancel_at && (
-            <div className="bg-orange-900/20 border border-orange-500/30 rounded-lg p-4">
-              <p className="text-orange-400 text-sm font-semibold mb-2">キャンセル予定</p>
-              <p className="text-white text-lg font-bold">
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 dark:bg-orange-900/20 dark:border-orange-500/30">
+              <p className="text-orange-700 text-base font-semibold mb-2 dark:text-orange-400">キャンセル予定</p>
+              <p className="text-slate-900 dark:text-white text-lg font-bold">
                 {new Date(billingStatus.scheduled_cancel_at).toLocaleDateString('ja-JP', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                 })}
               </p>
-              <p className="text-gray-400 text-xs mt-2">
+              <p className="text-slate-600 dark:text-gray-400 text-sm mt-2">
                 この日時にサブスクリプションが自動的にキャンセルされます
               </p>
             </div>
@@ -208,12 +208,12 @@ export default function PlanTab() {
 
           {/* トライアル期限 */}
           {isTrialActive && (
-            <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
-              <p className="text-blue-400 text-sm font-semibold mb-2">無料トライアル中</p>
-              <p className="text-white text-lg font-bold">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 dark:bg-blue-900/20 dark:border-blue-500/30">
+              <p className="text-blue-700 text-base font-semibold mb-2 dark:text-blue-400">無料トライアル中</p>
+              <p className="text-slate-900 dark:text-white text-lg font-bold">
                 残り {daysUntilTrialEnd} 日
               </p>
-              <p className="text-gray-400 text-sm mt-1">
+              <p className="text-slate-600 dark:text-gray-400 text-base font-semibold mt-1">
                 トライアル終了日: {trialEndDate.toLocaleDateString('ja-JP', {
                   year: 'numeric',
                   month: 'long',
@@ -225,19 +225,19 @@ export default function PlanTab() {
 
           {/* 早期支払い完了（無料期間残り） */}
           {isEarlyPayment && (
-            <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
-              <p className="text-green-400 text-sm font-semibold mb-2">課金完了</p>
-              <p className="text-white text-lg font-bold">
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 dark:bg-green-900/20 dark:border-green-500/30">
+              <p className="text-green-700 text-base font-semibold mb-2 dark:text-green-400">課金完了</p>
+              <p className="text-slate-900 dark:text-white text-lg font-bold">
                 無料期間終了まで残り {daysUntilTrialEnd} 日
               </p>
-              <p className="text-gray-400 text-sm mt-1">
+              <p className="text-slate-600 dark:text-gray-400 text-base font-semibold mt-1">
                 無料期間終了日: {trialEndDate.toLocaleDateString('ja-JP', {
                   year: 'numeric',
                   month: 'long',
                   day: 'numeric',
                 })}
               </p>
-              <p className="text-gray-400 text-xs mt-2">
+              <p className="text-slate-600 dark:text-gray-400 text-sm mt-2">
                 無料期間終了後、自動的に課金が開始されます
               </p>
             </div>
@@ -246,8 +246,8 @@ export default function PlanTab() {
           {/* 次回請求日 */}
           {billingStatus.next_billing_date && (
             <div>
-              <p className="text-gray-400 text-sm mb-2">次回請求予定日</p>
-              <p className="text-white font-semibold">
+              <p className="text-slate-600 dark:text-gray-400 text-base font-semibold mb-2">次回請求予定日</p>
+              <p className="text-slate-900 dark:text-white font-semibold">
                 {new Date(billingStatus.next_billing_date).toLocaleDateString('ja-JP', {
                   year: 'numeric',
                   month: 'long',
@@ -259,29 +259,29 @@ export default function PlanTab() {
 
           {/* プラン料金 */}
           <div>
-            <p className="text-gray-400 text-sm mb-2">月額料金</p>
-            <p className="text-white text-2xl font-bold">
+            <p className="text-slate-600 dark:text-gray-400 text-base font-semibold mb-2">月額料金</p>
+            <p className="text-slate-900 dark:text-white text-2xl font-bold">
               ¥{billingStatus.current_plan_amount.toLocaleString()}
-              <span className="text-gray-400 text-base font-normal ml-2">/月</span>
+              <span className="text-slate-600 dark:text-gray-400 text-base font-medium ml-2">/月</span>
             </p>
           </div>
         </div>
       </div>
 
       {/* アクションボタン */}
-      <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-        <h3 className="text-lg font-semibold mb-4">サブスクリプション管理</h3>
+      <div className="bg-white rounded-lg p-6 font-medium border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
+        <h3 className="text-xl font-semibold mb-4">サブスクリプション管理</h3>
 
         {/* トライアル期限切れの警告（課金登録前） */}
         {daysUntilTrialEnd < 0 && billingStatus.billing_status === BillingStatus.FREE && (
-          <div className="bg-yellow-900/50 border border-yellow-500 rounded-lg p-4 mb-4">
-            <p className="text-yellow-400 font-semibold flex items-center gap-2">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 dark:bg-yellow-900/50 dark:border-yellow-500">
+            <p className="text-yellow-700 font-semibold flex items-center gap-2 dark:text-yellow-400">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               無料トライアル期間は終了しています
             </p>
-            <p className="text-yellow-300 text-sm mt-2">
+            <p className="text-yellow-700 text-base font-semibold mt-2 dark:text-yellow-300">
               課金登録と同時に¥{billingStatus.current_plan_amount.toLocaleString()}が請求されます。
             </p>
           </div>
@@ -289,14 +289,14 @@ export default function PlanTab() {
 
         {/* 支払い遅延の警告 */}
         {billingStatus.billing_status === BillingStatus.PAST_DUE && (
-          <div className="bg-red-900/50 border border-red-500 rounded-lg p-4 mb-4">
-            <p className="text-red-400 font-semibold flex items-center gap-2">
+          <div className="bg-red-50 font-medium border border-red-200 rounded-lg p-4 mb-4 dark:bg-red-900/50 dark:border-red-500">
+            <p className="text-red-700 font-semibold flex items-center gap-2 dark:text-red-400">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               支払いが遅延しています
             </p>
-            <p className="text-red-300 text-sm mt-2">
+            <p className="text-red-700 text-base font-semibold mt-2 dark:text-red-300">
               サービスの利用が制限されています。サブスクリプションを再登録して支払いを完了してください。
             </p>
           </div>
@@ -310,7 +310,7 @@ export default function PlanTab() {
             <button
               onClick={handleCreateCheckout}
               disabled={isCreatingCheckout}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-slate-400 dark:disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
             >
               {isCreatingCheckout ? (
                 <>
@@ -339,7 +339,7 @@ export default function PlanTab() {
             <button
               onClick={handleCreatePortal}
               disabled={isCreatingPortal}
-              className="w-full bg-gray-700 hover:bg-gray-600 disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-slate-200 hover:bg-slate-300 text-slate-900 disabled:bg-slate-400 disabled:cursor-not-allowed px-6 py-3 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 dark:bg-gray-700 dark:hover:bg-gray-600 dark:disabled:bg-gray-600 dark:text-white"
             >
               {isCreatingPortal ? (
                 <>
@@ -362,7 +362,7 @@ export default function PlanTab() {
           )}
         </div>
 
-        <p className="text-gray-400 text-xs mt-4">
+        <p className="text-slate-600 dark:text-gray-400 text-sm mt-4">
           サブスクリプションの管理はStripeの安全な決済ページで行われます。
         </p>
       </div>

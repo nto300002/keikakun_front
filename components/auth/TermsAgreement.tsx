@@ -62,9 +62,9 @@ export default function TermsAgreement({
               type="checkbox"
               checked={termsAgreed}
               onChange={handleTermsCheckboxChange}
-              className="mt-1 mr-3 h-4 w-4 text-[#10B981] bg-[#1A1A1A] border-gray-600 rounded focus:ring-[#10B981] cursor-pointer"
+              className="mt-1 mr-3 h-4 w-4 text-[#10B981] bg-white dark:bg-[#1A1A1A] border-slate-300 dark:border-gray-600 rounded focus:ring-[#10B981] cursor-pointer"
             />
-            <label htmlFor="terms-agree" className="text-sm text-gray-300 flex-1">
+            <label htmlFor="terms-agree" className="text-sm text-slate-700 dark:text-gray-300 flex-1">
               <button
                 type="button"
                 onClick={() => setIsTermsModalOpen(true)}
@@ -109,9 +109,9 @@ export default function TermsAgreement({
               type="checkbox"
               checked={privacyAgreed}
               onChange={handlePrivacyCheckboxChange}
-              className="mt-1 mr-3 h-4 w-4 text-[#10B981] bg-[#1A1A1A] border-gray-600 rounded focus:ring-[#10B981] cursor-pointer"
+              className="mt-1 mr-3 h-4 w-4 text-[#10B981] bg-white dark:bg-[#1A1A1A] border-slate-300 dark:border-gray-600 rounded focus:ring-[#10B981] cursor-pointer"
             />
-            <label htmlFor="privacy-agree" className="text-sm text-gray-300 flex-1">
+            <label htmlFor="privacy-agree" className="text-sm text-slate-700 dark:text-gray-300 flex-1">
               <button
                 type="button"
                 onClick={() => setIsPrivacyModalOpen(true)}
@@ -149,7 +149,7 @@ export default function TermsAgreement({
         </div>
 
         {/* 必須マーク */}
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-slate-500 dark:text-gray-500 mt-2">
           <span className="text-red-400">*</span> 登録には両方への同意が必要です
         </p>
       </div>

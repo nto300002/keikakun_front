@@ -77,49 +77,49 @@ export default function HospitalVisitList({
       </div>
 
       {hospitalVisits.length === 0 ? (
-        <p className="text-gray-400 text-center py-8">通院歴がありません</p>
+        <p className="text-slate-600 dark:text-gray-400 text-center py-8">通院歴がありません</p>
       ) : (
         <div className="space-y-3">
           {hospitalVisits.map((visit) => (
             <div
               key={visit.id}
-              className="p-4 bg-[#0f1419] rounded-lg border border-[#2a3441] hover:border-[#3a4451] transition-colors"
+              className="p-4 bg-white dark:bg-[#0f1419] rounded-lg border border-slate-300 dark:border-[#2a3441] hover:border-[#3a4451] transition-colors"
             >
               <div className="flex justify-between items-start gap-4">
                 <div className="flex-1 space-y-3">
                   <div className="grid md:grid-cols-2 gap-3 text-sm">
                     <div>
-                      <p className="text-gray-400">病名</p>
-                      <p className="text-white font-medium">{visit.disease}</p>
+                      <p className="text-slate-600 dark:text-gray-400">病名</p>
+                      <p className="text-slate-900 dark:text-white font-medium">{visit.disease}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400">症状</p>
-                      <p className="text-white">{visit.symptoms}</p>
+                      <p className="text-slate-600 dark:text-gray-400">症状</p>
+                      <p className="text-slate-900 dark:text-white">{visit.symptoms}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400">医療機関名</p>
-                      <p className="text-white">{visit.medical_institution}</p>
+                      <p className="text-slate-600 dark:text-gray-400">医療機関名</p>
+                      <p className="text-slate-900 dark:text-white">{visit.medical_institution}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400">主治医</p>
-                      <p className="text-white">{visit.doctor}</p>
+                      <p className="text-slate-600 dark:text-gray-400">主治医</p>
+                      <p className="text-slate-900 dark:text-white">{visit.doctor}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400">電話番号</p>
-                      <p className="text-white">{visit.tel}</p>
+                      <p className="text-slate-600 dark:text-gray-400">電話番号</p>
+                      <p className="text-slate-900 dark:text-white">{visit.tel}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400">通院頻度</p>
-                      <p className="text-white">{visit.frequency_of_hospital_visits}</p>
+                      <p className="text-slate-600 dark:text-gray-400">通院頻度</p>
+                      <p className="text-slate-900 dark:text-white">{visit.frequency_of_hospital_visits}</p>
                     </div>
                     <div>
-                      <p className="text-gray-400">服薬状況</p>
-                      <p className="text-white">{visit.taking_medicine ? 'あり' : 'なし'}</p>
+                      <p className="text-slate-600 dark:text-gray-400">服薬状況</p>
+                      <p className="text-slate-900 dark:text-white">{visit.taking_medicine ? 'あり' : 'なし'}</p>
                     </div>
                     {(visit.date_started || visit.date_ended) && (
                       <div>
-                        <p className="text-gray-400">期間</p>
-                        <p className="text-white">
+                        <p className="text-slate-600 dark:text-gray-400">期間</p>
+                        <p className="text-slate-900 dark:text-white">
                           {visit.date_started && new Date(visit.date_started).toLocaleDateString('ja-JP')}
                           {visit.date_started && visit.date_ended && ' 〜 '}
                           {visit.date_ended && new Date(visit.date_ended).toLocaleDateString('ja-JP')}
@@ -129,8 +129,8 @@ export default function HospitalVisitList({
                   </div>
                   {visit.special_remarks && (
                     <div>
-                      <p className="text-gray-400 text-sm">特記事項</p>
-                      <div className="text-white text-sm">
+                      <p className="text-slate-600 dark:text-gray-400 text-sm">特記事項</p>
+                      <div className="text-slate-900 dark:text-white text-sm">
                         <ExpandableText text={visit.special_remarks} maxLength={50} />
                       </div>
                     </div>
@@ -140,7 +140,7 @@ export default function HospitalVisitList({
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(visit)}
-                    className="p-2 text-gray-400 hover:text-white transition-colors"
+                    className="p-2 text-slate-600 dark:text-gray-400 hover:text-slate-950 dark:hover:text-white transition-colors"
                     title="編集"
                   >
                     <PencilIcon className="w-4 h-4" />

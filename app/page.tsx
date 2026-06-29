@@ -257,11 +257,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 料金プランセクション */}
+      {/* 料金セクション */}
       <section id="pricing" className="py-32 px-4 sm:px-6 lg:px-8 bg-white dark:bg-[#1A1A1A]">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl sm:text-5xl font-bold mb-20">
-            シンプルで分かりやすい料金プラン
+            シンプルで分かりやすい有料会員料金
           </h2>
 
           <div className="bg-slate-100 rounded-2xl p-12 lg:p-16 max-w-lg mx-auto border-2 border-[#10B981]/20 shadow-sm transition-colors hover:border-[#10B981]/40 dark:bg-[#2A2A2A]">
@@ -269,7 +269,7 @@ export default function LandingPage() {
               <div className="inline-block bg-[#10B981]/10 text-[#10B981] px-6 py-2 rounded-full text-lg font-semibold mb-6">
                 半年間無料
               </div>
-              <h3 className="text-3xl font-semibold mb-8">月額プラン</h3>
+              <h3 className="text-3xl font-semibold mb-8">有料会員</h3>
               <div className="mb-4">
                 <span className="text-6xl font-bold">¥6,000</span>
                 <span className="text-slate-600 dark:text-gray-400 text-xl ml-2">/ 月</span>
@@ -363,7 +363,7 @@ export default function LandingPage() {
               <h4 className="font-semibold mb-4">サービス</h4>
               <ul className="space-y-2 text-sm text-slate-600 dark:text-gray-400">
                 <li><a href="#features-detail" className="transition-colors hover:text-slate-950 dark:hover:text-white">機能紹介</a></li>
-                <li><a href="#pricing" className="transition-colors hover:text-slate-950 dark:hover:text-white">料金プラン</a></li>
+                <li><a href="#pricing" className="transition-colors hover:text-slate-950 dark:hover:text-white">有料会員料金</a></li>
               </ul>
             </div>
 

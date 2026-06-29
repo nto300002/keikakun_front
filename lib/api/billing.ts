@@ -28,7 +28,7 @@ export const billingApi = {
    * Stripe Checkout Sessionを作成
    *
    * オーナー権限のみ実行可能。
-   * サブスクリプション登録のためのStripe Checkout URLを取得します。
+   * 有料会員登録のためのStripe Checkout URLを取得します。
    * 既存のStripe Customer IDがある場合は再利用されます。
    *
    * @returns Checkout SessionのIDとURL
@@ -45,7 +45,7 @@ export const billingApi = {
    * Stripe Customer Portal Sessionを作成
    *
    * オーナー権限のみ実行可能。
-   * サブスクリプション管理画面（支払い方法変更・キャンセル）へのURLを取得します。
+   * 有料会員管理画面（支払い方法変更・キャンセル）へのURLを取得します。
    *
    * @returns Customer Portal URL
    * @throws オーナー権限がない場合、Stripe Customer IDが存在しない場合

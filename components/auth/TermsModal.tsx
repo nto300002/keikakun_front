@@ -187,8 +187,8 @@ function TermsContent() {
 
       <h3 className="text-xl font-bold text-slate-950 dark:text-white mt-6 mb-3">第4条(料金とお支払い)</h3>
       <ol className="list-decimal pl-6 space-y-2">
-        <li><strong>無料トライアル期間</strong>: 新規登録後、30日間の無料トライアル期間が提供されます。トライアル期間中はすべての機能を無料でご利用いただけます。</li>
-        <li><strong>有料プランへの移行</strong>: トライアル期間終了後、本サービスを継続してご利用いただくには、有料プランへの登録が必要です。
+        <li><strong>無料試用期間</strong>: 新規登録後、30日間の無料試用期間が提供されます。無料試用期間中はすべての機能を無料でご利用いただけます。</li>
+        <li><strong>有料会員への移行</strong>: 無料試用期間終了後、本サービスを継続してご利用いただくには、有料会員への登録が必要です。
           <ul className="list-disc pl-6 mt-2 space-y-1">
             <li>料金: 月額6,000円（税込）</li>
             <li>課金サイクル: 毎月自動更新</li>
@@ -196,19 +196,19 @@ function TermsContent() {
           </ul>
         </li>
         <li><strong>決済処理</strong>: すべての決済処理はStripe社のセキュアな決済システムを通じて行われます。運営者はクレジットカード番号などの決済情報を直接保持しません。</li>
-        <li><strong>請求とサブスクリプション</strong>:
+        <li><strong>請求と有料会員登録</strong>:
           <ul className="list-disc pl-6 mt-2 space-y-1">
-            <li>有料プランは月次サブスクリプションとして自動更新されます</li>
+            <li>有料会員登録は毎月自動更新されます</li>
             <li>請求書はStripeから電子的に発行されます</li>
             <li>決済失敗時は、サービスが一時停止される場合があります</li>
           </ul>
         </li>
         <li><strong>キャンセルと返金</strong>:
           <ul className="list-disc pl-6 mt-2 space-y-1">
-            <li>サブスクリプションはいつでもキャンセル可能です</li>
+            <li>有料会員登録はいつでもキャンセル可能です</li>
             <li>キャンセル後、次回請求日までサービスをご利用いただけます</li>
             <li>月の途中でキャンセルした場合、日割り返金は行われません</li>
-            <li>無料トライアル期間中のキャンセルには料金は発生しません</li>
+            <li>無料試用期間中のキャンセルには料金は発生しません</li>
           </ul>
         </li>
         <li><strong>料金改定</strong>: 運営者は、30日前までの事前通知により料金を改定することがあります。改定後も継続利用する場合、新料金に同意したものとみなします。</li>
@@ -274,7 +274,7 @@ function TermsContent() {
       <ul className="list-disc pl-6 space-y-1">
         <li>アカウント操作履歴（削除、退会、利用規約同意等）</li>
         <li>支払い履歴・請求情報</li>
-        <li>サブスクリプション変更履歴</li>
+        <li>有料会員登録の変更履歴</li>
       </ul>
 
       <h4 className="text-lg font-semibold text-slate-950 dark:text-white mt-4 mb-2">【管理データ（3年間）】</h4>
@@ -352,7 +352,7 @@ function TermsContent() {
       <div className="mt-8 pt-6 border-t border-slate-300 dark:border-gray-600">
         <p className="text-sm text-slate-600 dark:text-gray-400"><strong>制定日</strong>: 2025年11月17日</p>
         <p className="text-sm text-slate-600 dark:text-gray-400"><strong>最終更新日</strong>: 2025年12月12日</p>
-        <p className="text-xs text-slate-500 dark:text-gray-500 mt-2">【更新内容】有料プラン・Stripe決済の導入、データ保持期間の追加</p>
+        <p className="text-xs text-slate-500 dark:text-gray-500 mt-2">【更新内容】有料会員・Stripe決済の導入、データ保持期間の追加</p>
       </div>
     </div>
   );
@@ -388,7 +388,7 @@ function PrivacyContent() {
         <li>クレジットカード情報（Stripe社が安全に管理、運営者は保持しません）</li>
         <li>請求先情報（事業所名、住所、電話番号）</li>
         <li>支払い履歴</li>
-        <li>サブスクリプション情報</li>
+        <li>有料会員登録情報</li>
         <li>Stripe顧客ID（決済システムとの連携用）</li>
       </ul>
       <p className="mt-2 text-sm text-slate-600 dark:text-gray-400">
@@ -428,7 +428,7 @@ function PrivacyContent() {
         <li>個別支援計画の作成・管理・モニタリングのため</li>
         <li><strong>料金の請求・決済処理のため（Stripe社を通じた決済含む）</strong></li>
         <li><strong>請求書・領収書の発行のため</strong></li>
-        <li><strong>サブスクリプション管理・更新のため</strong></li>
+        <li><strong>有料会員登録の管理・更新のため</strong></li>
         <li>ユーザー(スタッフ)からのお問い合わせに回答するため(本人確認を行うことを含む)</li>
         <li>サービスの新機能、更新情報、重要なお知らせ（料金改定含む）など必要に応じたご連絡のため</li>
         <li>利用規約に違反したユーザーや、不正・不当な目的でサービスを利用しようとするユーザーの特定をし、ご利用をお断りするため</li>
@@ -525,7 +525,7 @@ function PrivacyContent() {
         <li>事務所退会申請・承認・却下記録</li>
         <li>利用規約同意記録</li>
         <li><strong>支払い履歴・請求情報</strong></li>
-        <li><strong>サブスクリプション変更履歴</strong></li>
+        <li><strong>有料会員登録の変更履歴</strong></li>
       </ul>
       <p className="mt-2 text-sm text-slate-600 dark:text-gray-400">
         ※ 支払い関連データは税法上の要請により5年間保持します
@@ -546,7 +546,7 @@ function PrivacyContent() {
 
       <h4 className="text-lg font-semibold text-slate-950 dark:text-white mt-4 mb-2">【システムログ（90日間）】</h4>
       <ul className="list-disc pl-6 space-y-1">
-        <li>Webhook処理ログ（決済イベント、サブスクリプション変更等）</li>
+        <li>Webhook処理ログ（決済イベント、有料会員登録の変更等）</li>
         <li>決済エラーログ</li>
       </ul>
 

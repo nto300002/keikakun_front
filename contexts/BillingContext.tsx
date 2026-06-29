@@ -4,6 +4,13 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { billingApi } from '@/lib/api/billing';
 import { BillingStatusResponse } from '@/types/billing';
 import { BillingStatus } from '@/types/enums';
+import {
+  BillingRestrictionReason,
+  canWriteWithBillingStatus,
+  getBillingRestrictionReason,
+  isPaymentFailedAfterTrial,
+  requiresPaymentAction,
+} from '@/lib/billing/status';
 
 interface BillingContextType {
   billingStatus: BillingStatusResponse | null;
@@ -12,14 +19,19 @@ interface BillingContextType {
   refreshBillingStatus: () => Promise<void>;
   /**
    * 書き込み操作が許可されているかどうか
-   * past_due または canceled の場合は false を返す
+   * 支払いアクションが必要な状態または canceled の場合は false を返す
    */
   canWrite: boolean;
   /**
    * 支払い遅延状態かどうか
-   * past_due の場合は true を返す
+   * legacy past_due の場合は true を返す
    */
   isPastDue: boolean;
+  isTrialExpired: boolean;
+  isPaymentFailed: boolean;
+  isPaymentFailedAfterTrial: boolean;
+  requiresPaymentAction: boolean;
+  billingRestrictionReason: BillingRestrictionReason;
 }
 
 const BillingContext = createContext<BillingContextType | undefined>(undefined);
@@ -36,13 +48,13 @@ interface BillingProviderProps {
  *
  * 使用例:
  * ```tsx
- * const { billingStatus, canWrite, isPastDue, refreshBillingStatus } = useBilling();
+ * const { billingStatus, canWrite, requiresPaymentAction, refreshBillingStatus } = useBilling();
  *
  * // 書き込み操作を制限
  * <button disabled={!canWrite}>作成</button>
  *
- * // 支払い遅延モーダルを表示
- * {isPastDue && <PastDueModal />}
+ * // 支払いアクションが必要な場合にモーダルを表示
+ * {requiresPaymentAction && <PastDueModal />}
  * ```
  */
 export function BillingProvider({ children }: BillingProviderProps) {
@@ -82,13 +94,13 @@ export function BillingProvider({ children }: BillingProviderProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // 書き込み操作が許可されているかどうか
-  const canWrite =
-    billingStatus?.billing_status !== BillingStatus.PAST_DUE &&
-    billingStatus?.billing_status !== BillingStatus.CANCELED;
-
-  // 支払い遅延状態かどうか
+  const canWrite = canWriteWithBillingStatus(billingStatus);
   const isPastDue = billingStatus?.billing_status === BillingStatus.PAST_DUE;
+  const isTrialExpired = billingStatus?.billing_status === BillingStatus.TRIAL_EXPIRED;
+  const isPaymentFailed = billingStatus?.billing_status === BillingStatus.PAYMENT_FAILED;
+  const paymentFailedAfterTrial = isPaymentFailedAfterTrial(billingStatus);
+  const paymentActionRequired = requiresPaymentAction(billingStatus);
+  const billingRestrictionReason = getBillingRestrictionReason(billingStatus);
 
   return (
     <BillingContext.Provider
@@ -99,6 +111,11 @@ export function BillingProvider({ children }: BillingProviderProps) {
         refreshBillingStatus,
         canWrite,
         isPastDue,
+        isTrialExpired,
+        isPaymentFailed,
+        isPaymentFailedAfterTrial: paymentFailedAfterTrial,
+        requiresPaymentAction: paymentActionRequired,
+        billingRestrictionReason,
       }}
     >
       {children}

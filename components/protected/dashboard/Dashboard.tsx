@@ -9,8 +9,8 @@ import { DashboardData } from '@/types/dashboard';
 import { authApi } from '@/lib/auth';
 import { StaffResponse } from '@/types/staff';
 import { billingApi } from '@/lib/api/billing';
+import { canWriteWithBillingStatus, getBillingRestrictionReason } from '@/lib/billing/status';
 import { BillingStatusResponse } from '@/types/billing';
-import { BillingStatus } from '@/types/enums';
 import MfaPrompt from '@/components/auth/MfaPrompt';
 import { SmartDropdown } from '@/components/ui/smart-dropdown';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
@@ -57,17 +57,44 @@ export default function Dashboard() {
 
   const { isEmployee } = useStaffRole();
 
-  // 編集可能かどうかの判定: MFA有効 かつ 課金ステータスがactive/free/early_payment
+  // 編集可能かどうかの判定: MFA有効 かつ 課金ステータスが書き込み可能
   const canEdit = useMemo(() => {
     if (!staff || !billingStatus) return false;
 
-    const isActiveBilling =
-      billingStatus.billing_status === BillingStatus.FREE ||
-      billingStatus.billing_status === BillingStatus.ACTIVE ||
-      billingStatus.billing_status === BillingStatus.EARLY_PAYMENT;
-
-    return staff.is_mfa_enabled && isActiveBilling;
+    return staff.is_mfa_enabled && canWriteWithBillingStatus(billingStatus);
   }, [staff, billingStatus]);
+
+  const billingRestrictionReason = useMemo(
+    () => getBillingRestrictionReason(billingStatus),
+    [billingStatus]
+  );
+
+  const billingRestrictionWarning = (() => {
+    switch (billingRestrictionReason) {
+      case 'trial_expired':
+        return {
+          title: '無料試用期間が終了しているため利用できません',
+          body: '新規作成・編集・削除などの操作はご利用いただけません。オーナーの方は管理者設定の有料会員ページから有料会員に登録してください。',
+        };
+      case 'payment_failed':
+        return {
+          title: '有料会員料金のお支払いが失敗しているため利用できません',
+          body: '新規作成・編集・削除などの操作はご利用いただけません。オーナーの方は管理者設定の有料会員ページから支払い方法を更新してください。',
+        };
+      case 'past_due':
+        return {
+          title: 'お支払いの確認が必要なため利用できません',
+          body: '新規作成・編集・削除などの操作はご利用いただけません。オーナーの方は管理者設定の有料会員ページを確認してください。',
+        };
+      case 'canceled':
+        return {
+          title: '有料会員登録がキャンセル済みのため利用できません',
+          body: '新規作成・編集・削除などの操作はご利用いただけません。オーナーの方は管理者設定の有料会員ページから再度入会してください。',
+        };
+      default:
+        return null;
+    }
+  })();
 
   useEffect(() => {
     isLoadingRef.current = isLoading;
@@ -499,16 +526,16 @@ export default function Dashboard() {
             <MfaPrompt />
           </div>
         )}
-        {billingStatus && billingStatus.billing_status === BillingStatus.PAST_DUE && (
-          <div className="mb-6 bg-red-900/50 border border-red-500 rounded-lg p-4">
-            <p className="text-red-400 font-semibold flex items-center gap-2">
+        {billingRestrictionWarning && (
+          <div className="mb-6 rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-500 dark:bg-red-900/50">
+            <p className="flex items-center gap-2 font-semibold text-red-700 dark:text-red-400">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
-              無料お試し期間が過ぎているため利用できません
+              {billingRestrictionWarning.title}
             </p>
-            <p className="text-red-300 text-base mt-2">
-              新規作成・編集・削除などの操作はご利用いただけません。オーナーの方は管理者設定のプラン登録ページから課金登録を行ってください。
+            <p className="mt-2 text-base text-red-700 dark:text-red-300">
+              {billingRestrictionWarning.body}
             </p>
           </div>
         )}
@@ -800,7 +827,7 @@ export default function Dashboard() {
                             ) : (
                               <div>
                                 <div className="text-slate-950 text-lg md:text-xl font-bold dark:text-white">
-                                  {recipient.last_name}
+                                  {recipient.full_name}
                                 </div>
                               </div>
                             )}
@@ -947,7 +974,7 @@ export default function Dashboard() {
                         ) : (
                           <div>
                             <div className="text-slate-950 text-lg font-bold dark:text-white">
-                              {recipient.last_name}
+                              {recipient.full_name}
                             </div>
                           </div>
                         )}

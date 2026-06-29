@@ -6,10 +6,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 /**
- * 無料トライアル期限バナーコンポーネント
+ * 無料試用期限バナーコンポーネント
  *
  * billing_status が free の場合、ヘッダーの下に表示されます。
- * トライアル終了までの残り日数を表示し、プラン設定ページへのリンクを提供します。
+ * 無料試用終了までの残り日数を表示し、有料会員設定ページへのリンクを提供します。
  *
  * 表示対象:
  * - すべてのスタッフに表示
@@ -24,12 +24,12 @@ export default function TrialExpiryBanner() {
     return null;
   }
 
-  // 無料トライアル中のみ表示
+  // 無料試用中のみ表示
   if (billingStatus.billing_status !== BillingStatus.FREE) {
     return null;
   }
 
-  // 管理画面のプランタブでは表示しない（重複を避けるため）
+  // 管理画面の有料会員タブでは表示しない（重複を避けるため）
   if (pathname === '/admin' || pathname?.startsWith('/admin?')) {
     return null;
   }
@@ -38,7 +38,7 @@ export default function TrialExpiryBanner() {
   const now = new Date();
   const daysRemaining = Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
-  // トライアル期限切れの場合は表示しない（別のモーダルで対応）
+  // 無料試用期限切れ後は支払いアクションモーダルと各画面の警告で対応
   if (daysRemaining < 0) {
     return null;
   }
@@ -71,7 +71,7 @@ export default function TrialExpiryBanner() {
           />
         </svg>
         <span className="font-medium">
-          無料トライアル期間終了まで残り <strong className="text-lg">{daysRemaining}</strong> 日
+          無料試用期間終了まで残り <strong className="text-lg">{daysRemaining}</strong> 日
         </span>
         <span className="hidden sm:inline text-gray-100">|</span>
         <Link

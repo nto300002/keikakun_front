@@ -594,7 +594,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                   : 'text-slate-600 hover:text-slate-950 dark:text-gray-400 dark:hover:text-white'
               }`}
             >
-              プラン
+              有料会員
             </button>
           </div>
         </div>
@@ -1227,7 +1227,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
             </div>
           )}
 
-          {/* オフィス: プラン */}
+          {/* オフィス: 有料会員 */}
           {activeTab === 'plan' && <PlanTab />}
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { ReactNode } from 'react';
 import { useBilling } from '@/contexts/BillingContext';
+import { getBillingDisabledMessage } from '@/lib/billing/status';
 
 interface BillingProtectedButtonProps {
   children: ReactNode;
@@ -15,7 +16,7 @@ interface BillingProtectedButtonProps {
 /**
  * 課金ステータスに基づいてボタンを無効化するコンポーネント
  *
- * billing_status が past_due または canceled の場合、
+ * billing_status が支払いアクションを必要とする状態または canceled の場合、
  * ボタンを自動的に無効化します。
  *
  * 使用例:
@@ -47,16 +48,13 @@ export default function BillingProtectedButton({
   type = 'button',
   title,
 }: BillingProtectedButtonProps) {
-  const { canWrite, isPastDue } = useBilling();
+  const { billingStatus, canWrite } = useBilling();
 
-  // 課金ステータスによって無効化されている場合のツールチップメッセージ
-  const billingDisabledMessage = isPastDue
-    ? '支払い遅延のため、この操作は無効化されています。支払い方法を更新してください。'
-    : '課金プランが有効でないため、この操作は無効化されています。';
+  const billingDisabledMessage = getBillingDisabledMessage(billingStatus);
 
   // ボタンが無効化される条件:
   // 1. 明示的に disabled が true
-  // 2. 課金ステータスが past_due または canceled (canWrite が false)
+  // 2. 課金ステータスにより書き込み不可 (canWrite が false)
   const isDisabled = disabled || !canWrite;
 
   // ツールチップメッセージ:

@@ -9,8 +9,8 @@ const MODAL_SHOWN_KEY = 'pastDueModalShown';
 /**
  * PastDueModal のラッパーコンポーネント
  *
- * BillingContext から isPastDue を取得し、
- * 支払い遅延状態の場合にモーダルを自動表示する。
+ * BillingContext から requiresPaymentAction を取得し、
+ * 支払いアクションが必要な状態の場合にモーダルを自動表示する。
  *
  * セッションごとに一度だけモーダルを表示する仕組み：
  * - sessionStorageを使用して、このセッション中にモーダルを表示したかを記録
@@ -19,11 +19,11 @@ const MODAL_SHOWN_KEY = 'pastDueModalShown';
  * このコンポーネントは BillingProvider の子コンポーネントとして配置する必要があります。
  */
 export default function PastDueModalWrapper() {
-  const { isPastDue } = useBilling();
+  const { requiresPaymentAction } = useBilling();
   const [showModal, setShowModal] = useState(false);
   const hasCheckedRef = useRef(false);
 
-  // isPastDueが変化したときにモーダル表示状態を更新（セッション中に一度だけ）
+  // 支払いアクション要否が変化したときにモーダル表示状態を更新（セッション中に一度だけ）
   useEffect(() => {
     // クライアントサイドでのみ実行
     if (typeof window === 'undefined') return;
@@ -31,16 +31,16 @@ export default function PastDueModalWrapper() {
     // 既にチェック済みの場合は何もしない（無限ループ防止）
     if (hasCheckedRef.current) return;
 
-    // past_due状態で、かつこのセッションでまだモーダルを表示していない場合
+    // 支払いアクションが必要で、かつこのセッションでまだモーダルを表示していない場合
     const hasShownModal = sessionStorage.getItem(MODAL_SHOWN_KEY) === 'true';
-    if (isPastDue && !hasShownModal) {
+    if (requiresPaymentAction && !hasShownModal) {
       hasCheckedRef.current = true;
       // セッションストレージに記録（このセッション中は二度と表示しない）
       sessionStorage.setItem(MODAL_SHOWN_KEY, 'true');
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowModal(true);
     }
-  }, [isPastDue]);
+  }, [requiresPaymentAction]);
 
   const handleClose = () => {
     setShowModal(false);

@@ -73,7 +73,7 @@ export default function ActOnSpecifiedCommercialTransactionsPage() {
               {/* 販売価格 */}
               <section>
                 <h2 className="text-2xl font-semibold text-slate-950 dark:text-white mb-4">販売価格</h2>
-                <p>月額プラン: 6,000円（税抜）/ 月</p>
+                <p>有料会員: 6,000円（税抜）/ 月</p>
                 <p className="text-sm text-slate-600 dark:text-gray-400 mt-2">
                   ※消費税を含めた金額を購入時に表示いたします
                 </p>
@@ -94,9 +94,9 @@ export default function ActOnSpecifiedCommercialTransactionsPage() {
               {/* 支払時期 */}
               <section>
                 <h2 className="text-2xl font-semibold text-slate-950 dark:text-white mb-4">支払時期</h2>
-                <p>サブスクリプション登録時に決済されます。</p>
+                <p>有料会員登録時に決済されます。</p>
                 <p className="text-sm text-slate-600 dark:text-gray-400 mt-2">
-                  ※トライアル期間（6ヶ月）終了後、自動的に課金が開始されます
+                  ※無料試用期間（6ヶ月）終了後、自動的に有料会員料金のお支払いが開始されます
                 </p>
               </section>
 
@@ -111,7 +111,7 @@ export default function ActOnSpecifiedCommercialTransactionsPage() {
                 <h2 className="text-2xl font-semibold text-slate-950 dark:text-white mb-4">返品・キャンセルについて</h2>
                 <p>サービスの性質上、返品には応じかねます。</p>
                 <p className="mt-2">
-                  サブスクリプションのキャンセルはいつでも可能です。キャンセル後、当月末までサービスをご利用いただけます。
+                  有料会員登録のキャンセルはいつでも可能です。キャンセル後、当月末までサービスをご利用いただけます。
                 </p>
               </section>
 

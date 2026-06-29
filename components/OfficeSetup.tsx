@@ -64,14 +64,14 @@ export default function OfficeSetup() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0C1421] py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8 dark:bg-[#0C1421]">
       <div className="max-w-2xl mx-auto">
         {/* ヘッダー */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
+          <h1 className="text-3xl font-bold text-slate-950 mb-2 dark:text-white">
             事業所情報の登録
           </h1>
-          <p className="text-gray-400">
+          <p className="text-slate-600 dark:text-gray-400">
             ケイカくんをご利用いただくため、事業所の基本情報を登録してください
           </p>
         </div>
@@ -80,27 +80,27 @@ export default function OfficeSetup() {
         <StepWizard steps={steps} />
 
         {/* フォーム */}
-        <div className="bg-[#2A2A2A] rounded-lg border border-gray-700 p-8">
+        <div className="bg-white rounded-lg border border-slate-200 p-8 shadow-sm dark:bg-[#2A2A2A] dark:border-gray-700">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {errors.root && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 text-sm dark:bg-red-500/10 dark:border-red-500/20 dark:text-red-400">
                 {errors.root.message}
               </div>
             )}
 
             {/* 基本情報 */}
-            <div className="border-b border-gray-700 pb-6">
-              <h2 className="text-lg font-semibold text-white mb-4">基本情報</h2>
+            <div className="border-b border-slate-200 pb-6 dark:border-gray-700">
+              <h2 className="text-lg font-semibold text-slate-950 mb-4 dark:text-white">基本情報</h2>
               
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-gray-300">
                     事業所名 <span className="text-red-400">*</span>
                   </label>
                   <input
                     type="text"
                     {...register('name')}
-                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-950 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent dark:bg-[#1A1A1A] dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
                     placeholder="○○就労移行支援事業所"
                   />
                   {errors.name && (
@@ -109,12 +109,12 @@ export default function OfficeSetup() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-slate-700 mb-2 dark:text-gray-300">
                     事業所種別 <span className="text-red-400">*</span>
                   </label>
                   <select
                     {...register('type')}
-                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-950 focus:outline-none focus:ring-2 focus:ring-[#10B981] focus:border-transparent dark:bg-[#1A1A1A] dark:border-gray-600 dark:text-white"
                   >
                     <option value="">選択してください</option>
                     {officeTypes.map(type => (
@@ -136,7 +136,7 @@ export default function OfficeSetup() {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="flex-1 border-2 border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
+                className="flex-1 border-2 border-slate-300 hover:border-slate-400 text-slate-700 hover:text-slate-950 font-semibold py-3 px-4 rounded-lg transition-colors duration-200 dark:border-gray-600 dark:hover:border-gray-500 dark:text-gray-300 dark:hover:text-white"
               >
                 戻る
               </button>

@@ -10,6 +10,17 @@ type EnrollResponse = {
   secret_key: string
 }
 
+const authenticatorApps = [
+    {
+        platform: 'iPhone / iPad',
+        url: 'https://apps.apple.com/app/google-authenticator/id388497605',
+    },
+    {
+        platform: 'Android',
+        url: 'https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2',
+    },
+]
+
 function MfaSetupFormComponent() {
     const router = useRouter()
     const [qrCodeUri, setQrCodeUri] = useState('')
@@ -134,6 +145,38 @@ function MfaSetupFormComponent() {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-500/40 dark:bg-blue-950/30">
+                <h2 className="text-base font-semibold text-blue-950 dark:text-blue-100">
+                    認証アプリを準備してください
+                </h2>
+                <p className="mt-2 text-sm text-blue-900 dark:text-blue-200">
+                    Google Authenticator などの認証アプリが必要です。未インストールの場合は、お使いの端末に合わせて入手してください。
+                </p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {authenticatorApps.map((app) => (
+                        <div
+                            key={app.platform}
+                            className="rounded-md border border-blue-200 bg-white p-3 dark:border-blue-500/30 dark:bg-gray-900"
+                        >
+                            <p className="mb-2 text-sm font-semibold text-slate-900 dark:text-white">{app.platform}</p>
+                            <div className="flex items-center gap-3">
+                                <div className="rounded bg-white p-2">
+                                    <QRCodeCanvas value={app.url} size={88} />
+                                </div>
+                                <a
+                                    href={app.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-sm font-semibold text-blue-700 underline underline-offset-2 hover:text-blue-900 dark:text-blue-300 dark:hover:text-blue-200"
+                                >
+                                    Google Authenticator を開く
+                                </a>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
             <div className="flex flex-col items-center">
                 <p className="text-slate-700 dark:text-gray-300 mb-4">
                     認証アプリ（Google Authenticatorなど）で以下のQRコードをスキャンしてください。

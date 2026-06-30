@@ -452,6 +452,56 @@ export default function Dashboard() {
     () => (Array.isArray(dashboardData?.recipients) ? dashboardData.recipients : []),
     [dashboardData]
   );
+
+  const hasActiveDashboardFilter = useMemo(
+    () =>
+      Boolean(searchTerm) ||
+      activeFilters.isOverdue ||
+      activeFilters.isUpcoming ||
+      activeFilters.hasAssessmentDue ||
+      Boolean(activeFilters.status),
+    [activeFilters, searchTerm]
+  );
+
+  const emptyState = useMemo(() => {
+    if (serviceRecipients.length > 0) return null;
+
+    if (billingRestrictionWarning) {
+      return {
+        title: '現在は利用者の登録・編集が制限されています',
+        body: billingRestrictionWarning.body,
+        showAddButton: false,
+      };
+    }
+
+    if (hasActiveDashboardFilter) {
+      return {
+        title: '条件に一致する利用者はいません',
+        body: '検索条件や絞り込みを変更すると、表示される利用者が変わります。',
+        showAddButton: false,
+      };
+    }
+
+    if (isEmployee) {
+      return {
+        title: 'まだ利用者が登録されていません',
+        body: '利用者の登録は、オーナーまたは管理者に依頼してください。',
+        showAddButton: false,
+      };
+    }
+
+    return {
+      title: 'まだ利用者が登録されていません',
+      body: '最初の利用者を登録すると、期限や支援計画の進捗をここで確認できます。',
+      showAddButton: canEdit,
+    };
+  }, [
+    billingRestrictionWarning,
+    canEdit,
+    hasActiveDashboardFilter,
+    isEmployee,
+    serviceRecipients.length,
+  ]);
   
   // 検索デバウンス（300ms）
   useEffect(() => {
@@ -794,6 +844,25 @@ export default function Dashboard() {
                       </tr>
                     </thead>
                     <tbody className="min-h-[400px]">
+                      {emptyState && (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-12">
+                            <div className="mx-auto max-w-2xl rounded-lg border border-slate-300 bg-slate-50 p-6 text-center dark:border-gray-700 dark:bg-gray-900/60">
+                              <h3 className="text-xl font-bold text-slate-950 dark:text-white">{emptyState.title}</h3>
+                              <p className="mt-2 text-base font-semibold text-slate-600 dark:text-gray-300">{emptyState.body}</p>
+                              {emptyState.showAddButton && (
+                                <button
+                                  type="button"
+                                  onClick={() => router.push('/recipients/new')}
+                                  className="mt-5 inline-flex min-h-[44px] items-center justify-center rounded-lg bg-[#10b981] px-5 py-2 text-base font-semibold text-white transition-colors hover:bg-[#0f9f6e]"
+                                >
+                                  利用者追加
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
                       {serviceRecipients.map((recipient, index) => (
                         <tr 
                           key={recipient.id} 
@@ -921,6 +990,23 @@ export default function Dashboard() {
                 </div>
 
                 <div className="md:hidden">
+                  {emptyState && (
+                    <div className="p-4">
+                      <div className="rounded-lg border border-slate-300 bg-slate-50 p-5 text-center dark:border-gray-700 dark:bg-gray-900/60">
+                        <h3 className="text-lg font-bold text-slate-950 dark:text-white">{emptyState.title}</h3>
+                        <p className="mt-2 text-base font-semibold text-slate-600 dark:text-gray-300">{emptyState.body}</p>
+                        {emptyState.showAddButton && (
+                          <button
+                            type="button"
+                            onClick={() => router.push('/recipients/new')}
+                            className="mt-5 inline-flex min-h-[44px] w-full items-center justify-center rounded-lg bg-[#10b981] px-5 py-2 text-base font-semibold text-white transition-colors hover:bg-[#0f9f6e]"
+                          >
+                            利用者追加
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   {serviceRecipients.map((recipient) => (
                     <div 
                       key={recipient.id} 

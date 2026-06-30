@@ -177,7 +177,7 @@ export default function LandingPage() {
             </div>
             <div className="bg-white rounded-xl shadow-2xl ring-1 ring-slate-200 dark:bg-[#1A1A1A] dark:ring-0">
                 <Image
-                  src="/dashboard.png"
+                  src="/dashboard-20260630.png"
                   alt="ダッシュボード画面のスクリーンショット"
                   width={1200}
                   height={700}
@@ -189,21 +189,19 @@ export default function LandingPage() {
 
           {/* 機能2: 自動通知 */}
           <div className="grid lg:grid-cols-2 gap-16 items-center mb-32">
-            <div className="order-2 lg:order-1 rounded-xl overflow-hidden shadow-2xl">
-              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                <iframe
-                  className="absolute top-0 left-0 w-full h-full"
-                  src="https://www.youtube.com/embed/xAXWnT_kP2g"
-                  title="自動通知 & Googleカレンダー連携"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
+            <div className="order-2 lg:order-1 overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-slate-200 dark:bg-[#1A1A1A] dark:ring-gray-800">
+              <Image
+                src="/early_notice-20260630.png"
+                alt="更新期限通知とGmail連携の画面イメージ"
+                width={1200}
+                height={700}
+                className="h-auto w-full"
+              />
             </div>
             <div className="order-1 lg:order-2">
-              <h3 className="text-3xl font-bold mb-8">自動通知 & Googleカレンダー連携</h3>
+              <h3 className="text-3xl font-bold mb-8">自動通知 & Gmail連携</h3>
               <p className="text-slate-700 dark:text-gray-300 text-xl leading-relaxed mb-8">
-                更新期限が近づくと、アプリとカレンダーが自動でお知らせ。チーム全体で見落としを防ぎます。
+                更新期限が近づくと、アプリ内通知とGmail通知で自動的にお知らせ。担当者と管理者の見落としを防ぎます。
               </p>
               <ul className="space-y-4">
                 <li className="flex items-center text-slate-700 dark:text-gray-300 text-lg">
@@ -212,11 +210,11 @@ export default function LandingPage() {
                 </li>
                 <li className="flex items-center text-slate-700 dark:text-gray-300 text-lg">
                   <span className="text-[#10B981] mr-4 text-xl">✓</span>
-                  Googleカレンダー同期
+                  Gmailでの通知受信
                 </li>
                 <li className="flex items-center text-slate-700 dark:text-gray-300 text-lg">
                   <span className="text-[#10B981] mr-4 text-xl">✓</span>
-                  チーム全体への共有
+                  管理者・担当者への共有
                 </li>
               </ul>
             </div>
@@ -246,7 +244,7 @@ export default function LandingPage() {
             </div>
             <div className="bg-white rounded-xl shadow-2xl ring-1 ring-slate-200 dark:bg-[#1A1A1A] dark:ring-0">
               <Image
-                  src="/support_plan.png"
+                  src="/support_plan-20260630.png"
                   alt="ダッシュボード画面のスクリーンショット"
                   width={1200}
                   height={700}
@@ -288,7 +286,7 @@ export default function LandingPage() {
               </li>
               <li className="flex items-center text-lg">
                 <span className="text-[#10B981] mr-4 text-xl">✓</span>
-                <span>Googleカレンダー連携</span>
+                <span>Gmail通知連携</span>
               </li>
               <li className="flex items-center text-lg">
                 <span className="text-[#10B981] mr-4 text-xl">✓</span>

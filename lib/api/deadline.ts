@@ -1,5 +1,5 @@
 /**
- * 期限アラートAPI関数
+ * 更新期限のお知らせAPI関数
  */
 import { http } from '../http';
 import { DeadlineAlertResponse } from '@/types/deadline';

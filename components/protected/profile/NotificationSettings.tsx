@@ -81,13 +81,13 @@ export default function NotificationSettings() {
       } else if (message === 'VAPID_KEY_MISSING') {
         return 'システム設定エラーが発生しました。管理者にお問い合わせください';
       } else if (message.includes('Subscription not found')) {
-        return '購読データが見つかりません。再度システム通知を有効にしてください';
+        return '購読データが見つかりません。再度プッシュ通知を有効にしてください';
       } else if (message.includes('Service Worker')) {
         return 'Service Workerの登録に失敗しました。ページを再読み込みしてもう一度お試しください';
       }
     }
 
-    return 'システム通知の設定に失敗しました。ページを再読み込みしてもう一度お試しください';
+    return 'プッシュ通知の設定に失敗しました。ページを再読み込みしてもう一度お試しください';
   };
 
   const handleToggle = async (key: keyof NotificationPreferences) => {
@@ -110,7 +110,7 @@ export default function NotificationSettings() {
         try {
           await subscribe();
           await savePreferences(newPreferences);
-          toast.success('システム通知を有効にしました');
+          toast.success('プッシュ通知を有効にしました');
         } catch (error) {
           console.error('Failed to subscribe:', error);
           toast.error(getErrorMessage(error));
@@ -119,7 +119,7 @@ export default function NotificationSettings() {
         try {
           await unsubscribe();
           await savePreferences(newPreferences);
-          toast.success('システム通知を無効にしました');
+          toast.success('プッシュ通知を無効にしました');
         } catch (error) {
           console.error('Failed to unsubscribe:', error);
           toast.error(getErrorMessage(error));
@@ -151,7 +151,7 @@ export default function NotificationSettings() {
     <div className="bg-white border border-slate-300 text-slate-900 shadow-md rounded-lg p-6 font-semibold dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
       <h2 className="text-2xl font-semibold mb-5">通知設定</h2>
       <p className="text-slate-600 dark:text-gray-400 mb-7">
-        期限アラートやアクション承認をどのように受け取るか設定できます
+        更新期限のお知らせや承認通知をどのように受け取るか設定できます
       </p>
 
       <div className="space-y-4">
@@ -159,7 +159,7 @@ export default function NotificationSettings() {
           <div>
             <h3 className="text-lg font-semibold">アプリ内通知</h3>
             <p className="text-base text-slate-600 dark:text-gray-400">
-              アプリ内のトースト通知で受け取る
+              画面上の通知で受け取る
             </p>
           </div>
           <label className="relative inline-flex items-center cursor-pointer">
@@ -179,7 +179,7 @@ export default function NotificationSettings() {
             <div>
               <h3 className="text-lg font-semibold">メール通知</h3>
               <p className="text-base text-slate-600 dark:text-gray-400">
-                期限アラートをメールで受け取る（毎日9:00）
+                更新期限のお知らせをメールで受け取る（毎日9:00）
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -220,14 +220,14 @@ export default function NotificationSettings() {
         <div className="p-4 border border-slate-300 rounded-lg dark:border-gray-700">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="text-lg font-semibold">システム通知（Web Push）</h3>
+              <h3 className="text-lg font-semibold">プッシュ通知</h3>
               <p className="text-base text-slate-600 dark:text-gray-400">
-                デバイスのシステム通知で受け取る
+                端末の通知で受け取る
               </p>
 
               {!isSupported && (
                 <p className="text-base text-red-500 mt-2">
-                  お使いのブラウザはシステム通知をサポートしていません
+                  お使いのブラウザはプッシュ通知をサポートしていません
                 </p>
               )}
 
@@ -238,7 +238,7 @@ export default function NotificationSettings() {
                     <li>Safariで「共有」ボタンをタップ</li>
                     <li>「ホーム画面に追加」を選択</li>
                     <li>追加したアイコンからアプリを開く</li>
-                    <li>この設定画面でシステム通知を有効化</li>
+                    <li>この設定画面でプッシュ通知を有効化</li>
                   </ol>
                 </div>
               )}
@@ -278,7 +278,7 @@ export default function NotificationSettings() {
                 <option value={30}>30日前</option>
               </select>
               <p className="text-base text-slate-600 dark:text-gray-400 mt-1">
-                更新期限の何日前からWeb Push通知を送るか設定できます
+                更新期限の何日前からプッシュ通知を送るか設定できます
               </p>
             </div>
           )}

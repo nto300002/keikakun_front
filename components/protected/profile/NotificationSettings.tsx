@@ -81,9 +81,9 @@ export default function NotificationSettings() {
       } else if (message === 'VAPID_KEY_MISSING') {
         return 'システム設定エラーが発生しました。管理者にお問い合わせください';
       } else if (message.includes('Subscription not found')) {
-        return '購読データが見つかりません。再度プッシュ通知を有効にしてください';
+        return '通知設定が見つかりません。再度プッシュ通知を有効にしてください';
       } else if (message.includes('Service Worker')) {
-        return 'Service Workerの登録に失敗しました。ページを再読み込みしてもう一度お試しください';
+        return '通知機能の準備に失敗しました。ページを再読み込みしてもう一度お試しください';
       }
     }
 

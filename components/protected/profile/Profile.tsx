@@ -120,14 +120,10 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
       });
 
       setIsEditingName(false);
-      console.log('🎉 [Profile] 名前更新成功 - toastを表示します');
       toast.success('名前を更新しました');
-      console.log('🎉 [Profile] toast.success呼び出し完了');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error('❌ [Profile] 名前更新失敗:', message);
       toast.error(message || '名前の更新に失敗しました');
-      console.log('❌ [Profile] toast.error呼び出し完了');
     } finally {
       setIsLoading(false);
     }
@@ -160,9 +156,7 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
       setNewPassword('');
       setNewPasswordConfirm('');
 
-      console.log('🔐 [Profile] パスワード変更成功 - toastを表示します:', response.message);
       toast.success(response.message);
-      console.log('🔐 [Profile] toast.success呼び出し完了');
 
       // パスワード変更後はログアウトされるため、ログインページにリダイレクト
       setTimeout(() => {
@@ -170,9 +164,7 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
       }, 2000);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error('❌ [Profile] パスワード変更失敗:', message);
       toast.error(message || 'パスワードの変更に失敗しました');
-      console.log('❌ [Profile] toast.error呼び出し完了');
     } finally {
       setIsLoading(false);
     }
@@ -223,9 +215,7 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
       setEmailModalError(null);
 
       const message = `確認メールを ${newEmail} に送信しました。メール内のリンクをクリックして変更を完了してください。`;
-      console.log('📧 [Profile] メールアドレス変更リクエスト成功 - toastを表示します:', message);
       toast.success(message, { duration: 10000 });
-      console.log('📧 [Profile] toast.success呼び出し完了');
     } catch (err: unknown) {
       // サーバーエラーをモーダル内に表示
       const message = err instanceof Error ? err.message : String(err);
@@ -239,16 +229,12 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
   const handleFeedbackSubmit = async () => {
     // バリデーション
     if (!feedbackTitle.trim()) {
-      console.log('⚠️ [Profile] フィードバック件名が空 - エラーtoastを表示します');
       toast.error('件名を入力してください');
-      console.log('⚠️ [Profile] toast.error呼び出し完了');
       return;
     }
 
     if (!feedbackContent.trim()) {
-      console.log('⚠️ [Profile] フィードバック内容が空 - エラーtoastを表示します');
       toast.error('フィードバック内容を入力してください');
-      console.log('⚠️ [Profile] toast.error呼び出し完了');
       return;
     }
 
@@ -262,19 +248,15 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
         category: feedbackCategory,
       });
 
-      console.log('📬 [Profile] フィードバック送信成功 - toastを表示します:', response.message);
       toast.success(response.message || 'フィードバックを送信しました。ご協力ありがとうございます。');
-      console.log('📬 [Profile] toast.success呼び出し完了');
 
       // フォームをクリア
       setFeedbackTitle('');
       setFeedbackContent('');
       setFeedbackCategory('その他');
     } catch (error) {
-      console.error('❌ [Profile] フィードバック送信失敗:', error);
       const message = error instanceof Error ? error.message : String(error);
       toast.error(message || 'フィードバックの送信に失敗しました。しばらく時間をおいてからお試しください。');
-      console.log('❌ [Profile] toast.error呼び出し完了');
     } finally {
       setIsLoading(false);
     }

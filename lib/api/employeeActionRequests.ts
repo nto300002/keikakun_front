@@ -43,22 +43,7 @@ export const employeeActionRequestsApi = {
       ? `${API_V1_PREFIX}/employee-action-requests?${queryString}`
       : `${API_V1_PREFIX}/employee-action-requests`;
 
-    console.log('[DEBUG FRONTEND] Fetching employee action requests:', endpoint);
-    const response = await http.get<EmployeeActionRequestListResponse>(endpoint);
-    console.log('[DEBUG FRONTEND] Employee action requests response:', response);
-    console.log('[DEBUG FRONTEND] Requests count:', response?.requests?.length || 0);
-    if (response?.requests) {
-      response.requests.forEach((req, index) => {
-        console.log(`[DEBUG FRONTEND] Request ${index + 1}:`, {
-          id: req.id,
-          resource_type: req.resource_type,
-          action_type: req.action_type,
-          status: req.status,
-          request_data: req.request_data,
-        });
-      });
-    }
-    return response;
+    return http.get<EmployeeActionRequestListResponse>(endpoint);
   },
 
   /**

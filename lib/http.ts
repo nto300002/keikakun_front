@@ -138,8 +138,6 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
   // Cookie認証: credentials: 'include' により自動的にCookieが送信される
   // バックエンドはCookieから認証情報を取得する
-  // console.log('[DEBUG HTTP] Request URL:', url);
-  // console.log('[DEBUG HTTP] Environment:', typeof window === 'undefined' ? 'server' : 'client');
 
   const defaultHeaders: HeadersInit = {
     'Content-Type': 'application/json',
@@ -162,24 +160,17 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     },
   };
 
-  // console.log('[DEBUG HTTP] Request config:', { method: config.method || 'GET', headers: config.headers });
-
   const response = await fetch(url, config);
-  // console.log('[DEBUG HTTP] Response status:', response.status, response.statusText);
 
   if (!response.ok) {
-    console.error('[DEBUG HTTP] Response not OK. Status:', response.status);
     if (response.status === 401) {
       // 認証エラーの場合はログアウト処理
-      console.error('[DEBUG HTTP] 401 Unauthorized - triggering logout');
       await handleLogout();
       // エラーを投げて処理を中断
       throw new Error('認証されていません');
     }
     const errorData = await response.json().catch(() => ({ detail: `リクエストが失敗しました (ステータス: ${response.status})` }));
-    console.error('[DEBUG HTTP] Error data:', errorData);
     const errorMessage = formatErrorMessage(errorData);
-    console.error('[DEBUG HTTP] Formatted error message:', errorMessage);
     throw new Error(errorMessage);
   }
 

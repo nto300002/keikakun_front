@@ -7,6 +7,7 @@ import { authApi } from '@/lib/auth';
 import { StaffCreateData } from '@/types/staff';
 import TermsAgreement from '@/components/auth/TermsAgreement';
 import { validatePassword, ALLOWED_PASSWORD_SYMBOLS } from '@/lib/password-validation';
+import { useSlowLoadingMessage } from '@/hooks/useSlowLoadingMessage';
 
 export default function SignupForm() {
   const [formData, setFormData] = useState<StaffCreateData & { confirmPassword: string }> ({
@@ -25,6 +26,7 @@ export default function SignupForm() {
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const router = useRouter();
+  const showSlowLoadingMessage = useSlowLoadingMessage(isLoading);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -255,10 +257,19 @@ export default function SignupForm() {
             <button
               type="submit"
               disabled={isLoading || !termsAgreed || !privacyAgreed}
-              className="w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center justify-center gap-2"
             >
+              {isLoading && (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              )}
               {isLoading ? '作成中...' : 'アカウントを作成する'}
             </button>
+
+            {showSlowLoadingMessage && (
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">
+                登録処理に時間がかかっています。画面が変わらない場合は、通信状況を確認してページを更新してください。
+              </p>
+            )}
           </form>
 
           <div className="mt-6 text-center">

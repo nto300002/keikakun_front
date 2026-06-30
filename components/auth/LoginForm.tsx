@@ -6,6 +6,7 @@ import { authApi, tokenUtils } from '@/lib/auth';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai'; // アイコンをインポート
 import { toast } from '@/lib/toast-debug';
 import DeletedOfficeNotice from './DeletedOfficeNotice';
+import { useSlowLoadingMessage } from '@/hooks/useSlowLoadingMessage';
 
 export default function LoginForm() {
   const [formData, setFormData] = useState({
@@ -19,6 +20,7 @@ export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const messageShownRef = useRef(false); // メッセージ表示済みフラグ
+  const showSlowLoadingMessage = useSlowLoadingMessage(isLoading);
 
   // 自動認証チェックを削除: middlewareとDALパターンに委譲
   // これによりログインページでの不要な401エラーを防ぐ
@@ -27,23 +29,18 @@ export default function LoginForm() {
   useEffect(() => {
     // 既にメッセージを表示済みの場合はスキップ（重複防止）
     if (messageShownRef.current) {
-      console.log('📨 [LoginForm] メッセージは既に表示済みです。スキップします。');
       return;
     }
 
     const message = searchParams.get('message');
     if (message) {
-      console.log('📨 [LoginForm] クエリパラメータからメッセージを検出:', message);
-      console.log('📨 [LoginForm] toastを表示します');
       toast.success(decodeURIComponent(message));
-      console.log('📨 [LoginForm] toast.success呼び出し完了');
       messageShownRef.current = true; // 表示済みフラグを立てる
 
       // クエリパラメータをクリア
       const url = new URL(window.location.href);
       url.searchParams.delete('message');
       window.history.replaceState({}, '', url.toString());
-      console.log('📨 [LoginForm] クエリパラメータをクリアしました');
     }
   }, [searchParams]);
 
@@ -204,10 +201,19 @@ export default function LoginForm() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center justify-center gap-2"
             >
+              {isLoading && (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              )}
               {isLoading ? 'ログイン中...' : 'ログイン'}
             </button>
+
+            {showSlowLoadingMessage && (
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">
+                読み込みに時間がかかっています。画面が変わらない場合は、通信状況を確認してページを更新してください。
+              </p>
+            )}
           </form>
 
           <div className="mt-6 text-center">

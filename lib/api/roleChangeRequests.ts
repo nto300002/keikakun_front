@@ -39,22 +39,7 @@ export const roleChangeRequestsApi = {
       ? `${API_V1_PREFIX}/role-change-requests?${queryString}`
       : `${API_V1_PREFIX}/role-change-requests`;
 
-    console.log('[DEBUG FRONTEND] Fetching role change requests:', endpoint);
-    const response = await http.get<RoleChangeRequestListResponse>(endpoint);
-    console.log('[DEBUG FRONTEND] Role change requests response:', response);
-    console.log('[DEBUG FRONTEND] Requests count:', response?.requests?.length || 0);
-    if (response?.requests) {
-      response.requests.forEach((req, index) => {
-        console.log(`[DEBUG FRONTEND] Request ${index + 1}:`, {
-          id: req.id,
-          from_role: req.from_role,
-          requested_role: req.requested_role,
-          status: req.status,
-          request_notes: req.request_notes,
-        });
-      });
-    }
-    return response;
+    return http.get<RoleChangeRequestListResponse>(endpoint);
   },
 
   /**

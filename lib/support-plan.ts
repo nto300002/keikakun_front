@@ -50,14 +50,6 @@ export const supportPlanApi = {
   ): Promise<{ success: boolean; message: string }> => {
     const deliverableType = STEP_TO_DELIVERABLE_MAP[stepType] || stepType;
 
-    console.log('=== uploadDeliverable API Call ===');
-    console.log('recipientId:', recipientId);
-    console.log('cycleId:', cycleId);
-    console.log('stepType (from UI):', stepType);
-    console.log('deliverableType (mapped):', deliverableType);
-    console.log('file:', file.name, file.type, file.size);
-    console.log('STEP_TO_DELIVERABLE_MAP:', STEP_TO_DELIVERABLE_MAP);
-
     const formData = new FormData();
     formData.append('file', file);
     formData.append('plan_cycle_id', cycleId);
@@ -65,31 +57,17 @@ export const supportPlanApi = {
 
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
-    console.log('API URL:', `${API_BASE_URL}/api/v1/support-plans/plan-deliverables`);
-
     // Cookieで認証されるため、credentials: 'include'を追加
     return fetch(`${API_BASE_URL}/api/v1/support-plans/plan-deliverables`, {
       method: 'POST',
       credentials: 'include', // Cookie自動送信
       body: formData,
     }).then(async (res) => {
-      console.log('Response status:', res.status, res.statusText);
-
       if (!res.ok) {
-        const errorText = await res.text();
-        console.error('Response error body:', errorText);
-        try {
-          const errorJson = JSON.parse(errorText);
-          console.error('Parsed error:', errorJson);
-        } catch {
-          console.error('Could not parse error as JSON');
-        }
         throw new Error(`アップロードに失敗しました: ${res.status} ${res.statusText}`);
       }
 
-      const responseData = await res.json();
-      console.log('Response data:', responseData);
-      return responseData;
+      return res.json();
     });
   },
 

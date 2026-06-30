@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApi, tokenUtils } from '@/lib/auth';
+import { useSlowLoadingMessage } from '@/hooks/useSlowLoadingMessage';
 
 export default function MfaVerifyPage() {
   const [totpCode, setTotpCode] = useState('');
@@ -10,6 +11,7 @@ export default function MfaVerifyPage() {
   const [error, setError] = useState('');
   const [verifyAttempts, setVerifyAttempts] = useState(0);
   const router = useRouter();
+  const showSlowLoadingMessage = useSlowLoadingMessage(isLoading);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,10 +117,19 @@ export default function MfaVerifyPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center justify-center gap-2"
             >
+              {isLoading && (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              )}
               {isLoading ? '検証中...' : '検証'}
             </button>
+
+            {showSlowLoadingMessage && (
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">
+                認証に時間がかかっています。画面が変わらない場合は、通信状況を確認してページを更新してください。
+              </p>
+            )}
           </form>
         </div>
       </div>

@@ -9,6 +9,7 @@ import StepWizard from '@/components/ui/StepWizard';
 import { authApi } from '@/lib/auth';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import TermsAgreement from '@/components/auth/TermsAgreement';
+import { useSlowLoadingMessage } from '@/hooks/useSlowLoadingMessage';
 
 const signupSchema = z.object({
   last_name: z.string()
@@ -38,6 +39,7 @@ export default function AdminSignupForm() {
   const [termsAgreed, setTermsAgreed] = useState(false);
   const [privacyAgreed, setPrivacyAgreed] = useState(false);
   const router = useRouter();
+  const showSlowLoadingMessage = useSlowLoadingMessage(isLoading);
   
   const {
     register,
@@ -183,10 +185,19 @@ export default function AdminSignupForm() {
             <button
               type="submit"
               disabled={isLoading || !termsAgreed || !privacyAgreed}
-              className="w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none inline-flex items-center justify-center gap-2"
             >
+              {isLoading && (
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              )}
               {isLoading ? '作成中...' : 'アカウントを作成する'}
             </button>
+
+            {showSlowLoadingMessage && (
+              <p className="text-sm font-semibold text-slate-600 dark:text-gray-400">
+                登録処理に時間がかかっています。画面が変わらない場合は、通信状況を確認してページを更新してください。
+              </p>
+            )}
           </form>
 
           <div className="mt-6 text-center">

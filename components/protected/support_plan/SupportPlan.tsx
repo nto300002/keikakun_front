@@ -33,9 +33,6 @@ export default function SupportPlan() {
     const fetchData = async () => {
       if (!recipientId) return;
 
-      console.log('=== SupportPlan useEffect ===');
-      console.log('recipientId:', recipientId);
-
       try {
         setIsLoading(true);
         setError(null);
@@ -45,9 +42,6 @@ export default function SupportPlan() {
           welfareRecipientsApi.get(recipientId),
           supportPlanApi.getCycles(recipientId),
         ]);
-
-        console.log('recipientData:', recipientData);
-        console.log('cyclesData:', cyclesData);
 
         setRecipient(recipientData);
         setCycles(cyclesData.cycles || []);
@@ -112,10 +106,6 @@ export default function SupportPlan() {
   };
 
   const handleCellClick = (cycle: PlanCycle, stepType: string) => {
-    console.log('=== handleCellClick ===');
-    console.log('cycle:', cycle);
-    console.log('stepType (passed):', stepType);
-    console.log('cycle_number:', cycle.cycle_number);
     setSelectedCycle(cycle);
     setSelectedStepType(stepType);
     setIsModalOpen(true);
@@ -124,20 +114,13 @@ export default function SupportPlan() {
   const handleUpload = async (file: File) => {
     if (!selectedCycle) return;
 
-    console.log('=== handleUpload START ===');
-    console.log('recipientId:', recipientId);
-    console.log('cycleId:', selectedCycle.id);
-    console.log('stepType:', selectedStepType);
-    console.log('file:', file.name, file.type, file.size);
-
     try {
-      const result = await supportPlanApi.uploadDeliverable(
+      await supportPlanApi.uploadDeliverable(
         recipientId,
         selectedCycle.id,
         selectedStepType,
         file
       );
-      console.log('Upload success:', result);
 
       // アップロード成功後、データを再取得
       const cyclesData = await supportPlanApi.getCycles(recipientId);
@@ -149,10 +132,6 @@ export default function SupportPlan() {
       setIsModalOpen(false);
     } catch (err) {
       console.error('Failed to upload file:', err);
-      console.error('Error details:', {
-        message: err instanceof Error ? err.message : 'Unknown error',
-        stack: err instanceof Error ? err.stack : undefined
-      });
       // エラーメッセージを表示
       toast.error('PDFのアップロードに失敗しました');
       throw err; // モーダル側でエラーハンドリング

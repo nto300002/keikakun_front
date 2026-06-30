@@ -21,10 +21,9 @@ export const initializeCsrfToken = async (): Promise<boolean> => {
   try {
     const token = await csrfApi.getCsrfToken();
     setCsrfToken(token);
-    console.log('[CSRF] Token initialized successfully');
     return true;
-  } catch (error) {
-    console.error('[CSRF] Failed to initialize CSRF token:', error);
+  } catch {
+    console.error('[CSRF] Failed to initialize CSRF token');
     return false;
   }
 };
@@ -37,6 +36,5 @@ export const initializeCsrfToken = async (): Promise<boolean> => {
  * @returns リフレッシュが成功したかどうか
  */
 export const refreshCsrfToken = async (): Promise<boolean> => {
-  console.log('[CSRF] Refreshing CSRF token...');
   return await initializeCsrfToken();
 };

@@ -1,26 +1,20 @@
 const SW_VERSION = 'v2.0.0';
 
 self.addEventListener('install', () => {
-  console.log(`[Service Worker ${SW_VERSION}] Install event`);
   self.skipWaiting();
 });
 
 self.addEventListener('activate', (event) => {
-  console.log(`[Service Worker ${SW_VERSION}] Activate event`);
   event.waitUntil(self.clients.claim());
 });
 
 self.addEventListener('push', (event) => {
-  console.log(`[Service Worker ${SW_VERSION}] Push event received`);
-
   if (!event.data) {
-    console.log(`[Service Worker ${SW_VERSION}] Push event has no data`);
     return;
   }
 
   try {
     const data = event.data.json();
-    console.log(`[Service Worker ${SW_VERSION}] Push data:`, data);
 
     const options = {
       body: data.body || '',
@@ -37,16 +31,10 @@ self.addEventListener('push', (event) => {
       timestamp: Date.now()
     };
 
-    console.log(`[Service Worker ${SW_VERSION}] Showing notification with options:`, options);
-    console.log(`[Service Worker ${SW_VERSION}] Notification.permission:`, Notification.permission);
-
     event.waitUntil(
       self.registration.showNotification(data.title || '通知', options)
-        .then(() => {
-          console.log(`[Service Worker ${SW_VERSION}] ✅ Notification shown successfully`);
-        })
         .catch((error) => {
-          console.error(`[Service Worker ${SW_VERSION}] ❌ Failed to show notification:`, error);
+          console.error(`[Service Worker ${SW_VERSION}] Failed to show notification:`, error);
         })
     );
   } catch (error) {
@@ -55,8 +43,6 @@ self.addEventListener('push', (event) => {
 });
 
 self.addEventListener('notificationclick', (event) => {
-  console.log(`[Service Worker ${SW_VERSION}] Notification click event`);
-
   event.notification.close();
 
   const data = event.notification.data || {};
@@ -98,15 +84,12 @@ self.addEventListener('notificationclick', (event) => {
 });
 
 self.addEventListener('pushsubscriptionchange', (event) => {
-  console.log(`[Service Worker ${SW_VERSION}] Push subscription changed`);
-
   event.waitUntil(
     self.registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: null
     })
     .then((subscription) => {
-      console.log(`[Service Worker ${SW_VERSION}] Re-subscribed:`, subscription);
       return fetch('/api/v1/push-subscriptions/subscribe', {
         method: 'POST',
         headers: {

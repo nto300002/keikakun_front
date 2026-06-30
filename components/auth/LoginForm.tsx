@@ -27,23 +27,18 @@ export default function LoginForm() {
   useEffect(() => {
     // 既にメッセージを表示済みの場合はスキップ（重複防止）
     if (messageShownRef.current) {
-      console.log('📨 [LoginForm] メッセージは既に表示済みです。スキップします。');
       return;
     }
 
     const message = searchParams.get('message');
     if (message) {
-      console.log('📨 [LoginForm] クエリパラメータからメッセージを検出:', message);
-      console.log('📨 [LoginForm] toastを表示します');
       toast.success(decodeURIComponent(message));
-      console.log('📨 [LoginForm] toast.success呼び出し完了');
       messageShownRef.current = true; // 表示済みフラグを立てる
 
       // クエリパラメータをクリア
       const url = new URL(window.location.href);
       url.searchParams.delete('message');
       window.history.replaceState({}, '', url.toString());
-      console.log('📨 [LoginForm] クエリパラメータをクリアしました');
     }
   }, [searchParams]);
 

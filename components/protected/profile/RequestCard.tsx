@@ -34,13 +34,6 @@ const resourceTypeLabels: Record<ResourceType, string> = {
 };
 
 export default function RequestCard({ request, type, onDelete }: RequestCardProps) {
-  console.log('[DEBUG REQUEST_CARD] Rendering card for request:', {
-    type,
-    id: request.id,
-    status: request.status,
-    request,
-  });
-
   // ステータスに応じたスタイルとアイコン
   const getStatusStyle = (status: RequestStatus) => {
     switch (status) {

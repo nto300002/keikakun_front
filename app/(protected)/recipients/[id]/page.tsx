@@ -50,8 +50,6 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
       setIsLoadingUser(true);
       try {
         const userData = await authApi.getCurrentUser();
-        console.log('Current user data:', userData);
-        console.log('User role:', userData.role);
         setCurrentUser(userData);
       } catch (err) {
         console.error('Failed to fetch current user:', err);
@@ -109,21 +107,17 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
 
   const canEditOrDelete = () => {
     if (!currentUser) {
-      console.log('canEditOrDelete: no currentUser');
       return false;
     }
     const canEdit = ['manager', 'owner'].includes(currentUser.role);
-    console.log(`canEditOrDelete: role=${currentUser.role}, canEdit=${canEdit}`);
     return canEdit;
   };
 
   const isEmployee = () => {
     if (!currentUser) {
-      console.log('isEmployee: no currentUser');
       return false;
     }
     const employeeCheck = currentUser.role === 'employee';
-    console.log(`isEmployee: role=${currentUser.role}, isEmployee=${employeeCheck}`);
     return employeeCheck;
   };
 

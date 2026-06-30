@@ -225,9 +225,7 @@ export default function Dashboard() {
         ...params,
       };
 
-      console.log('Applying filters with params:', filterParams);
       const newDashboardData = await dashboardApi.getDashboardData(filterParams);
-      console.log('API Response:', newDashboardData);
 
       // recipients を必ず配列にする（API の不整合や null を防ぐ）
       if (newDashboardData) {

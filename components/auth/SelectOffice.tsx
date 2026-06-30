@@ -27,7 +27,6 @@ export default function SelectOffice() {
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : '事業所の読み込みに失敗しました';
         setError(errorMessage);
-        console.log(errorMessage);
       } finally {
         setIsLoading(false);
       }

@@ -20,9 +20,6 @@ export default function EditRecipientPage({ params }: { params: Promise<{ id: st
       setIsLoading(true);
       try {
         const data = await welfareRecipientsApi.get(resolvedParams.id);
-        console.log('[EditRecipientPage] Fetched recipient data:', data);
-        console.log('[EditRecipientPage] data.detail:', data.detail);
-        console.log('[EditRecipientPage] data.disability_status:', data.disability_status);
         setRecipient(data);
       } catch (err) {
         console.error('Failed to fetch recipient data:', err);

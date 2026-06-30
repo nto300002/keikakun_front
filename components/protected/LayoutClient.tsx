@@ -225,7 +225,6 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
           !(isIOS && !isPWA)
         ) {
           await subscribe();
-          console.log('[Auto-subscribe] Push notification subscribed on login');
         }
       } catch (error) {
         console.error('[Notifications] Failed to initialize notifications:', error);

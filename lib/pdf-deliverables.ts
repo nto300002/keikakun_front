@@ -9,8 +9,6 @@ export const pdfDeliverablesApi = {
    * PDF一覧を取得
    */
   async getList(params: PlanDeliverableSearchParams): Promise<PlanDeliverableListResponse> {
-    console.log('[DEBUG] pdfDeliverablesApi.getList called with params:', params);
-
     const searchParams = new URLSearchParams();
 
     // 必須パラメータ
@@ -28,11 +26,7 @@ export const pdfDeliverablesApi = {
     if (params.limit !== undefined) searchParams.append('limit', params.limit.toString());
 
     const endpoint = `/api/v1/support-plans/plan-deliverables?${searchParams.toString()}`;
-    console.log('[DEBUG] Requesting endpoint:', endpoint);
-
-    const response = await http.get<PlanDeliverableListResponse>(endpoint);
-    console.log('[DEBUG] Response received:', response);
-    return response;
+    return http.get<PlanDeliverableListResponse>(endpoint);
   },
 
   /**

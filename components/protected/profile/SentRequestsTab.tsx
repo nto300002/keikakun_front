@@ -22,23 +22,15 @@ export default function SentRequestsTab() {
     setIsLoading(true);
     setError(null);
     try {
-      console.log('[DEBUG SENT_REQUESTS_TAB] Loading requests with filter:', filter);
-
       // Role変更リクエストとEmployee制限リクエストを並行で取得
       const [roleChangeData, employeeActionData] = await Promise.all([
         roleChangeRequestsApi.getRequests().catch(() => ({ requests: [], total: 0 })),
         employeeActionRequestsApi.getRequests().catch(() => ({ requests: [], total: 0 })),
       ]);
 
-      console.log('[DEBUG SENT_REQUESTS_TAB] Role change data:', roleChangeData);
-      console.log('[DEBUG SENT_REQUESTS_TAB] Employee action data:', employeeActionData);
-
       // 安全にrequests配列にアクセス（undefinedの場合は空配列を使用）
       const roleChangeRequests = roleChangeData?.requests || [];
       const employeeActionRequests = employeeActionData?.requests || [];
-
-      console.log('[DEBUG SENT_REQUESTS_TAB] Role change requests count:', roleChangeRequests.length);
-      console.log('[DEBUG SENT_REQUESTS_TAB] Employee action requests count:', employeeActionRequests.length);
 
       // 両方のリクエストを結合して、作成日時でソート
       const combined: CombinedRequest[] = [
@@ -56,8 +48,6 @@ export default function SentRequestsTab() {
         return dateB - dateA; // 新しい順
       });
 
-      console.log('[DEBUG SENT_REQUESTS_TAB] Combined requests:', combined);
-
       // フィルターを適用
       const filtered = combined.filter((item) => {
         if (filter === 'pending') {
@@ -72,13 +62,10 @@ export default function SentRequestsTab() {
         return true; // 'all'
       });
 
-      console.log('[DEBUG SENT_REQUESTS_TAB] Filtered requests:', filtered);
-      console.log('[DEBUG SENT_REQUESTS_TAB] Setting requests to state, count:', filtered.length);
-
       setRequests(filtered);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error('[DEBUG SENT_REQUESTS_TAB] Error loading requests:', err);
+      console.error('リクエストの取得に失敗しました');
       setError(message || 'リクエストの取得に失敗しました');
       // エラー時も空配列を設定
       setRequests([]);

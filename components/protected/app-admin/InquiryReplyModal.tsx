@@ -38,7 +38,6 @@ export default function InquiryReplyModal({
         send_email: sendEmail,
       });
 
-      console.log('✅ [InquiryReplyModal] 返信送信成功:', response.message);
       toast.success(response.message || '返信を送信しました');
 
       // 成功時にコールバックを実行してモーダルを閉じる

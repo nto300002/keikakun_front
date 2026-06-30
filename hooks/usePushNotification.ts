@@ -172,7 +172,6 @@ export function usePushNotification(): UsePushNotificationReturn {
       );
 
       setIsSubscribed(true);
-      console.log('[usePushNotification] Successfully subscribed');
     } catch (err) {
       console.error('[usePushNotification] Subscribe error:', err);
       const errorMessage = err instanceof Error ? err.message : 'UNKNOWN_ERROR';
@@ -192,7 +191,6 @@ export function usePushNotification(): UsePushNotificationReturn {
 
       if (!registration) {
         // Service Workerが登録されていない場合は、既に購読解除済みとみなす
-        console.log('[usePushNotification] Service Worker not registered, assuming already unsubscribed');
         setIsSubscribed(false);
         return;
       }
@@ -201,7 +199,6 @@ export function usePushNotification(): UsePushNotificationReturn {
 
       if (!subscription) {
         // 購読が存在しない場合は、既に購読解除済みとみなす
-        console.log('[usePushNotification] No subscription found, assuming already unsubscribed');
         setIsSubscribed(false);
         return;
       }
@@ -222,7 +219,6 @@ export function usePushNotification(): UsePushNotificationReturn {
       }
 
       setIsSubscribed(false);
-      console.log('[usePushNotification] Successfully unsubscribed');
     } catch (err) {
       console.error('[usePushNotification] Unsubscribe error:', err);
       const errorMessage = err instanceof Error ? err.message : 'UNKNOWN_ERROR';

@@ -16,17 +16,13 @@ function VerifyEmailChangeContent() {
 
   useEffect(() => {
     if (!token) {
-      console.error('[DEBUG FRONT] No token found in URL');
+      console.error('メールアドレス変更トークンが見つかりません');
       return;
     }
 
-    console.log('[DEBUG FRONT] Token found:', token.substring(0, 10) + '...');
-
     const verify = async () => {
       try {
-        console.log('[DEBUG FRONT] Calling verifyEmailChange API...');
         const response = await profileApi.verifyEmailChange(token);
-        console.log('[DEBUG FRONT] API response:', response);
 
         setNewEmail(response.new_email);
         setStatus('success');
@@ -36,13 +32,10 @@ function VerifyEmailChangeContent() {
           router.push('/auth/login?message=メールアドレスを変更しました。新しいメールアドレスでログインしてください');
         }, 5000);
       } catch (err: unknown) {
-        console.error('[DEBUG FRONT] Error in verifyEmailChange:', err);
         setStatus('error');
         if (err instanceof Error) {
-          console.error('[DEBUG FRONT] Error message:', err.message);
           setError(err.message);
         } else {
-          console.error('[DEBUG FRONT] Unknown error:', err);
           setError('メールアドレスの変更に失敗しました。');
         }
       }

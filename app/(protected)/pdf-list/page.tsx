@@ -26,30 +26,24 @@ export default function PdfViewPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log('[DEBUG] Fetching user data...');
         // 認証チェック
         const currentUser = await authApi.getCurrentUser();
-        console.log('[DEBUG] Current user:', currentUser);
         setUserRole(currentUser.role);
 
         // office_idの取得
         if (!currentUser.office?.id) {
-          console.error('[ERROR] User has no office associated');
           router.push('/auth/select-office');
           return;
         }
-        console.log('[DEBUG] Office ID:', currentUser.office.id);
         setOfficeId(currentUser.office.id);
 
         // URLパラメータ取得
         const page = Number(searchParams.get('page')) || 1;
         const search = searchParams.get('search') || '';
         const recipientId = searchParams.get('recipient') || '';
-        console.log('[DEBUG] URL params - page:', page, 'search:', search, 'recipientId:', recipientId);
 
         // PDF一覧取得
         const skip = (page - 1) * 20;
-        console.log('[DEBUG] Calling pdfDeliverablesApi.getList with skip:', skip);
         const data = await pdfDeliverablesApi.getList({
           office_id: currentUser.office.id,
           skip,
@@ -58,14 +52,9 @@ export default function PdfViewPage() {
           recipient_ids: recipientId && recipientId !== 'all' ? recipientId : undefined,
         });
 
-        console.log('[DEBUG] PDF data received:', data);
         setPdfData(data);
-      } catch (error) {
-        console.error('[ERROR] Failed to fetch data:', error);
-        if (error instanceof Error) {
-          console.error('[ERROR] Error message:', error.message);
-          console.error('[ERROR] Error stack:', error.stack);
-        }
+      } catch {
+        console.error('PDF一覧の取得に失敗しました');
         router.push('/auth/login');
       } finally {
         setIsLoading(false);

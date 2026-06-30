@@ -1271,7 +1271,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
             <div className="mb-6 p-4 bg-slate-100 border border-slate-300 rounded-lg dark:bg-gray-700 dark:border-gray-600">
               <h4 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">リカバリーコード</h4>
               <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-3">
-                デバイスを紛失した場合に使用できるバックアップコードです。安全な場所に保管してください。
+                端末を紛失した場合に使用できるバックアップコードです。安全な場所に保管してください。
               </p>
               <div className="bg-slate-100 border border-slate-300 p-4 rounded">
                 <div className="grid grid-cols-2 gap-2">

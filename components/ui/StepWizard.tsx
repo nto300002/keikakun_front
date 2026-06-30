@@ -45,8 +45,8 @@ export default function StepWizard({ steps, className = '' }: StepWizardProps) {
               )}
             </li>
             {stepIdx < steps.length - 1 && (
-              <li aria-hidden="true" className="px-4 text-slate-400 dark:text-gray-500 sm:px-8">
-                &gt;
+              <li aria-hidden="true" className="px-3 sm:px-6">
+                <span className="block h-px w-8 bg-slate-300 dark:bg-gray-600 sm:w-14" />
               </li>
             )}
           </React.Fragment>

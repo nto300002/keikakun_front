@@ -8,8 +8,8 @@ import { noticesApi } from '@/lib/api/notices';
 import { messagesApi } from '@/lib/api/messages';
 import { deadlineApi } from '@/lib/api/deadline';
 import { initializeCsrfToken } from '@/lib/csrf';
-import { Notice } from '@/types/notice';
 import { DeadlineAlert } from '@/types/deadline';
+import { MessageInboxItem } from '@/types/message';
 import { BillingProvider } from '@/contexts/BillingContext';
 import PastDueModalWrapper from '@/components/billing/PastDueModalWrapper';
 import TrialExpiryBanner from '@/components/billing/TrialExpiryBanner';
@@ -47,8 +47,9 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   const [office, setOffice] = useState<OfficeResponse | null>(null);
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [isNoticeHovered, setIsNoticeHovered] = useState<boolean>(false);
-  const [recentUnreadNotices, setRecentUnreadNotices] = useState<Notice[]>([]);
-  const [noticesLoaded, setNoticesLoaded] = useState<boolean>(false);
+  const [recentUnreadMessages, setRecentUnreadMessages] = useState<MessageInboxItem[]>([]);
+  const [noticePopoverView, setNoticePopoverView] = useState<'deadlines' | 'messages'>('deadlines');
+  const [messagesLoaded, setMessagesLoaded] = useState<boolean>(false);
   const [isMounted, setIsMounted] = useState<boolean>(false);
   const [deadlineAlerts, setDeadlineAlerts] = useState<DeadlineAlert[]>([]);
   const [deadlineAlertsLoaded, setDeadlineAlertsLoaded] = useState<boolean>(false);
@@ -58,6 +59,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   const [showOfficeTooltip, setShowOfficeTooltip] = useState<boolean>(false);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const deadlineAlertsShownRef = useRef<boolean>(false);
+  const deadlineAlertsSessionKey = 'keikakun_deadline_alerts_toast_shown';
 
   // Push通知の自動購読機能
   const { isSupported, isSubscribed, subscribe, isPWA, isIOS } = usePushNotification();
@@ -76,44 +78,53 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
     }
   };
 
-  // 最新の未読通知を取得（最大2件、承認・却下のみ）
-  const fetchRecentUnreadNotices = async () => {
-    if (noticesLoaded) return; // 既に取得済みの場合はスキップ
+  // 最新の未読メッセージを取得（最大3件）
+  const fetchRecentUnreadMessages = async () => {
+    if (messagesLoaded) return;
 
     try {
-      const data = await noticesApi.getNotices({ is_read: false });
-
-      // 承認または却下された通知のみフィルタリング
-      const approvedOrRejectedNotices = data.notices.filter((notice) =>
-        notice.type === 'role_change_approved' ||
-        notice.type === 'role_change_rejected' ||
-        notice.type === 'employee_action_approved' ||
-        notice.type === 'employee_action_rejected'
-      );
-
-      // 最新2件を取得（created_atで降順ソート）
-      const sortedNotices = approvedOrRejectedNotices.sort((a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      );
-      setRecentUnreadNotices(sortedNotices.slice(0, 2));
-      setNoticesLoaded(true);
+      const data = await messagesApi.getInbox({ is_read: false, limit: 3 });
+      setRecentUnreadMessages(data.messages.slice(0, 3));
+      setMessagesLoaded(true);
     } catch (error) {
-      console.error('未読通知の取得に失敗しました', error);
+      console.error('未読メッセージの取得に失敗しました', error);
     }
   };
 
-  // 期限アラート取得（全件）- ログイン時のトースト用
-  const fetchDeadlineAlertsAll = async () => {
+  // 更新期限のお知らせ取得（全件）- ログイン時の通知用
+  const fetchDeadlineAlertsAll = async (): Promise<DeadlineAlert[] | null> => {
     try {
       const data = await deadlineApi.getAlerts({ threshold_days: 30 });
       return data.alerts;
     } catch (error) {
-      console.error('期限アラートの取得に失敗しました', error);
-      return [];
+      console.error('更新期限のお知らせの取得に失敗しました', error);
+      return null;
     }
   };
 
-  // 期限アラート取得（最大10件）- ホバー時のポップオーバー用
+  const showDeadlineAlertSummaryToasts = (alerts: DeadlineAlert[]) => {
+    const overdueCount = alerts.filter((alert) => alert.alert_type === 'renewal_overdue').length;
+    const deadlineCount = alerts.filter((alert) => alert.alert_type === 'renewal_deadline').length;
+    const assessmentIncompleteCount = alerts.filter(
+      (alert) => alert.alert_type === 'assessment_incomplete'
+    ).length;
+
+    if (overdueCount > 0) {
+      toast.error(`更新期限が過ぎている利用者が${overdueCount}件あります`, { duration: 7000 });
+    }
+
+    if (deadlineCount > 0) {
+      toast.warning(`更新期限が近い利用者が${deadlineCount}件あります`, { duration: 7000 });
+    }
+
+    if (assessmentIncompleteCount > 0) {
+      toast.warning(`アセスメント未完了の利用者が${assessmentIncompleteCount}件あります`, {
+        duration: 7000,
+      });
+    }
+  };
+
+  // 更新期限のお知らせ取得（最大10件）- ホバー時のポップオーバー用
   const fetchDeadlineAlerts = async (offset: number = 0) => {
     try {
       const data = await deadlineApi.getAlerts({ threshold_days: 30, limit: 10, offset });
@@ -130,7 +141,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
       setTotalDeadlineAlerts(data.total);
       setDeadlineAlertsOffset(offset + data.alerts.length);
     } catch (error) {
-      console.error('期限アラートの取得に失敗しました', error);
+      console.error('更新期限のお知らせの取得に失敗しました', error);
     }
   };
 
@@ -142,10 +153,9 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   // ホバー時の処理
   const handleNoticeHover = () => {
     setIsNoticeHovered(true);
-    if (unreadCount > 0) {
-      fetchRecentUnreadNotices();
-    }
-    // 期限アラートも取得（初回のみ）
+    setNoticePopoverView('deadlines');
+    fetchRecentUnreadMessages();
+    // 更新期限のお知らせも取得（初回のみ）
     if (!deadlineAlertsLoaded) {
       fetchDeadlineAlerts(0);
     }
@@ -186,32 +196,24 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
           push_threshold_days: number;
         }>('/api/v1/staffs/me/notification-preferences');
 
-        // アプリ内通知がONの場合のみ期限アラートのトーストを表示
-        if (preferences.in_app_notification && !deadlineAlertsShownRef.current) {
+        const hasShownDeadlineAlertsInSession =
+          typeof window !== 'undefined' &&
+          window.sessionStorage.getItem(deadlineAlertsSessionKey) === 'true';
+
+        // アプリ内通知がONの場合のみ、ブラウザセッションごとに1回だけ更新期限のお知らせを表示
+        if (
+          preferences.in_app_notification &&
+          !deadlineAlertsShownRef.current &&
+          !hasShownDeadlineAlertsInSession
+        ) {
           deadlineAlertsShownRef.current = true;
           const alerts = await fetchDeadlineAlertsAll();
-          alerts.forEach((alert) => {
-            // alert_typeに応じてメッセージとトースト種類を変更
-            let message: string;
-            let toastType: 'warning' | 'error' = 'warning';
-
-            if (alert.alert_type === 'assessment_incomplete') {
-              message = alert.message;
-            } else if (alert.alert_type === 'renewal_overdue') {
-              // 期限切れの場合は赤色のエラートースト
-              message = alert.message; // "!<利用者名>の更新期限が過ぎています!"
-              toastType = 'error';
-            } else {
-              // renewal_deadline: 通常の期限アラート
-              message = `${alert.full_name} 更新期限まで残り${alert.days_remaining}日`;
-            }
-
-            if (toastType === 'error') {
-              toast.error(message, { duration: 5000 });
-            } else {
-              toast.warning(message, { duration: 5000 });
-            }
-          });
+          if (alerts !== null) {
+            window.sessionStorage.setItem(deadlineAlertsSessionKey, 'true');
+            showDeadlineAlertSummaryToasts(alerts);
+          } else {
+            deadlineAlertsShownRef.current = false;
+          }
         }
 
         // system_notification=trueかつ未購読の場合のみPush通知を購読
@@ -376,11 +378,13 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                 >
                   プロフィール
                 </Link>
-                <div className="relative">
+                <div
+                  className="relative"
+                  onMouseEnter={handleNoticeHover}
+                  onMouseLeave={() => setIsNoticeHovered(false)}
+                >
                   <button
                     onClick={() => router.push('/notice')}
-                    onMouseEnter={handleNoticeHover}
-                    onMouseLeave={() => setIsNoticeHovered(false)}
                     className={`relative flex flex-col items-center gap-1 p-2 rounded-md transition-colors ${
                       pathname === '/notice'
                         ? 'bg-blue-50 text-blue-800 dark:bg-gray-700 dark:text-white'
@@ -401,111 +405,126 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                   </button>
 
                   {/* 通知プレビューポップオーバー */}
-                  {isMounted && isNoticeHovered && ((unreadCount > 0 && recentUnreadNotices.length > 0) || deadlineAlerts.length > 0) && (
+                  {isMounted && isNoticeHovered && (deadlineAlerts.length > 0 || recentUnreadMessages.length > 0) && (
                     <div
-                      className="absolute right-0 top-full mt-2 w-80 bg-white border border-slate-300 rounded-lg shadow-xl z-50 p-4 dark:bg-[#0f1419] dark:border-[#2a2a3e]"
-                      onMouseEnter={() => setIsNoticeHovered(true)}
-                      onMouseLeave={() => setIsNoticeHovered(false)}
+                      className="absolute right-0 top-full z-50 w-80 pt-2"
                     >
-                      {/* 未読通知セクション */}
-                      {unreadCount > 0 && recentUnreadNotices.length > 0 && (
-                        <>
-                          <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-slate-900 font-semibold text-base dark:text-white">最新の未読通知</h4>
-                            <span className="text-base font-semibold text-slate-500 dark:text-gray-400">{unreadCount}件</span>
-                          </div>
-                          <div className="space-y-2">
-                            {recentUnreadNotices.map((notice) => (
-                              <div
-                                key={notice.id}
-                                className="p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer border border-slate-200 dark:bg-gray-800/50 dark:hover:bg-gray-800 dark:border-gray-700/50"
-                                onClick={() => router.push('/notice')}
-                              >
-                                <div className="flex items-start justify-between gap-2 mb-1">
-                                  <h5 className="text-slate-900 text-base font-semibold line-clamp-1 dark:text-white">{notice.title}</h5>
-                                  <span className="inline-block w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5"></span>
-                                </div>
-                                <p className="text-slate-600 text-base font-semibold line-clamp-2 mb-2 dark:text-gray-400">{notice.content}</p>
-                                <time className="text-slate-500 text-base font-semibold dark:text-gray-500">
-                                  {new Date(notice.created_at).toLocaleString('ja-JP', {
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                  })}
-                                </time>
-                              </div>
-                            ))}
-                          </div>
-                          {unreadCount > 2 && (
-                            <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-700">
-                              <button
-                                onClick={() => router.push('/notice')}
-                                className="w-full text-center text-blue-400 hover:text-blue-300 text-base font-semibold transition-colors"
-                              >
-                                すべての通知を見る
-                              </button>
-                            </div>
-                          )}
-                        </>
-                      )}
+                      <div className="rounded-lg border border-slate-300 bg-white p-4 shadow-xl dark:border-[#2a2a3e] dark:bg-[#0f1419]">
+                        <div className="mb-3 flex items-center justify-between gap-3">
+                          <h4 className="text-slate-900 font-semibold text-base dark:text-white">
+                            {noticePopoverView === 'deadlines' ? '更新期限が近い利用者' : '未読メッセージ'}
+                          </h4>
+                          <button
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              setNoticePopoverView((view) => view === 'deadlines' ? 'messages' : 'deadlines');
+                            }}
+                            className="shrink-0 rounded-md border border-blue-300 px-3 py-1.5 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50 dark:border-blue-500/60 dark:text-blue-300 dark:hover:bg-blue-950/40"
+                          >
+                            {noticePopoverView === 'deadlines' ? '通知/メッセージ' : '更新期限'}
+                          </button>
+                        </div>
 
-                      {/* 期限アラートセクション */}
-                      {deadlineAlerts.length > 0 && (
-                        <>
-                          <div className={`${unreadCount > 0 && recentUnreadNotices.length > 0 ? 'mt-3 pt-3 border-t border-slate-200 dark:border-gray-700' : ''}`}>
-                            <div className="flex items-center justify-between mb-3">
-                              <h4 className="text-slate-900 font-semibold text-base dark:text-white">更新期限が近い利用者</h4>
+                        {noticePopoverView === 'deadlines' && (
+                          <>
+                            <div className="mb-3 flex items-center justify-end">
                               <span className="text-base font-semibold text-slate-500 dark:text-gray-400">{totalDeadlineAlerts}件</span>
                             </div>
-                            <div className="space-y-2">
-                              {deadlineAlerts.map((alert, index) => (
-                                <div
-                                  key={`${alert.id}-${alert.alert_type || 'renewal'}-${index}`}
-                                  className="p-3 bg-slate-50 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer border border-slate-200 flex items-center justify-between dark:bg-gray-800/50 dark:hover:bg-gray-800 dark:border-gray-700/50"
-                                  onClick={() => router.push(`/support_plan/${alert.id}`)}
+                            {deadlineAlerts.length > 0 ? (
+                              <div className="space-y-2">
+                                {deadlineAlerts.map((alert, index) => (
+                                  <div
+                                    key={`${alert.id}-${alert.alert_type || 'renewal'}-${index}`}
+                                    className="flex cursor-pointer items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:border-gray-700/50 dark:bg-gray-800/50 dark:hover:bg-gray-800"
+                                    onClick={() => router.push(`/support_plan/${alert.id}`)}
+                                  >
+                                    <div className="flex min-w-0 items-center gap-2">
+                                      <span className="text-orange-400">⚠️</span>
+                                      <span className="truncate text-base font-semibold text-slate-900 dark:text-white">{alert.full_name}</span>
+                                    </div>
+                                    <div className="ml-2 flex shrink-0 items-center gap-2">
+                                      {alert.alert_type === 'assessment_incomplete' ? (
+                                        <span className="text-base font-semibold text-red-400">アセスメント未完了</span>
+                                      ) : alert.alert_type === 'renewal_overdue' ? (
+                                        <span className="text-base font-semibold text-red-400">期限切れ</span>
+                                      ) : (
+                                        <span className={`text-base font-semibold ${
+                                          (alert.days_remaining ?? 0) <= 15 ? 'text-red-400' :
+                                          (alert.days_remaining ?? 0) <= 25 ? 'text-orange-400' :
+                                          'text-yellow-500 dark:text-yellow-400'
+                                        }`}>
+                                          残り{alert.days_remaining}日
+                                        </span>
+                                      )}
+                                      <span className="text-gray-500">→</span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center text-base font-semibold text-slate-600 dark:border-gray-700/50 dark:bg-gray-800/50 dark:text-gray-300">
+                                更新期限が近い利用者はいません
+                              </p>
+                            )}
+                            {deadlineAlertsOffset < totalDeadlineAlerts && (
+                              <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-700">
+                                <button
+                                  onClick={handleLoadMoreDeadlineAlerts}
+                                  className="w-full text-center text-blue-500 hover:text-blue-600 text-base font-semibold transition-colors dark:text-blue-400 dark:hover:text-blue-300"
                                 >
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-orange-400">⚠️</span>
-                                    <span className="text-slate-900 text-base font-semibold dark:text-white">{alert.full_name}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    {alert.alert_type === 'assessment_incomplete' ? (
-                                      <span className="text-base font-semibold text-red-400">
-                                        アセスメント未完了
-                                      </span>
-                                    ) : alert.alert_type === 'renewal_overdue' ? (
-                                      <span className="text-base text-red-400 font-semibold">
-                                        期限切れ
-                                      </span>
-                                    ) : (
-                                      <span className={`text-base font-semibold ${
-                                        (alert.days_remaining ?? 0) <= 15 ? 'text-red-400' :
-                                        (alert.days_remaining ?? 0) <= 25 ? 'text-orange-400' :
-                                        'text-yellow-400'
-                                      }`}>
-                                        残り{alert.days_remaining}日
-                                      </span>
-                                    )}
-                                    <span className="text-gray-500">→</span>
-                                  </div>
-                                </div>
-                              ))}
+                                  さらに表示
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {noticePopoverView === 'messages' && (
+                          <>
+                            <div className="mb-3 flex items-center justify-end">
+                              <span className="text-base font-semibold text-slate-500 dark:text-gray-400">{recentUnreadMessages.length}件</span>
                             </div>
-                          </div>
-                          {/* さらに表示ボタン（まだ表示していないデータがある場合） */}
-                          {deadlineAlertsOffset < totalDeadlineAlerts && (
+                            {recentUnreadMessages.length > 0 ? (
+                              <div className="space-y-2">
+                                {recentUnreadMessages.map((message) => (
+                                  <div
+                                    key={message.message_id}
+                                    className="cursor-pointer rounded-lg border border-slate-200 bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:border-gray-700/50 dark:bg-gray-800/50 dark:hover:bg-gray-800"
+                                    onClick={() => router.push('/notice')}
+                                  >
+                                    <div className="mb-1 flex items-start justify-between gap-2">
+                                      <h5 className="line-clamp-1 text-base font-semibold text-slate-900 dark:text-white">{message.title}</h5>
+                                      <span className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-blue-500"></span>
+                                    </div>
+                                    <p className="mb-2 line-clamp-2 text-base font-semibold text-slate-600 dark:text-gray-400">{message.content}</p>
+                                    <time className="text-base font-semibold text-slate-500 dark:text-gray-500">
+                                      {new Date(message.created_at).toLocaleString('ja-JP', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}
+                                    </time>
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center text-base font-semibold text-slate-600 dark:border-gray-700/50 dark:bg-gray-800/50 dark:text-gray-300">
+                                未読メッセージはありません
+                              </p>
+                            )}
                             <div className="mt-3 pt-3 border-t border-slate-200 dark:border-gray-700">
                               <button
-                                onClick={handleLoadMoreDeadlineAlerts}
-                                className="w-full text-center text-blue-400 hover:text-blue-300 text-base font-semibold transition-colors"
+                                onClick={() => router.push('/notice')}
+                                className="w-full text-center text-blue-500 hover:text-blue-600 text-base font-semibold transition-colors dark:text-blue-400 dark:hover:text-blue-300"
                               >
-                                さらに表示
+                                通知/メッセージを開く
                               </button>
                             </div>
-                          )}
-                        </>
-                      )}
+                          </>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>

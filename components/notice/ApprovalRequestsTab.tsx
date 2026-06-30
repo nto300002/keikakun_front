@@ -8,6 +8,17 @@ import { employeeActionRequestsApi } from '@/lib/api/employeeActionRequests';
 import NoticeCard from './NoticeCard';
 import { toast } from '@/lib/toast-debug';
 
+const approvalNoticeTypes = new Set<string>([
+  NoticeType.ROLE_CHANGE_PENDING,
+  NoticeType.ROLE_CHANGE_REQUEST_SENT,
+  NoticeType.ROLE_CHANGE_APPROVED,
+  NoticeType.ROLE_CHANGE_REJECTED,
+  NoticeType.EMPLOYEE_ACTION_PENDING,
+  NoticeType.EMPLOYEE_ACTION_REQUEST_SENT,
+  NoticeType.EMPLOYEE_ACTION_APPROVED,
+  NoticeType.EMPLOYEE_ACTION_REJECTED,
+]);
+
 export default function ApprovalRequestsTab() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [filter, setFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
@@ -19,7 +30,9 @@ export default function ApprovalRequestsTab() {
     try {
       // 全ての通知を取得
       const data = await noticesApi.getNotices({});
-      let filteredNotices = data?.notices || [];
+      let filteredNotices = (data?.notices || []).filter((notice) =>
+        approvalNoticeTypes.has(notice.type)
+      );
 
       // フィルタリング
       if (filter === 'pending') {
@@ -112,10 +125,10 @@ export default function ApprovalRequestsTab() {
     try {
       if (noticeType === NoticeType.ROLE_CHANGE_PENDING) {
         await roleChangeRequestsApi.rejectRequest(requestId);
-        toast.success('Role変更リクエストを却下しました');
+        toast.success('権限変更リクエストを却下しました');
       } else if (noticeType === NoticeType.EMPLOYEE_ACTION_PENDING) {
         await employeeActionRequestsApi.rejectRequest(requestId);
-        toast.success('Employee制限リクエストを却下しました');
+        toast.success('利用者の作成、編集、削除リクエストを却下しました');
       }
       await loadNotices();
     } catch (err: unknown) {

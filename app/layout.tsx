@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "けいかくん",
-  description: "ケイカくんは福祉サービス事業所向けの個別支援計画管理システムです。計画の作成から進捗管理、期限アラートまで、A型・B型事業所の業務効率化を実現。月額6,000円で無制限に利用可能。",
+  description: "ケイカくんは福祉サービス事業所向けの個別支援計画管理システムです。計画の作成から進捗管理、更新期限のお知らせまで、A型・B型事業所の業務効率化を実現。月額6,000円で無制限に利用可能。",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

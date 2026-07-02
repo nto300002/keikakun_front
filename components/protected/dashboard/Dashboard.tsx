@@ -3,14 +3,6 @@
 import Link from 'next/link';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { dashboardApi, DashboardParams } from '@/lib/dashboard';
-import { welfareRecipientsApi } from '@/lib/welfare-recipients';
-import { DashboardData } from '@/types/dashboard';
-import { authApi } from '@/lib/auth';
-import { StaffResponse } from '@/types/staff';
-import { billingApi } from '@/lib/api/billing';
-import { canWriteWithBillingStatus, getBillingRestrictionReason } from '@/lib/billing/status';
-import { BillingStatusResponse } from '@/types/billing';
 import MfaPrompt from '@/components/auth/MfaPrompt';
 import { SmartDropdown } from '@/components/ui/smart-dropdown';
 import { DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
@@ -20,33 +12,27 @@ import { useStaffRole } from '@/hooks/useStaffRole';
 import { ActionType, ResourceType } from '@/types/employeeActionRequest';
 import { toast } from '@/lib/toast-debug';
 import { ActiveFilters } from './ActiveFilters';
+import { canEditDashboard, buildBillingRestrictionWarning } from '@/lib/permissions/dashboard';
+import { useDashboardData } from '@/hooks/dashboard/useDashboardData';
+import { useDashboardFilters } from '@/hooks/dashboard/useDashboardFilters';
 
 // UI設計意図: 30〜60代の福祉職員向けに、主要情報はtext-base以上、操作はアイコン依存を避けた文字ボタンで表示する。
 // 変更概要: 期限・氏名・操作ボタンを拡大し、期限超過/絞り込み/並び替えを文字で判断できるようにした。
 export default function Dashboard() {
-  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
-  const [staff, setStaff] = useState<StaffResponse | null>(null);
-  const [billingStatus, setBillingStatus] = useState<BillingStatusResponse | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [sortBy, setSortBy] = useState('next_renewal_deadline');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const isLoadingRef = useRef(isLoading);
   const messageShownRef = useRef(false); // メッセージ表示済みフラグ
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [activeFilters, setActiveFilters] = useState<{
-    isOverdue: boolean;
-    isUpcoming: boolean;
-    hasAssessmentDue: boolean;
-    status: string | null;
-  }>({
-    isOverdue: false,
-    isUpcoming: false,
-    hasAssessmentDue: false,
-    status: null,
-  });
+  const {
+    dashboardData,
+    staff,
+    billingStatus,
+    isLoading,
+    isLoadingRef,
+    applyFilters,
+    fetchInitialData,
+    resetDashboardData,
+    deleteRecipient,
+  } = useDashboardData();
 
   // Employee Action Request Modal state
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
@@ -57,81 +43,37 @@ export default function Dashboard() {
 
   const { isEmployee } = useStaffRole();
 
-  // 編集可能かどうかの判定: MFA有効 かつ 課金ステータスが書き込み可能
-  const canEdit = useMemo(() => {
-    if (!staff || !billingStatus) return false;
+  const canEdit = useMemo(
+    () => canEditDashboard(staff, billingStatus),
+    [staff, billingStatus]
+  );
 
-    return staff.is_mfa_enabled && canWriteWithBillingStatus(billingStatus);
-  }, [staff, billingStatus]);
-
-  const billingRestrictionReason = useMemo(
-    () => getBillingRestrictionReason(billingStatus),
+  const billingRestrictionWarning = useMemo(
+    () => buildBillingRestrictionWarning(billingStatus),
     [billingStatus]
   );
 
-  const billingRestrictionWarning = (() => {
-    switch (billingRestrictionReason) {
-      case 'trial_expired':
-        return {
-          title: '無料試用期間が終了しているため利用できません',
-          body: '新規作成・編集・削除などの操作はご利用いただけません。オーナーの方は管理者設定の有料会員ページから有料会員に登録してください。',
-        };
-      case 'payment_failed':
-        return {
-          title: '有料会員料金のお支払いが失敗しているため利用できません',
-          body: '新規作成・編集・削除などの操作はご利用いただけません。オーナーの方は管理者設定の有料会員ページから支払い方法を更新してください。',
-        };
-      case 'past_due':
-        return {
-          title: 'お支払いの確認が必要なため利用できません',
-          body: '新規作成・編集・削除などの操作はご利用いただけません。オーナーの方は管理者設定の有料会員ページを確認してください。',
-        };
-      case 'canceled':
-        return {
-          title: '有料会員登録がキャンセル済みのため利用できません',
-          body: '新規作成・編集・削除などの操作はご利用いただけません。オーナーの方は管理者設定の有料会員ページから再度入会してください。',
-        };
-      default:
-        return null;
-    }
-  })();
+  const {
+    activeFilters,
+    searchTerm,
+    hasActiveDashboardFilter,
+    handleNextRenewalSortClick,
+    handleNameSortClick,
+    getSortButtonLabel,
+    handleSearch,
+    handleFilterToggle,
+    handleStatusFilter,
+    handleFilterRemove,
+    handleClearAllFilters,
+    resetFiltersForDisplayReset,
+  } = useDashboardFilters({
+    initialDeadlineAlert: searchParams.get('filter') === 'deadline_alert',
+    onApplyFilters: applyFilters,
+  });
 
   useEffect(() => {
-    isLoadingRef.current = isLoading;
-  }, [isLoading]);
-
-  useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        const [userData, data, billing] = await Promise.all([
-          authApi.getCurrentUser(),
-          dashboardApi.getDashboardData(),
-          billingApi.getBillingStatus()
-        ]);
-        setStaff(userData);
-        setDashboardData(data);
-        setBillingStatus(billing);
-      } catch (error) {
-        console.error('Failed to fetch initial data:', error);
-      }
-    };
-
     fetchInitialData();
-  }, []);
-
-  // クエリパラメータのfilterを読み取ってフィルターを設定
-  useEffect(() => {
-    const filter = searchParams.get('filter');
-    if (filter === 'deadline_alert') {
-      // 期限が近い利用者のみを表示するフィルター
-      setActiveFilters({
-        isOverdue: false,
-        isUpcoming: true,
-        hasAssessmentDue: false,
-        status: null,
-      });
-    }
-  }, [searchParams]);
+  }, [fetchInitialData]);
 
   // クエリパラメータからメッセージを読み取ってtoastを表示
   useEffect(() => {
@@ -172,178 +114,15 @@ export default function Dashboard() {
     url.searchParams.delete('hotbar_type');
     window.history.replaceState({}, '', url.toString());
   }, [searchParams]);
-
-
-
-
-  const handleNextRenewalSortClick = () => {
-    const newSortOrder = sortBy === 'next_renewal_deadline' && sortOrder === 'asc' ? 'desc' : 'asc';
-    setSortBy('next_renewal_deadline');
-    setSortOrder(newSortOrder);
-    applyFilters({
-      sortBy: 'next_renewal_deadline',
-      sortOrder: newSortOrder,
-      is_overdue: activeFilters.isOverdue,
-      is_upcoming: activeFilters.isUpcoming,
-      has_assessment_due: activeFilters.hasAssessmentDue,
-      status: activeFilters.status || undefined,
-    });
-  };
-
-  const handleNameSortClick = () => {
-    const newSortOrder = sortBy === 'name_phonetic' && sortOrder === 'asc' ? 'desc' : 'asc';
-    setSortBy('name_phonetic');
-    setSortOrder(newSortOrder);
-    applyFilters({
-      sortBy: 'name_phonetic',
-      sortOrder: newSortOrder,
-      is_overdue: activeFilters.isOverdue,
-      is_upcoming: activeFilters.isUpcoming,
-      has_assessment_due: activeFilters.hasAssessmentDue,
-      status: activeFilters.status || undefined,
-    });
-  };
-
-  const getSortButtonLabel = (targetSortBy: string) => {
-    if (sortBy !== targetSortBy) return '昇順';
-    return sortOrder === 'asc' ? '降順' : '昇順';
-  };
-
-  const handleSearch = useCallback(async (term: string) => {
-    setSearchTerm(term);
-    // デバウンス処理に委譲するため、ここでは即座にAPIは呼ばない
-  }, []);
-
-  const applyFilters = useCallback(async (params: Partial<DashboardParams> = {}) => {
-    if (isLoadingRef.current) return;
-    try {
-      setIsLoading(true);
-      const filterParams: DashboardParams = {
-        searchTerm: searchTerm,
-        sortBy: params.sortBy ?? sortBy,
-        sortOrder: (params.sortOrder as 'asc'|'desc') ?? sortOrder,
-        ...params,
-      };
-
-      const newDashboardData = await dashboardApi.getDashboardData(filterParams);
-
-      // recipients を必ず配列にする（API の不整合や null を防ぐ）
-      if (newDashboardData) {
-        if (!Array.isArray(newDashboardData.recipients)) {
-          console.warn('dashboardApi returned recipients not array:', newDashboardData.recipients);
-          // 安全のため空配列で初期化
-          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-          // @ts-ignore
-          newDashboardData.recipients = Array.isArray(newDashboardData.recipients) ? newDashboardData.recipients : [];
-        }
-      }
-      setDashboardData(newDashboardData);
-    } catch (error) {
-      console.error('Failed to apply filters:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [searchTerm, sortOrder, sortBy]);
-
-  // フィルタ切替ハンドラ（applyFilters を先に宣言していることが前提）
-  const handleFilterToggle = useCallback((filterType: 'isOverdue' | 'isUpcoming' | 'hasAssessmentDue', value: boolean) => {
-    setActiveFilters((prev) => {
-      const newFilters = { ...prev, [filterType]: value };
-      // 非同期呼び出しだが UI 側の状態更新は即時に行う -> エラー無視で発火
-      void applyFilters({
-        is_overdue: newFilters.isOverdue,
-        is_upcoming: newFilters.isUpcoming,
-        has_assessment_due: newFilters.hasAssessmentDue,
-        status: newFilters.status || undefined,
-      });
-      return newFilters;
-    });
-  }, [applyFilters]);
-
-  const handleStatusFilter = useCallback((status: string | null) => {
-    setActiveFilters((prev) => {
-      const newFilters = { ...prev, status };
-      void applyFilters({
-        is_overdue: newFilters.isOverdue,
-        is_upcoming: newFilters.isUpcoming,
-        has_assessment_due: newFilters.hasAssessmentDue,
-        status: status || undefined,
-      });
-      return newFilters;
-    });
-  }, [applyFilters]);
-
-  // フィルターを個別に解除
-  const handleFilterRemove = useCallback((filterKey: string) => {
-    if (filterKey === 'search') {
-      setSearchTerm('');
-      setDebouncedSearchTerm('');
-    } else {
-      setActiveFilters((prev) => {
-        const newFilters = { ...prev };
-        if (filterKey === 'status') {
-          newFilters.status = null;
-        } else {
-          // isOverdue, isUpcoming, hasAssessmentDue
-          (newFilters as Record<string, unknown>)[filterKey] = false;
-        }
-        void applyFilters({
-          is_overdue: newFilters.isOverdue,
-          is_upcoming: newFilters.isUpcoming,
-          has_assessment_due: newFilters.hasAssessmentDue,
-          status: newFilters.status || undefined,
-        });
-        return newFilters;
-      });
-    }
-  }, [applyFilters]);
-
-  // すべてのフィルターをクリア
-  const handleClearAllFilters = useCallback(() => {
-    setSearchTerm('');
-    setDebouncedSearchTerm('');
-    setActiveFilters({
-      isOverdue: false,
-      isUpcoming: false,
-      hasAssessmentDue: false,
-      status: null,
-    });
-    void applyFilters({
-      is_overdue: false,
-      is_upcoming: false,
-      has_assessment_due: false,
-      status: undefined,
-    });
-  }, [applyFilters]);
-
   const handleResetDisplay = useCallback(async () => {
     if (isLoadingRef.current) return;
-    setSearchTerm('');
-    setDebouncedSearchTerm('');
-    setSortBy('name_phonetic');
-    setSortOrder('asc');
-    setActiveFilters({
-      isOverdue: false,
-      isUpcoming: false,
-      hasAssessmentDue: false,
-      status: null,
-    });
+    resetFiltersForDisplayReset();
 
     try {
-      setIsLoading(true);
-      const resetData = await dashboardApi.getDashboardData();
-      if (resetData) {
-        if (!Array.isArray(resetData.recipients)) {
-          resetData.recipients = Array.isArray(resetData.recipients) ? resetData.recipients : [];
-        }
-      }
-      setDashboardData(resetData);
-    } catch (error) {
-      console.error('Failed to reset display:', error);
-    } finally {
-      setIsLoading(false);
+      await resetDashboardData();
+    } catch {
     }
-  }, []);
+  }, [isLoadingRef, resetDashboardData, resetFiltersForDisplayReset]);
 
   const handleDeleteRecipient = useCallback(async (recipientId: string, recipientName: string) => {
     // Employeeの場合はリクエスト申請モーダルを表示
@@ -355,33 +134,14 @@ export default function Dashboard() {
 
     // Manager/Ownerの場合は従来通り削除確認
     if (window.confirm(`${recipientName}を本当に削除しますか？この操作は元に戻せません。`)) {
-      try {
-        setIsLoading(true);
-
-        // APIを呼び出してバックエンドのデータを削除
-        await welfareRecipientsApi.delete(recipientId);
-
-        // フロントエンドの状態を直接更新してUIから即座に削除
-        setDashboardData(prevData => {
-          if (!prevData) return null;
-          const updatedRecipients = prevData.recipients.filter(
-            recipient => recipient.id !== recipientId
-          );
-          return { ...prevData, recipients: updatedRecipients };
-        });
-
-        // 削除成功をtoastで通知
+      const deleted = await deleteRecipient(recipientId);
+      if (deleted) {
         toast.success(`${recipientName}を削除しました`);
-
-      } catch (error) {
-        console.error('Failed to delete recipient:', error);
-        // toastでエラー通知
+      } else {
         toast.error('利用者の削除に失敗しました。ページをリロードして再度お試しください。');
-      } finally {
-        setIsLoading(false);
       }
     }
-  }, [isEmployee]);
+  }, [deleteRecipient, isEmployee]);
 
   const handleRequestSuccess = () => {
     // リクエスト送信成功時の処理
@@ -451,16 +211,6 @@ export default function Dashboard() {
     [dashboardData]
   );
 
-  const hasActiveDashboardFilter = useMemo(
-    () =>
-      Boolean(searchTerm) ||
-      activeFilters.isOverdue ||
-      activeFilters.isUpcoming ||
-      activeFilters.hasAssessmentDue ||
-      Boolean(activeFilters.status),
-    [activeFilters, searchTerm]
-  );
-
   const emptyState = useMemo(() => {
     if (serviceRecipients.length > 0) return null;
 
@@ -501,23 +251,6 @@ export default function Dashboard() {
     serviceRecipients.length,
   ]);
   
-  // 検索デバウンス（300ms）
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
-  // デバウンスされた検索実行
-  useEffect(() => {
-    if (debouncedSearchTerm !== searchTerm) return;
-    if (debouncedSearchTerm) {
-      applyFilters({ searchTerm: debouncedSearchTerm });
-    }
-  }, [debouncedSearchTerm, applyFilters, searchTerm]);
-
   // カウント計算のメモ化
   const { expiredCount, nearDeadlineCount, assessmentDueCount } = useMemo(() => {
     return serviceRecipients.reduce(

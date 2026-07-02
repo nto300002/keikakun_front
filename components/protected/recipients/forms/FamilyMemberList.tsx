@@ -45,7 +45,7 @@ export default function FamilyMemberList({
       await assessmentApi.familyMembers.delete(id);
       onRefresh();
     } catch (err) {
-      console.error('Failed to delete family member:', err);
+      console.error('Client operation failed');
       alert('家族情報の削除に失敗しました。');
     } finally {
       setDeletingId(null);

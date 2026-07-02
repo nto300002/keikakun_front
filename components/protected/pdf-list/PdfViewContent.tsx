@@ -100,7 +100,7 @@ export default function PdfViewContent({
           (a.last_name + a.first_name).localeCompare(b.last_name + b.first_name, 'ja')
         ));
       } catch (err) {
-        console.error('Failed to fetch recipients:', err);
+        console.error('Client operation failed');
       }
     };
 
@@ -135,7 +135,7 @@ export default function PdfViewContent({
         setPdfs(response.items);
         setTotal(response.total);
       } catch (err) {
-        console.error('Failed to fetch PDFs:', err);
+        console.error('Client operation failed');
         setError('PDF一覧の取得に失敗しました');
       } finally {
         setIsLoading(false);

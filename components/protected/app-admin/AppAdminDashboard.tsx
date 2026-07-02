@@ -29,7 +29,7 @@ export default function AppAdminDashboard({ staff }: AppAdminDashboardProps) {
       await authApi.logout();
       router.push('/auth/app-admin/login');
     } catch (error) {
-      console.error('ログアウトに失敗しました:', error);
+      console.error('Client operation failed');
     } finally {
       setIsLoggingOut(false);
     }

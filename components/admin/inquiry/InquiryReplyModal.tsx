@@ -55,7 +55,7 @@ export default function InquiryReplyModal({
         onSuccess();
       }
     } catch (err) {
-      console.error('返信の送信に失敗しました:', err);
+      console.error('Client operation failed');
       setError('返信の送信に失敗しました。もう一度お試しください。');
     } finally {
       setIsSubmitting(false);

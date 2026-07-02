@@ -33,12 +33,12 @@ self.addEventListener('push', (event) => {
 
     event.waitUntil(
       self.registration.showNotification(data.title || '通知', options)
-        .catch((error) => {
-          console.error(`[Service Worker ${SW_VERSION}] Failed to show notification:`, error);
+        .catch(() => {
+          console.error(`[Service Worker ${SW_VERSION}] Failed to show notification`);
         })
     );
-  } catch (error) {
-    console.error(`[Service Worker ${SW_VERSION}] Error parsing push data:`, error);
+  } catch {
+    console.error(`[Service Worker ${SW_VERSION}] Error parsing push data`);
   }
 });
 

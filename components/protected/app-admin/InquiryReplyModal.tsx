@@ -44,7 +44,7 @@ export default function InquiryReplyModal({
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('❌ [InquiryReplyModal] 返信送信失敗:', error);
+      console.error('Client operation failed');
       const message = error instanceof Error ? error.message : String(error);
       toast.error(message || '返信の送信に失敗しました');
     } finally {

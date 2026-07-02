@@ -43,7 +43,7 @@ export default function DeadlineAlertsTab() {
         setAlerts(data.alerts);
         setTotal(data.total);
       } catch (err) {
-        console.error('更新期限のお知らせの取得に失敗しました:', err);
+        console.error('Client operation failed');
         setError('更新期限のお知らせの取得に失敗しました。時間をおいて再度お試しください。');
       } finally {
         setIsLoading(false);

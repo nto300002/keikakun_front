@@ -64,8 +64,8 @@ export default function AppAdminLoginForm() {
         }
 
         router.push('/app-admin');
-      } catch (verifyError) {
-        console.error('User verification failed:', verifyError);
+      } catch {
+        console.error('User verification failed');
         setFormError('root', { message: '認証に失敗しました。もう一度お試しください。' });
       }
     } catch (error: unknown) {

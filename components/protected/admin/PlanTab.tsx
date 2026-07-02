@@ -39,7 +39,7 @@ export default function PlanTab() {
       // Stripe Checkoutページへリダイレクト
       window.location.href = url;
     } catch (err) {
-      console.error('Checkout Session作成エラー:', err);
+      console.error('Client operation failed');
       setErrorMessage(err instanceof Error ? err.message : '有料会員登録に失敗しました');
     } finally {
       setIsCreatingCheckout(false);
@@ -59,7 +59,7 @@ export default function PlanTab() {
         refreshBillingStatus();
       }, 3000);
     } catch (err) {
-      console.error('Portal Session作成エラー:', err);
+      console.error('Client operation failed');
       setErrorMessage(err instanceof Error ? err.message : '有料会員管理画面の表示に失敗しました');
     } finally {
       setIsCreatingPortal(false);

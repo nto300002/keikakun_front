@@ -112,7 +112,7 @@ export default function ApprovalRequestsTab() {
               setStatusFilter(e.target.value as typeof statusFilter);
               setCurrentPage(0);
             }}
-            className="bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+            className="bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           >
             <option value="">すべて</option>
             <option value="pending">承認待ち</option>
@@ -136,39 +136,39 @@ export default function ApprovalRequestsTab() {
         </div>
       )}
 
-      <div className="bg-gray-800 rounded-lg border border-gray-700">
+      <div className="bg-white rounded-lg border border-slate-300 dark:bg-gray-800 dark:border-gray-700">
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-400 mx-auto"></div>
-            <p className="text-gray-400 mt-4">読み込み中...</p>
+            <p className="text-slate-600 mt-4 dark:text-gray-400">読み込み中...</p>
           </div>
         ) : requests.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-gray-400">退会リクエストがありません</p>
+            <p className="text-slate-600 dark:text-gray-400">退会リクエストがありません</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-700">
+          <div className="divide-y divide-slate-200 dark:divide-gray-700">
             {requests.map((request) => (
-              <div key={request.id} className="p-4 hover:bg-gray-700/50">
+              <div key={request.id} className="p-4 hover:bg-slate-50 dark:hover:bg-gray-700/50">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <FaExclamationTriangle className="w-4 h-4 text-yellow-400" />
-                      <span className="font-semibold text-white">{request.title}</span>
+                      <span className="font-semibold text-slate-950 dark:text-white">{request.title}</span>
                       {getStatusBadge(request.status)}
                     </div>
-                    <p className="text-gray-300 text-base mb-2">{request.reason}</p>
-                    <div className="flex items-center gap-4 text-base text-gray-400">
+                    <p className="text-slate-700 text-base mb-2 dark:text-gray-300">{request.reason}</p>
+                    <div className="flex items-center gap-4 text-base text-slate-500 dark:text-gray-400">
                       <span>事務所: {request.office_name}</span>
                       <span>申請者: {request.requester_name}</span>
                       <span>申請日: {formatDate(request.created_at)}</span>
                     </div>
                     {request.reviewer_notes && (
-                      <div className="mt-3 p-3 bg-gray-700/50 rounded-lg">
-                        <p className="text-base text-gray-400 mb-1">
+                      <div className="mt-3 p-3 bg-slate-100 rounded-lg dark:bg-gray-700/50">
+                        <p className="text-base text-slate-500 mb-1 dark:text-gray-400">
                           {request.status === 'approved' ? '承認者コメント' : '却下理由'}:
                         </p>
-                        <p className="text-gray-300 text-base">{request.reviewer_notes}</p>
+                        <p className="text-slate-700 text-base dark:text-gray-300">{request.reviewer_notes}</p>
                       </div>
                     )}
                   </div>
@@ -203,21 +203,21 @@ export default function ApprovalRequestsTab() {
       {/* ページネーション */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-gray-400 text-base">
+          <p className="text-slate-600 text-base dark:text-gray-400">
             全 {total} 件中 {currentPage * ITEMS_PER_PAGE + 1} - {Math.min((currentPage + 1) * ITEMS_PER_PAGE, total)} 件を表示
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setCurrentPage(currentPage - 1)}
               disabled={currentPage === 0}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
             >
               前へ
             </button>
             <button
               onClick={() => setCurrentPage(currentPage + 1)}
               disabled={currentPage >= totalPages - 1}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
             >
               次へ
             </button>
@@ -228,10 +228,10 @@ export default function ApprovalRequestsTab() {
       {/* 承認確認モーダル */}
       {showApproveConfirm && selectedRequest && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-lg w-full">
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full dark:bg-gray-800">
             <div className="flex items-center gap-3 mb-4">
               <FaExclamationTriangle className="w-8 h-8 text-yellow-400" />
-              <h3 className="text-2xl font-bold text-white">退会承認の確認</h3>
+              <h3 className="text-2xl font-bold text-slate-950 dark:text-white">退会承認の確認</h3>
             </div>
             <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-4">
               <p className="text-red-400 text-base">
@@ -239,9 +239,9 @@ export default function ApprovalRequestsTab() {
                 30日後にデータは完全に削除されます。
               </p>
             </div>
-            <div className="mb-4 p-3 bg-gray-700 rounded-lg">
-              <p className="text-base text-gray-400 mb-1">タイトル: {selectedRequest.title}</p>
-              <p className="text-gray-300">{selectedRequest.reason}</p>
+            <div className="mb-4 p-3 bg-slate-100 rounded-lg dark:bg-gray-700">
+              <p className="text-base text-slate-500 mb-1 dark:text-gray-400">タイトル: {selectedRequest.title}</p>
+              <p className="text-slate-700 dark:text-gray-300">{selectedRequest.reason}</p>
             </div>
             <div className="flex justify-end gap-2">
               <button
@@ -249,7 +249,7 @@ export default function ApprovalRequestsTab() {
                   setShowApproveConfirm(false);
                   setSelectedRequest(null);
                 }}
-                className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors"
+                className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
               >
                 キャンセル
               </button>
@@ -268,21 +268,21 @@ export default function ApprovalRequestsTab() {
       {/* 却下モーダル */}
       {selectedRequest && !showApproveConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 rounded-lg p-6 max-w-lg w-full">
-            <h3 className="text-2xl font-bold text-white mb-4">退会リクエストを却下</h3>
-            <div className="mb-4 p-3 bg-gray-700 rounded-lg">
-              <p className="text-base text-gray-400 mb-1">タイトル: {selectedRequest.title}</p>
-              <p className="text-gray-300">{selectedRequest.reason}</p>
+          <div className="bg-white rounded-lg p-6 max-w-lg w-full dark:bg-gray-800">
+            <h3 className="text-2xl font-bold text-slate-950 mb-4 dark:text-white">退会リクエストを却下</h3>
+            <div className="mb-4 p-3 bg-slate-100 rounded-lg dark:bg-gray-700">
+              <p className="text-base text-slate-500 mb-1 dark:text-gray-400">タイトル: {selectedRequest.title}</p>
+              <p className="text-slate-700 dark:text-gray-300">{selectedRequest.reason}</p>
             </div>
             <div className="mb-4">
-              <label className="block text-base text-gray-400 mb-2">
+              <label className="block text-base text-slate-600 mb-2 dark:text-gray-400">
                 却下理由 <span className="text-red-400">*</span>
               </label>
               <textarea
                 value={rejectReason}
                 onChange={(e) => setRejectReason(e.target.value)}
                 placeholder="却下理由を入力..."
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-500 h-32 resize-none"
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 h-32 resize-none dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
               />
             </div>
             <div className="flex justify-end gap-2">
@@ -291,7 +291,7 @@ export default function ApprovalRequestsTab() {
                   setSelectedRequest(null);
                   setRejectReason('');
                 }}
-                className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors"
+                className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
               >
                 キャンセル
               </button>

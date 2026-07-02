@@ -91,7 +91,7 @@ export default function AnnouncementsTab() {
           <button
             onClick={fetchAnnouncements}
             disabled={isLoading}
-            className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
           >
             <FaSync className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             更新
@@ -113,11 +113,11 @@ export default function AnnouncementsTab() {
 
       {/* 新規作成フォーム */}
       {showForm && (
-        <div className="bg-gray-800 rounded-lg border border-purple-500/30 p-6 mb-6">
-          <h3 className="text-xl font-bold text-white mb-4">新規お知らせを作成</h3>
+        <div className="bg-white rounded-lg border border-purple-300 p-6 mb-6 dark:bg-gray-800 dark:border-purple-500/30">
+          <h3 className="text-xl font-bold text-slate-950 mb-4 dark:text-white">新規お知らせを作成</h3>
           <div className="space-y-4">
             <div>
-              <label className="block text-base text-gray-400 mb-2">
+              <label className="block text-base text-slate-600 mb-2 dark:text-gray-400">
                 タイトル <span className="text-red-400">*</span>
               </label>
               <input
@@ -125,18 +125,18 @@ export default function AnnouncementsTab() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="お知らせのタイトル"
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-500"
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
               />
             </div>
             <div>
-              <label className="block text-base text-gray-400 mb-2">
+              <label className="block text-base text-slate-600 mb-2 dark:text-gray-400">
                 本文 <span className="text-red-400">*</span>
               </label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="お知らせの本文を入力..."
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-500 h-32 resize-none"
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 placeholder-slate-400 h-32 resize-none dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
               />
             </div>
             <div className="flex justify-end gap-2">
@@ -146,7 +146,7 @@ export default function AnnouncementsTab() {
                   setTitle('');
                   setContent('');
                 }}
-                className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors"
+                className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
               >
                 キャンセル
               </button>
@@ -164,34 +164,34 @@ export default function AnnouncementsTab() {
       )}
 
       {/* お知らせ履歴 */}
-      <div className="bg-gray-800 rounded-lg border border-gray-700">
-        <div className="p-4 border-b border-gray-700">
-          <h3 className="text-xl font-semibold text-white">送信履歴</h3>
+      <div className="bg-white rounded-lg border border-slate-300 dark:bg-gray-800 dark:border-gray-700">
+        <div className="p-4 border-b border-slate-200 dark:border-gray-700">
+          <h3 className="text-xl font-semibold text-slate-950 dark:text-white">送信履歴</h3>
         </div>
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-400 mx-auto"></div>
-            <p className="text-gray-400 mt-4">読み込み中...</p>
+            <p className="text-slate-600 mt-4 dark:text-gray-400">読み込み中...</p>
           </div>
         ) : announcements.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-gray-400">お知らせの履歴がありません</p>
+            <p className="text-slate-600 dark:text-gray-400">お知らせの履歴がありません</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-700">
+          <div className="divide-y divide-slate-200 dark:divide-gray-700">
             {announcements.map((announcement) => (
-              <div key={announcement.id} className="p-4 hover:bg-gray-700/50">
+              <div key={announcement.id} className="p-4 hover:bg-slate-50 dark:hover:bg-gray-700/50">
                 <div className="flex items-start gap-3">
                   <FaBullhorn className="w-5 h-5 text-purple-400 mt-1 flex-shrink-0" />
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
-                      <h4 className="font-semibold text-white">{announcement.title}</h4>
-                      <span className="text-base text-gray-400">
+                      <h4 className="font-semibold text-slate-950 dark:text-white">{announcement.title}</h4>
+                      <span className="text-base text-slate-500 dark:text-gray-400">
                         {formatDate(announcement.created_at)}
                       </span>
                     </div>
-                    <p className="text-gray-300 text-base whitespace-pre-wrap">{announcement.content}</p>
-                    <p className="text-base text-gray-400 mt-2">
+                    <p className="text-slate-700 text-base whitespace-pre-wrap dark:text-gray-300">{announcement.content}</p>
+                    <p className="text-base text-slate-500 mt-2 dark:text-gray-400">
                       送信者: {announcement.sender_name}
                     </p>
                   </div>
@@ -205,21 +205,21 @@ export default function AnnouncementsTab() {
       {/* ページネーション */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-gray-400 text-base">
+          <p className="text-slate-600 text-base dark:text-gray-400">
             全 {total} 件中 {currentPage * ITEMS_PER_PAGE + 1} - {Math.min((currentPage + 1) * ITEMS_PER_PAGE, total)} 件を表示
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setCurrentPage(currentPage - 1)}
               disabled={currentPage === 0}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
             >
               前へ
             </button>
             <button
               onClick={() => setCurrentPage(currentPage + 1)}
               disabled={currentPage >= totalPages - 1}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
             >
               次へ
             </button>

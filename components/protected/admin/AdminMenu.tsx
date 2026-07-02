@@ -236,13 +236,13 @@ export default function AdminMenu({ office }: AdminMenuProps) {
   const getRoleBadgeColor = (role: string) => {
     switch (role) {
       case 'owner':
-        return 'border-purple-500 text-purple-700 dark:text-purple-300';
+        return 'border-purple-300 bg-purple-50 text-purple-700 dark:border-purple-500 dark:bg-purple-950/30 dark:text-purple-300';
       case 'manager':
-        return 'border-blue-500 text-blue-700 dark:text-blue-300';
+        return 'border-blue-300 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-950/30 dark:text-blue-300';
       case 'employee':
-        return 'border-green-500 text-green-700 dark:text-green-300';
+        return 'border-green-300 bg-green-50 text-green-700 dark:border-green-500 dark:bg-green-950/30 dark:text-green-300';
       default:
-        return 'border-slate-400 text-slate-700 dark:text-slate-300';
+        return 'border-slate-300 bg-slate-50 text-slate-700 dark:border-slate-500 dark:bg-slate-800 dark:text-slate-300';
     }
   };
 
@@ -608,28 +608,28 @@ export default function AdminMenu({ office }: AdminMenuProps) {
               <h2 className="text-2xl font-bold mb-4">事業所設定</h2>
 
               {mfaSuccess && (
-                <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                  <p className="text-green-400 text-base">{mfaSuccess}</p>
+                <div className="mb-4 p-4 bg-green-50 border border-green-300 rounded-lg dark:bg-green-950/40 dark:border-green-700">
+                  <p className="text-green-700 text-base dark:text-green-300">{mfaSuccess}</p>
                 </div>
               )}
 
               {mfaError && (
-                <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                  <p className="text-red-400 text-base font-semibold">エラー</p>
-                  <p className="text-red-400 text-base font-semibold mt-1">{mfaError}</p>
+                <div className="mb-4 p-4 bg-red-50 border border-red-300 rounded-lg dark:bg-red-950/40 dark:border-red-700">
+                  <p className="text-red-700 text-base font-semibold dark:text-red-300">エラー</p>
+                  <p className="text-red-700 text-base font-semibold mt-1 dark:text-red-300">{mfaError}</p>
                 </div>
               )}
 
               {deleteStaffSuccess && (
-                <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                  <p className="text-green-400 text-base">{deleteStaffSuccess}</p>
+                <div className="mb-4 p-4 bg-green-50 border border-green-300 rounded-lg dark:bg-green-950/40 dark:border-green-700">
+                  <p className="text-green-700 text-base dark:text-green-300">{deleteStaffSuccess}</p>
                 </div>
               )}
 
               {deleteStaffError && (
-                <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                  <p className="text-red-400 text-base font-semibold">エラー</p>
-                  <p className="text-red-400 text-base font-semibold mt-1">{deleteStaffError}</p>
+                <div className="mb-4 p-4 bg-red-50 border border-red-300 rounded-lg dark:bg-red-950/40 dark:border-red-700">
+                  <p className="text-red-700 text-base font-semibold dark:text-red-300">エラー</p>
+                  <p className="text-red-700 text-base font-semibold mt-1 dark:text-red-300">{deleteStaffError}</p>
                 </div>
               )}
 
@@ -722,7 +722,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
               <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-3">
                 QRコードをスキャンできない場合は、以下のキーを手動で入力してください。
               </p>
-              <div className="bg-slate-100 border border-slate-300 p-3 rounded font-mono text-base text-slate-900 dark:text-white break-all">
+              <div className="bg-slate-50 border border-slate-300 p-3 rounded font-mono text-base text-slate-900 dark:bg-gray-900 dark:border-gray-600 dark:text-white break-all">
                 {mfaSetupData.secret_key}
               </div>
             </div>
@@ -733,7 +733,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
               <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-3">
                 端末を紛失した場合に使用できるバックアップコードです。安全な場所に保管してください。
               </p>
-              <div className="bg-slate-100 border border-slate-300 p-4 rounded">
+              <div className="bg-slate-50 border border-slate-300 p-4 rounded dark:bg-gray-900 dark:border-gray-600">
                 <div className="grid grid-cols-2 gap-2">
                   {mfaSetupData.recovery_codes.map((code, index) => (
                     <div key={index} className="font-mono text-base text-slate-900 dark:text-white">
@@ -789,15 +789,15 @@ export default function AdminMenu({ office }: AdminMenuProps) {
           <div className="bg-white rounded-lg border border-slate-300 shadow-xl dark:bg-gray-800 dark:border-gray-700 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-300 dark:border-gray-700">
               <h2 className="text-2xl font-bold text-slate-900 dark:text-white">２段階認証一括有効化結果</h2>
-              <p className="text-green-400 mt-2">
+              <p className="text-green-700 mt-2 dark:text-green-300">
                 {bulkMfaResultData.enabled_count}名のスタッフの２段階認証を有効化しました
               </p>
             </div>
 
             <div className="p-6">
-              <div className="mb-4 p-4 bg-yellow-900/50 border border-yellow-500 rounded-lg">
-                <p className="text-yellow-400 text-base font-semibold">重要</p>
-                <p className="text-yellow-400 text-base font-semibold mt-1">
+              <div className="mb-4 p-4 bg-yellow-50 border border-yellow-400 rounded-lg dark:bg-yellow-950/40 dark:border-yellow-600">
+                <p className="text-yellow-800 text-base font-semibold dark:text-yellow-300">重要</p>
+                <p className="text-yellow-800 text-base font-semibold mt-1 dark:text-yellow-300">
                   以下の情報を各スタッフに安全な方法で伝えてください。QRコードをスキャンしてTOTPアプリに登録し、リカバリーコードは安全な場所に保管してください。
                 </p>
               </div>
@@ -826,17 +826,17 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                       <div>
                         <div className="mb-4">
                           <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">シークレットキー</p>
-                          <code className="block bg-slate-900 text-green-300 p-2 rounded text-sm break-all dark:bg-gray-900 dark:text-green-400">
+                          <code className="block bg-slate-50 border border-slate-300 text-slate-900 p-2 rounded text-sm break-all dark:bg-gray-900 dark:border-gray-600 dark:text-green-300">
                             {staffData.secret_key}
                           </code>
                         </div>
 
                         <div>
                           <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">リカバリーコード（10個）</p>
-                          <div className="bg-slate-900 border border-slate-700 p-3 rounded max-h-40 overflow-y-auto dark:bg-gray-900 dark:border-transparent">
+                          <div className="bg-slate-50 border border-slate-300 p-3 rounded max-h-40 overflow-y-auto dark:bg-gray-900 dark:border-gray-600">
                             <div className="grid grid-cols-2 gap-2">
                               {staffData.recovery_codes.map((code, codeIndex) => (
-                                <code key={codeIndex} className="text-green-400 text-sm">
+                                <code key={codeIndex} className="text-slate-900 text-sm dark:text-green-300">
                                   {code}
                                 </code>
                               ))}

@@ -55,20 +55,10 @@ export const supportPlanApi = {
     formData.append('plan_cycle_id', cycleId);
     formData.append('deliverable_type', deliverableType);
 
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-    // Cookieで認証されるため、credentials: 'include'を追加
-    return fetch(`${API_BASE_URL}/api/v1/support-plans/plan-deliverables`, {
-      method: 'POST',
-      credentials: 'include', // Cookie自動送信
-      body: formData,
-    }).then(async (res) => {
-      if (!res.ok) {
-        throw new Error(`アップロードに失敗しました: ${res.status} ${res.statusText}`);
-      }
-
-      return res.json();
-    });
+    return http.postFormData<{ success: boolean; message: string }>(
+      '/api/v1/support-plans/plan-deliverables',
+      formData
+    );
   },
 
   /**
@@ -78,17 +68,10 @@ export const supportPlanApi = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-    // Cookieで認証されるため、credentials: 'include'を追加
-    return fetch(`${API_BASE_URL}/api/v1/support-plans/deliverables/${deliverableId}`, {
-      method: 'PUT',
-      credentials: 'include', // Cookie自動送信
-      body: formData,
-    }).then((res) => {
-      if (!res.ok) throw new Error('再アップロードに失敗しました');
-      return res.json();
-    });
+    return http.putFormData<{ success: boolean; message: string }>(
+      `/api/v1/support-plans/deliverables/${deliverableId}`,
+      formData
+    );
   },
 
   /**

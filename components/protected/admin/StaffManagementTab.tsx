@@ -115,16 +115,16 @@ export default function StaffManagementTab({
       </div>
 
       {bulkMfaError && (
-        <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-          <p className="text-red-400 text-base font-semibold">エラー</p>
-          <p className="text-red-400 text-base font-semibold mt-1">{bulkMfaError}</p>
+        <div className="mb-4 p-4 bg-red-50 border border-red-300 rounded-lg dark:bg-red-950/40 dark:border-red-700">
+          <p className="text-red-700 text-base font-semibold dark:text-red-300">エラー</p>
+          <p className="text-red-700 text-base font-semibold mt-1 dark:text-red-300">{bulkMfaError}</p>
         </div>
       )}
 
       {bulkMfaSuccess && !showBulkMfaResultModal && (
-        <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-          <p className="text-green-400 text-base font-semibold">成功</p>
-          <p className="text-green-400 text-base font-semibold mt-1">{bulkMfaSuccess}</p>
+        <div className="mb-4 p-4 bg-green-50 border border-green-300 rounded-lg dark:bg-green-950/40 dark:border-green-700">
+          <p className="text-green-700 text-base font-semibold dark:text-green-300">成功</p>
+          <p className="text-green-700 text-base font-semibold mt-1 dark:text-green-300">{bulkMfaSuccess}</p>
         </div>
       )}
 
@@ -136,9 +136,9 @@ export default function StaffManagementTab({
       )}
 
       {loadStaffsError && !isLoadingStaffs && (
-        <div className="p-4 bg-red-900/50 border border-red-500 rounded-lg">
-          <p className="text-red-400 text-base font-semibold">読み込みエラー</p>
-          <p className="text-red-400 text-base font-semibold mt-1">{loadStaffsError}</p>
+        <div className="p-4 bg-red-50 border border-red-300 rounded-lg dark:bg-red-950/40 dark:border-red-700">
+          <p className="text-red-700 text-base font-semibold dark:text-red-300">読み込みエラー</p>
+          <p className="text-red-700 text-base font-semibold mt-1 dark:text-red-300">{loadStaffsError}</p>
         </div>
       )}
 
@@ -198,7 +198,7 @@ export default function StaffManagementTab({
                           {staff.full_name}
                         </span>
                         {isDeleted && (
-                          <span className="px-2 py-1 rounded-lg text-sm font-semibold bg-red-900/50 text-red-400 border border-red-500">
+                          <span className="px-2 py-1 rounded-lg text-sm font-semibold bg-red-50 text-red-700 border border-red-300 dark:bg-red-950/40 dark:text-red-300 dark:border-red-700">
                             削除済み - 残り{remainingDays}日で完全削除
                           </span>
                         )}
@@ -217,8 +217,8 @@ export default function StaffManagementTab({
                         <span
                           className={`inline-flex min-w-20 justify-center rounded border px-3 py-1 text-base font-semibold items-center gap-1 ${
                             staff.is_mfa_enabled
-                              ? 'border-green-500 text-green-700 dark:text-green-300'
-                              : 'border-slate-400 text-slate-600 dark:border-gray-500 dark:text-gray-300'
+                              ? 'border-green-300 bg-green-50 text-green-700 dark:border-green-500 dark:bg-green-950/30 dark:text-green-300'
+                              : 'border-slate-300 bg-slate-50 text-slate-600 dark:border-gray-500 dark:bg-gray-800 dark:text-gray-300'
                           }`}
                         >
                           {staff.is_mfa_enabled ? (

@@ -58,15 +58,15 @@ export default function OfficeInfoTab({
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg mt-6 border border-red-300 shadow-sm dark:bg-gray-800 dark:border-red-500/30">
+      <div className="bg-white p-6 rounded-lg mt-6 border border-red-300 shadow-sm dark:bg-gray-800 dark:border-red-700/60">
         <div className="flex items-center gap-3 mb-4">
-          <MdExitToApp className="w-6 h-6 text-red-400" />
-          <h3 className="text-xl font-semibold text-red-400">退会</h3>
+          <MdExitToApp className="w-6 h-6 text-red-600 dark:text-red-300" />
+          <h3 className="text-xl font-semibold text-red-700 dark:text-red-300">退会</h3>
         </div>
 
         {withdrawalSuccess && (
-          <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-            <p className="text-green-400 text-base">{withdrawalSuccess}</p>
+          <div className="mb-4 p-4 bg-green-50 border border-green-300 rounded-lg dark:bg-green-950/40 dark:border-green-700">
+            <p className="text-green-700 text-base dark:text-green-300">{withdrawalSuccess}</p>
           </div>
         )}
 

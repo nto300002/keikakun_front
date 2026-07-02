@@ -39,7 +39,7 @@ export default function ServiceHistoryForm({
       }
       onSuccess();
     } catch (err) {
-      console.error('Failed to save service history:', err);
+      console.error('Client operation failed');
       if (err instanceof Error) {
         setError(err.message);
       } else {

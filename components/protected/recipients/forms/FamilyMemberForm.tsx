@@ -39,7 +39,7 @@ export default function FamilyMemberForm({
       }
       onSuccess();
     } catch (err) {
-      console.error('Failed to save family member:', err);
+      console.error('Client operation failed');
       if (err instanceof Error) {
         setError(err.message);
       } else {

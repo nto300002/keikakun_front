@@ -47,7 +47,7 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
         const officeData = await officeApi.getMyOffice();
         setOffice(officeData);
       } catch (error) {
-        console.error('事業所情報の取得に失敗しました:', error);
+        console.error('Client operation failed');
       }
     };
     fetchOffice();

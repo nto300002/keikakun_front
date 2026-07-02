@@ -58,7 +58,7 @@ export default function EmployeeActionRequestModal({
       onClose();
       setNotes('');
     } catch (err) {
-      console.error('Failed to create employee action request:', err);
+      console.error('Client operation failed');
       if (err instanceof Error) {
         setError(err.message);
       } else {

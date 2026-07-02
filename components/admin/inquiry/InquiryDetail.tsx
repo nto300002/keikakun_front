@@ -49,7 +49,7 @@ export default function InquiryDetail({ inquiryId, onBack, onOpenReply }: Inquir
         },
       });
     } catch (err) {
-      console.error('ステータスの更新に失敗しました:', err);
+      console.error('Client operation failed');
     } finally {
       setIsUpdating(false);
     }
@@ -69,7 +69,7 @@ export default function InquiryDetail({ inquiryId, onBack, onOpenReply }: Inquir
         },
       });
     } catch (err) {
-      console.error('優先度の更新に失敗しました:', err);
+      console.error('Client operation failed');
     } finally {
       setIsUpdating(false);
     }

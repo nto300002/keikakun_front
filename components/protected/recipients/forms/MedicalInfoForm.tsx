@@ -34,7 +34,7 @@ export default function MedicalInfoForm({
       await assessmentApi.medicalInfo.createOrUpdate(recipientId, formData);
       onSuccess();
     } catch (err) {
-      console.error('Failed to save medical info:', err);
+      console.error('Client operation failed');
       if (err instanceof Error) {
         setError(err.message);
       } else {

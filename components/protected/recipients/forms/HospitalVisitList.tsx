@@ -41,7 +41,7 @@ export default function HospitalVisitList({
       await assessmentApi.hospitalVisits.delete(id);
       onRefresh();
     } catch (err) {
-      console.error('Failed to delete hospital visit:', err);
+      console.error('Client operation failed');
       alert('通院歴の削除に失敗しました。');
     } finally {
       setDeletingId(null);

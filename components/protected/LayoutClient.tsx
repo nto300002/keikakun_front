@@ -62,6 +62,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
   const [showOfficeTooltip, setShowOfficeTooltip] = useState<boolean>(false);
   const noticePopoverRef = useRef<HTMLDivElement | null>(null);
   const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const unreadCountIntervalRef = useRef<number | null>(null);
   const deadlineAlertsShownRef = useRef<boolean>(false);
   const deadlineDrawerHintShownRef = useRef<boolean>(false);
   const deadlineAlertsSessionKey = 'keikakun_deadline_alerts_toast_shown';
@@ -189,10 +190,6 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
         .catch(() => {});
     }
 
-    // 初回の未読件数取得
-    fetchUnreadCount();
-    fetchDeadlineAlerts(0);
-
     // 通知設定を取得し、トースト表示とPush購読を実行（ログイン時のみ、1回だけ）
     const initializeNotifications = async () => {
       try {
@@ -240,15 +237,27 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
       }
     };
 
-    initializeNotifications();
-
-    // 30秒ごとに未読件数を更新
-    const interval = setInterval(() => {
+    const notificationInitTimer = window.setTimeout(() => {
       fetchUnreadCount();
-    }, 30000); // 30秒
+      fetchDeadlineAlerts(0);
+      initializeNotifications();
+    }, 1200);
+
+    // 初期描画後に30秒ごとの未読件数更新を開始
+    const intervalStartTimer = window.setTimeout(() => {
+      const interval = window.setInterval(() => {
+        fetchUnreadCount();
+      }, 30000);
+      unreadCountIntervalRef.current = interval;
+    }, 1200);
 
     return () => {
-      clearInterval(interval);
+      window.clearTimeout(notificationInitTimer);
+      window.clearTimeout(intervalStartTimer);
+      if (unreadCountIntervalRef.current) {
+        window.clearInterval(unreadCountIntervalRef.current);
+        unreadCountIntervalRef.current = null;
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

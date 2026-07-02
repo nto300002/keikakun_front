@@ -4,6 +4,8 @@ import { useState } from 'react';
 import InquiryList from '@/components/admin/inquiry/InquiryList';
 import InquiryDetail from '@/components/admin/inquiry/InquiryDetail';
 import InquiryReplyModal from '@/components/admin/inquiry/InquiryReplyModal';
+import type { InquiryFullResponse } from '@/types/inquiry';
+import { getReplyInquiryInfo, type ReplyInquiryInfo } from './newInquiriesTab.helpers';
 
 type ViewMode = 'list' | 'detail';
 
@@ -11,7 +13,7 @@ export default function NewInquiriesTab() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedInquiryId, setSelectedInquiryId] = useState<string | null>(null);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
-  const [replyInquiryId, setReplyInquiryId] = useState<string | null>(null);
+  const [replyInquiry, setReplyInquiry] = useState<ReplyInquiryInfo | null>(null);
 
   const handleSelectInquiry = (inquiryId: string) => {
     setSelectedInquiryId(inquiryId);
@@ -23,14 +25,14 @@ export default function NewInquiriesTab() {
     setViewMode('list');
   };
 
-  const handleOpenReply = (inquiryId: string) => {
-    setReplyInquiryId(inquiryId);
+  const handleOpenReply = (inquiry: InquiryFullResponse) => {
+    setReplyInquiry(getReplyInquiryInfo(inquiry));
     setIsReplyModalOpen(true);
   };
 
   const handleCloseReply = () => {
     setIsReplyModalOpen(false);
-    setReplyInquiryId(null);
+    setReplyInquiry(null);
   };
 
   const handleReplySuccess = () => {
@@ -56,13 +58,13 @@ export default function NewInquiriesTab() {
       )}
 
       {/* 返信モーダル */}
-      {isReplyModalOpen && replyInquiryId && (
+      {isReplyModalOpen && replyInquiry && (
         <InquiryReplyModal
           isOpen={isReplyModalOpen}
           onClose={handleCloseReply}
-          inquiryId={replyInquiryId}
-          inquiryTitle="問い合わせ件名" // TODO: 実際の件名を渡す
-          senderEmail="example@example.com" // TODO: 実際の送信者メールを渡す
+          inquiryId={replyInquiry.inquiryId}
+          inquiryTitle={replyInquiry.inquiryTitle}
+          senderEmail={replyInquiry.senderEmail}
           onSuccess={handleReplySuccess}
         />
       )}

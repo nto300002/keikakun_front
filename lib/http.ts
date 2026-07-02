@@ -17,6 +17,30 @@ export const setCsrfToken = (token: string) => {
  */
 export const getCsrfToken = () => csrfToken;
 
+const fetchCsrfToken = async (): Promise<string> => {
+  const response = await fetch(`${API_BASE_URL}/api/v1/csrf-token`, {
+    method: 'GET',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('CSRFトークンの取得に失敗しました');
+  }
+
+  const data = await response.json() as { csrf_token: string };
+  setCsrfToken(data.csrf_token);
+  return data.csrf_token;
+};
+
+const ensureCsrfToken = async (): Promise<string> => {
+  if (csrfToken) return csrfToken;
+  return fetchCsrfToken();
+};
+
+const isCsrfFailure = (response: Response, errorData: FastAPIErrorResponse): boolean => {
+  return response.status === 403 && errorData.detail === 'CSRF token validation failed';
+};
+
 // FastAPIのバリデーションエラーの型定義
 interface ValidationError {
   loc: (string | number)[];
@@ -147,8 +171,8 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   const method = options.method?.toUpperCase();
   const isStateMutatingMethod = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method || '');
 
-  if (isStateMutatingMethod && csrfToken) {
-    defaultHeaders['X-CSRF-Token'] = csrfToken;
+  if (isStateMutatingMethod) {
+    defaultHeaders['X-CSRF-Token'] = await ensureCsrfToken();
   }
 
   const config: RequestInit = {
@@ -170,6 +194,24 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
       throw new Error('認証されていません');
     }
     const errorData = await response.json().catch(() => ({ detail: `リクエストが失敗しました (ステータス: ${response.status})` }));
+    if (isStateMutatingMethod && isCsrfFailure(response, errorData)) {
+      const refreshedToken = await fetchCsrfToken();
+      const retryResponse = await fetch(url, {
+        ...config,
+        headers: {
+          ...defaultHeaders,
+          ...options.headers,
+          'X-CSRF-Token': refreshedToken,
+        },
+      });
+
+      if (retryResponse.ok) {
+        if (retryResponse.status === 204) {
+          return Promise.resolve(null as T);
+        }
+        return retryResponse.json();
+      }
+    }
     const errorMessage = formatErrorMessage(errorData);
     throw new Error(errorMessage);
   }
@@ -181,18 +223,21 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   return response.json();
 }
 
-async function requestWithFormData<T>(endpoint: string, formData: FormData): Promise<T> {
+async function requestWithFormData<T>(
+  endpoint: string,
+  formData: FormData,
+  method: 'POST' | 'PUT' = 'POST'
+): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  // POSTリクエストなので、CSRFトークンをヘッダーに追加
-  const headers: HeadersInit = {};
-  if (csrfToken) {
-    headers['X-CSRF-Token'] = csrfToken;
-  }
+  // 状態変更リクエストなので、CSRFトークンをヘッダーに追加
+  const headers: HeadersInit = {
+    'X-CSRF-Token': await ensureCsrfToken(),
+  };
 
   // Cookie認証: credentials: 'include' により自動的にCookieが送信される
   const config: RequestInit = {
-    method: 'POST',
+    method,
     credentials: 'include', // Cookie送信のため必須
     headers,
     body: formData,
@@ -207,6 +252,22 @@ async function requestWithFormData<T>(endpoint: string, formData: FormData): Pro
       throw new Error('認証されていません');
     }
     const errorData = await response.json().catch(() => ({ detail: `リクエストが失敗しました (ステータス: ${response.status})` }));
+    if (isCsrfFailure(response, errorData)) {
+      const refreshedToken = await fetchCsrfToken();
+      const retryResponse = await fetch(url, {
+        ...config,
+        headers: {
+          'X-CSRF-Token': refreshedToken,
+        },
+      });
+
+      if (retryResponse.ok) {
+        if (retryResponse.status === 204) {
+          return Promise.resolve(null as T);
+        }
+        return retryResponse.json();
+      }
+    }
     const errorMessage = formatErrorMessage(errorData);
     throw new Error(errorMessage);
   }
@@ -225,4 +286,5 @@ export const http = {
   patch: <T>(endpoint: string, body: unknown, options?: RequestInit) => request<T>(endpoint, { ...options, method: 'PATCH', body: JSON.stringify(body) }),
   delete: <T>(endpoint: string, options?: RequestInit) => request<T>(endpoint, { ...options, method: 'DELETE' }),
   postFormData: <T>(endpoint: string, formData: FormData) => requestWithFormData<T>(endpoint, formData),
+  putFormData: <T>(endpoint: string, formData: FormData) => requestWithFormData<T>(endpoint, formData, 'PUT'),
 };

@@ -1,10 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { StaffResponse } from '@/types/staff';
-import { authApi } from '@/lib/auth';
-import { MdAdminPanelSettings, MdLogout } from 'react-icons/md';
+import { MdAdminPanelSettings } from 'react-icons/md';
 import { FaHistory, FaEnvelope, FaCheckCircle, FaBullhorn, FaBuilding } from 'react-icons/fa';
 import AuditLogTab from './tabs/AuditLogTab';
 import InquiriesTab from './tabs/InquiriesTab';
@@ -20,20 +18,6 @@ type TabType = 'logs' | 'inquiries' | 'approvals' | 'announcements' | 'offices';
 
 export default function AppAdminDashboard({ staff }: AppAdminDashboardProps) {
   const [activeTab, setActiveTab] = useState<TabType>('logs');
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    setIsLoggingOut(true);
-    try {
-      await authApi.logout();
-      router.push('/auth/app-admin/login');
-    } catch (error) {
-      console.error('Client operation failed');
-    } finally {
-      setIsLoggingOut(false);
-    }
-  };
 
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
     { id: 'logs', label: 'ログ', icon: <FaHistory className="w-4 h-4" /> },
@@ -44,36 +28,28 @@ export default function AppAdminDashboard({ staff }: AppAdminDashboardProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-200 font-semibold">
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-semibold dark:bg-gray-900 dark:text-gray-200">
       {/* ヘッダー */}
-      <header className="bg-gray-800 border-b border-purple-500/30 px-6 py-4">
+      <header className="bg-white border-b border-slate-200 px-6 py-4 shadow-sm dark:bg-gray-800 dark:border-purple-500/30 dark:shadow-none">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <MdAdminPanelSettings className="h-8 w-8 text-purple-500" />
             <div>
-              <h1 className="text-3xl font-bold text-white">アプリ管理コンソール</h1>
-              <p className="text-base font-semibold text-gray-300">ケイカくん管理者向けダッシュボード</p>
+              <h1 className="text-3xl font-bold text-slate-950 dark:text-white">アプリ管理コンソール</h1>
+              <p className="text-base font-semibold text-slate-600 dark:text-gray-300">ケイカくん管理者向けダッシュボード</p>
             </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-base font-semibold text-white">{staff.full_name}</p>
+              <p className="text-base font-semibold text-slate-950 dark:text-white">{staff.full_name}</p>
               <p className="text-base font-semibold text-purple-400">アプリ管理者</p>
             </div>
-            <button
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2.5 rounded-lg text-base font-semibold transition-colors disabled:opacity-50"
-            >
-              <MdLogout className="w-5 h-5" />
-              {isLoggingOut ? 'ログアウト中...' : 'ログアウト'}
-            </button>
           </div>
         </div>
       </header>
 
       {/* タブナビゲーション */}
-      <div className="bg-gray-800 border-b border-gray-700">
+      <div className="bg-white border-b border-slate-200 dark:bg-gray-800 dark:border-gray-700">
         <div className="flex overflow-x-auto">
           {tabs.map((tab) => (
             <button
@@ -81,8 +57,8 @@ export default function AppAdminDashboard({ staff }: AppAdminDashboardProps) {
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center gap-2 px-6 py-3 text-base font-semibold whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? 'bg-gray-900 text-purple-400 border-b-2 border-purple-500'
-                  : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                  ? 'bg-purple-50 text-purple-700 border-b-2 border-purple-500 dark:bg-gray-900 dark:text-purple-400'
+                  : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700/50'
               }`}
             >
               {tab.icon}

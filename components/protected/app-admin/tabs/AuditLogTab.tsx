@@ -54,10 +54,10 @@ export default function AuditLogTab() {
   };
 
   const getActionColor = (action: string) => {
-    if (action.includes('approved')) return 'text-green-400';
-    if (action.includes('rejected') || action.includes('deleted') || action.includes('failed')) return 'text-red-400';
-    if (action.includes('created') || action.includes('enabled')) return 'text-blue-400';
-    return 'text-gray-300';
+    if (action.includes('approved')) return 'text-green-600 dark:text-green-400';
+    if (action.includes('rejected') || action.includes('deleted') || action.includes('failed')) return 'text-red-600 dark:text-red-400';
+    if (action.includes('created') || action.includes('enabled')) return 'text-blue-600 dark:text-blue-400';
+    return 'text-slate-700 dark:text-gray-300';
   };
 
   return (
@@ -67,7 +67,7 @@ export default function AuditLogTab() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors"
+            className="flex items-center gap-2 bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
           >
             <FaFilter className="w-4 h-4" />
             フィルター
@@ -85,14 +85,14 @@ export default function AuditLogTab() {
 
       {/* フィルターパネル */}
       {showFilters && (
-        <div className="bg-gray-800 rounded-lg p-4 mb-6 border border-gray-700">
+        <div className="bg-white rounded-lg p-4 mb-6 border border-slate-300 dark:bg-gray-800 dark:border-gray-700">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-base text-gray-400 mb-1">ターゲット種別</label>
+              <label className="block text-base text-slate-600 mb-1 dark:text-gray-400">ターゲット種別</label>
               <select
                 value={filters.target_type || ''}
                 onChange={(e) => setFilters({ ...filters, target_type: e.target.value || undefined })}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               >
                 <option value="">すべて</option>
                 <option value="staff">スタッフ</option>
@@ -101,11 +101,11 @@ export default function AuditLogTab() {
               </select>
             </div>
             <div>
-              <label className="block text-base text-gray-400 mb-1">アクション</label>
+              <label className="block text-base text-slate-600 mb-1 dark:text-gray-400">アクション</label>
               <select
                 value={filters.action || ''}
                 onChange={(e) => setFilters({ ...filters, action: e.target.value || undefined })}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               >
                 <option value="">すべて</option>
                 <option value="withdrawal.approved">退会承認</option>
@@ -117,12 +117,12 @@ export default function AuditLogTab() {
               </select>
             </div>
             <div>
-              <label className="block text-base text-gray-400 mb-1">開始日</label>
+              <label className="block text-base text-slate-600 mb-1 dark:text-gray-400">開始日</label>
               <input
                 type="date"
                 value={filters.start_date || ''}
                 onChange={(e) => setFilters({ ...filters, start_date: e.target.value || undefined })}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white"
+                className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
           </div>
@@ -132,7 +132,7 @@ export default function AuditLogTab() {
                 setFilters({ limit: 30 });
                 setCurrentPage(0);
               }}
-              className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-lg transition-colors"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white"
             >
               リセット
             </button>
@@ -154,51 +154,51 @@ export default function AuditLogTab() {
       )}
 
       {/* ログテーブル */}
-      <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+      <div className="bg-white rounded-lg border border-slate-300 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-400 mx-auto"></div>
-            <p className="text-gray-400 mt-4">読み込み中...</p>
+            <p className="text-slate-600 mt-4 dark:text-gray-400">読み込み中...</p>
           </div>
         ) : logs.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-gray-400">監査ログがありません</p>
+            <p className="text-slate-600 dark:text-gray-400">監査ログがありません</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-700">
+              <thead className="bg-slate-100 dark:bg-gray-700">
                 <tr>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">日時</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">実行者</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">アクション</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">対象</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">事務所</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">詳細</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">日時</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">実行者</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">アクション</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">対象</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">事務所</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">詳細</th>
                 </tr>
               </thead>
               <tbody>
                 {logs.map((log) => (
-                  <tr key={log.id} className="border-t border-gray-700 hover:bg-gray-700/50">
-                    <td className="py-3 px-4 text-gray-300 text-base whitespace-nowrap">
+                  <tr key={log.id} className="border-t border-slate-200 hover:bg-slate-50 dark:border-gray-700 dark:hover:bg-gray-700/50">
+                    <td className="py-3 px-4 text-slate-700 text-base whitespace-nowrap dark:text-gray-300">
                       {formatDate(log.created_at)}
                     </td>
                     <td className="py-3 px-4">
                       <div>
-                        <p className="text-white">{log.actor_name}</p>
-                        <p className="text-base text-gray-400">{log.actor_role}</p>
+                        <p className="text-slate-950 dark:text-white">{log.actor_name}</p>
+                        <p className="text-base text-slate-500 dark:text-gray-400">{log.actor_role}</p>
                       </div>
                     </td>
                     <td className={`py-3 px-4 font-mono text-base ${getActionColor(log.action)}`}>
                       {log.action}
                     </td>
-                    <td className="py-3 px-4 text-gray-300 text-base">
+                    <td className="py-3 px-4 text-slate-700 text-base dark:text-gray-300">
                       {log.target_type}
                     </td>
-                    <td className="py-3 px-4 text-gray-300 text-base">
+                    <td className="py-3 px-4 text-slate-700 text-base dark:text-gray-300">
                       {log.office_name || '-'}
                     </td>
-                    <td className="py-3 px-4 text-gray-400 text-base max-w-xs truncate">
+                    <td className="py-3 px-4 text-slate-500 text-base max-w-xs truncate dark:text-gray-400">
                       {JSON.stringify(log.details)}
                     </td>
                   </tr>
@@ -212,24 +212,24 @@ export default function AuditLogTab() {
       {/* ページネーション */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-gray-400 text-base">
+          <p className="text-slate-600 text-base dark:text-gray-400">
             全 {total} 件中 {currentPage * ITEMS_PER_PAGE + 1} - {Math.min((currentPage + 1) * ITEMS_PER_PAGE, total)} 件を表示
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setCurrentPage(currentPage - 1)}
               disabled={currentPage === 0}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
             >
               前へ
             </button>
-            <span className="bg-gray-700 text-white px-4 py-2 rounded-lg">
+            <span className="bg-slate-200 text-slate-900 px-4 py-2 rounded-lg dark:bg-gray-700 dark:text-white">
               {currentPage + 1} / {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage(currentPage + 1)}
               disabled={currentPage >= totalPages - 1}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
             >
               次へ
             </button>

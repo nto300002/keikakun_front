@@ -8,7 +8,7 @@ import { FaArrowLeft, FaReply, FaUser, FaEnvelope, FaGlobe, FaDesktop } from 're
 interface InquiryDetailProps {
   inquiryId: string;
   onBack: () => void;
-  onOpenReply: (inquiryId: string) => void;
+  onOpenReply: (inquiry: InquiryFullResponse) => void;
 }
 
 export default function InquiryDetail({ inquiryId, onBack, onOpenReply }: InquiryDetailProps) {
@@ -173,7 +173,7 @@ export default function InquiryDetail({ inquiryId, onBack, onOpenReply }: Inquir
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-slate-300 dark:border-gray-700 p-6">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">アクション</h3>
             <button
-              onClick={() => onOpenReply(inquiryId)}
+              onClick={() => onOpenReply(inquiry)}
               className="w-full flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors mb-3"
             >
               <FaReply />

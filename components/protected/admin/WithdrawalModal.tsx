@@ -65,8 +65,8 @@ export default function WithdrawalModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white font-semibold border border-slate-300 rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto dark:bg-gray-800 dark:border-gray-700">
         <div className="flex items-center gap-3 mb-4">
-          <div className="bg-red-500/20 p-3 rounded-full">
-            <FaExclamationTriangle className="w-6 h-6 text-red-400" />
+          <div className="bg-red-50 p-3 rounded-full border border-red-200 dark:bg-red-950/40 dark:border-red-700">
+            <FaExclamationTriangle className="w-6 h-6 text-red-600 dark:text-red-300" />
           </div>
           <div>
             <h3 className="text-xl font-bold text-slate-900 dark:text-white">退会申請</h3>
@@ -75,8 +75,8 @@ export default function WithdrawalModal({
         </div>
 
         {/* 警告メッセージ */}
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
-          <p className="text-red-400 text-base font-semibold mb-2">注意事項</p>
+        <div className="bg-red-50 border border-red-300 rounded-lg p-4 mb-6 dark:bg-red-950/40 dark:border-red-700">
+          <p className="text-red-700 text-base font-semibold mb-2 dark:text-red-300">注意事項</p>
           <ul className="text-red-700 text-base font-semibold space-y-1 list-disc list-inside dark:text-red-300">
             <li>退会申請後、アプリ管理者による承認が必要です</li>
             <li>承認されると事務所データは論理削除されます</li>
@@ -86,15 +86,15 @@ export default function WithdrawalModal({
         </div>
 
         {error && (
-          <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-4">
-            <p className="text-red-400 text-base font-semibold">{error}</p>
+          <div className="bg-red-50 border border-red-300 rounded-lg p-4 mb-4 dark:bg-red-950/40 dark:border-red-700">
+            <p className="text-red-700 text-base font-semibold dark:text-red-300">{error}</p>
           </div>
         )}
 
         <div className="space-y-4">
           <div>
             <label className="block text-base font-semibold text-slate-600 dark:text-gray-400 mb-2">
-              タイトル <span className="text-red-400">*</span>
+              タイトル <span className="text-red-600 dark:text-red-300">*</span>
             </label>
             <input
               type="text"
@@ -108,7 +108,7 @@ export default function WithdrawalModal({
 
           <div>
             <label className="block text-base font-semibold text-slate-600 dark:text-gray-400 mb-2">
-              退会理由 <span className="text-red-400">*</span>
+              退会理由 <span className="text-red-600 dark:text-red-300">*</span>
             </label>
             <textarea
               value={reason}
@@ -121,7 +121,7 @@ export default function WithdrawalModal({
 
           <div>
             <label className="block text-base font-semibold text-slate-600 dark:text-gray-400 mb-2">
-              確認のため「退会申請」と入力してください <span className="text-red-400">*</span>
+              確認のため「退会申請」と入力してください <span className="text-red-600 dark:text-red-300">*</span>
             </label>
             <input
               type="text"

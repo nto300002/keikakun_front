@@ -79,7 +79,7 @@ export default function OfficesTab() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="事務所名で検索..."
-              className="bg-gray-700 border border-gray-600 rounded-lg pl-10 pr-4 py-2 text-white placeholder-gray-500 w-64"
+              className="bg-white border border-slate-300 rounded-lg pl-10 pr-4 py-2 text-slate-900 placeholder-slate-400 w-64 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
             />
           </div>
           <button
@@ -99,29 +99,29 @@ export default function OfficesTab() {
         </div>
       )}
 
-      <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+      <div className="bg-white rounded-lg border border-slate-300 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
         {isLoading ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-purple-400 mx-auto"></div>
-            <p className="text-gray-400 mt-4">読み込み中...</p>
+            <p className="text-slate-600 mt-4 dark:text-gray-400">読み込み中...</p>
           </div>
         ) : offices.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-gray-400">
+            <p className="text-slate-600 dark:text-gray-400">
               {debouncedSearch ? `「${debouncedSearch}」に一致する事務所が見つかりません` : '事務所がありません'}
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-700">
+              <thead className="bg-slate-100 dark:bg-gray-700">
                 <tr>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">事務所名</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">種別</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">住所</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">電話番号</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold">メール</th>
-                  <th className="text-left py-3 px-4 text-gray-300 font-semibold"></th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">事務所名</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">種別</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">住所</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">電話番号</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">メール</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300"></th>
                 </tr>
               </thead>
               <tbody>
@@ -129,30 +129,30 @@ export default function OfficesTab() {
                   <tr
                     key={office.id}
                     onClick={() => handleOfficeClick(office.id)}
-                    className="border-t border-gray-700 hover:bg-gray-700/50 cursor-pointer transition-colors"
+                    className="border-t border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors dark:border-gray-700 dark:hover:bg-gray-700/50"
                   >
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
                         <FaBuilding className="w-4 h-4 text-purple-400" />
-                        <span className="text-white font-semibold">{office.name}</span>
+                        <span className="text-slate-950 font-semibold dark:text-white">{office.name}</span>
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <span className="bg-gray-600 text-gray-200 px-2 py-1 rounded text-base">
+                      <span className="bg-slate-200 text-slate-700 px-2 py-1 rounded text-base dark:bg-gray-600 dark:text-gray-200">
                         {getOfficeTypeName(office.office_type)}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-300 text-base">
+                    <td className="py-3 px-4 text-slate-700 text-base dark:text-gray-300">
                       {office.address || '-'}
                     </td>
-                    <td className="py-3 px-4 text-gray-300 text-base">
+                    <td className="py-3 px-4 text-slate-700 text-base dark:text-gray-300">
                       {office.phone_number || '-'}
                     </td>
-                    <td className="py-3 px-4 text-gray-300 text-base">
+                    <td className="py-3 px-4 text-slate-700 text-base dark:text-gray-300">
                       {office.email || '-'}
                     </td>
                     <td className="py-3 px-4">
-                      <FaChevronRight className="w-4 h-4 text-gray-400" />
+                      <FaChevronRight className="w-4 h-4 text-slate-400 dark:text-gray-400" />
                     </td>
                   </tr>
                 ))}
@@ -165,24 +165,24 @@ export default function OfficesTab() {
       {/* ページネーション */}
       {(currentPage > 0 || hasNextPage) && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-gray-400 text-base">
+          <p className="text-slate-600 text-base dark:text-gray-400">
             {offices.length} 件を表示中（ページ {currentPage + 1}）
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => setCurrentPage(currentPage - 1)}
               disabled={currentPage === 0}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
             >
               前へ
             </button>
-            <span className="bg-gray-700 text-white px-4 py-2 rounded-lg">
+            <span className="bg-slate-200 text-slate-900 px-4 py-2 rounded-lg dark:bg-gray-700 dark:text-white">
               ページ {currentPage + 1}
             </span>
             <button
               onClick={() => setCurrentPage(currentPage + 1)}
               disabled={!hasNextPage}
-              className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
             >
               次へ
             </button>

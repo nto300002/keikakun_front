@@ -46,7 +46,7 @@ export default function SupportPlan() {
         setRecipient(recipientData);
         setCycles(cyclesData.cycles || []);
       } catch (err) {
-        console.error('Failed to fetch support plan data:', err);
+        console.error('Client operation failed');
         setError('データの取得に失敗しました');
       } finally {
         setIsLoading(false);
@@ -131,7 +131,7 @@ export default function SupportPlan() {
 
       setIsModalOpen(false);
     } catch (err) {
-      console.error('Failed to upload file:', err);
+      console.error('Client operation failed');
       // エラーメッセージを表示
       toast.error('PDFのアップロードに失敗しました');
       throw err; // モーダル側でエラーハンドリング
@@ -151,7 +151,7 @@ export default function SupportPlan() {
 
       setIsModalOpen(false);
     } catch (err) {
-      console.error('Failed to reupload file:', err);
+      console.error('Client operation failed');
       // エラーメッセージを表示
       toast.error('PDFの再アップロードに失敗しました');
       throw err;
@@ -172,7 +172,7 @@ export default function SupportPlan() {
       const cyclesData = await supportPlanApi.getCycles(recipientId);
       setCycles(cyclesData.cycles || []);
     } catch (err) {
-      console.error('Failed to set monitoring deadline:', err);
+      console.error('Client operation failed');
       toast.error('モニタリング期限の設定に失敗しました。');
     }
   };

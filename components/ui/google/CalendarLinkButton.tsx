@@ -177,7 +177,7 @@ export default function CalendarLinkButton() {
           setOfficeId(id);
         }
       } catch (err) {
-        console.error('Failed to fetch user office:', err);
+        console.error('Client operation failed');
       }
     };
 
@@ -194,7 +194,7 @@ export default function CalendarLinkButton() {
           const account = await calendarApi.getOfficeCalendar(officeId);
           setCalendarAccount(account);
         } catch (err) {
-          console.error('Failed to fetch calendar info:', err);
+          console.error('Client operation failed');
 
           // 404エラー（カレンダー未設定）の場合は特別扱い
           const errorMessage = err instanceof Error ? err.message : String(err);

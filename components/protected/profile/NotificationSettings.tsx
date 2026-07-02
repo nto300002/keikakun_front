@@ -47,7 +47,7 @@ export default function NotificationSettings() {
       );
       setPreferences(data);
     } catch (error) {
-      console.error('Failed to fetch notification preferences:', error);
+      console.error('Client operation failed');
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +64,7 @@ export default function NotificationSettings() {
       setPreferences(data);
       toast.success('通知設定を保存しました');
     } catch (error) {
-      console.error('Failed to save notification preferences:', error);
+      console.error('Client operation failed');
       toast.error(error instanceof Error ? error.message : '設定の保存に失敗しました');
     } finally {
       setIsSaving(false);
@@ -112,7 +112,7 @@ export default function NotificationSettings() {
           await savePreferences(newPreferences);
           toast.success('プッシュ通知を有効にしました');
         } catch (error) {
-          console.error('Failed to subscribe:', error);
+          console.error('Client operation failed');
           toast.error(getErrorMessage(error));
         }
       } else {
@@ -121,7 +121,7 @@ export default function NotificationSettings() {
           await savePreferences(newPreferences);
           toast.success('プッシュ通知を無効にしました');
         } catch (error) {
-          console.error('Failed to unsubscribe:', error);
+          console.error('Client operation failed');
           toast.error(getErrorMessage(error));
         }
       }

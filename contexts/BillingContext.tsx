@@ -70,7 +70,7 @@ export function BillingProvider({ children }: BillingProviderProps) {
       const data = await billingApi.getBillingStatus();
       setBillingStatus(data);
     } catch (err) {
-      console.error('課金ステータスの取得に失敗しました:', err);
+      console.error('課金ステータスの取得に失敗しました');
       setError(err instanceof Error ? err.message : '課金ステータスの取得に失敗しました');
     } finally {
       setIsLoading(false);

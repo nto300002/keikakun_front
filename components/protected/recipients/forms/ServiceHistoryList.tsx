@@ -40,7 +40,7 @@ export default function ServiceHistoryList({
       await assessmentApi.serviceHistory.delete(id);
       onRefresh();
     } catch (err) {
-      console.error('Failed to delete service history:', err);
+      console.error('Client operation failed');
       alert('サービス利用歴の削除に失敗しました。');
     } finally {
       setDeletingId(null);

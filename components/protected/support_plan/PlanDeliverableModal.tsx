@@ -73,7 +73,7 @@ export default function PlanDeliverableModal({
           setIsLoadingPdf(false);
         })
         .catch((err) => {
-          console.error('PDF読み込みエラー:', err);
+          console.error('Client operation failed');
           setError('PDFの読み込みに失敗しました。CORS設定を確認してください。');
           setIsLoadingPdf(false);
         });

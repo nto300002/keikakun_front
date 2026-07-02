@@ -81,7 +81,7 @@ export default function EmploymentSection({
       setShowModal(false);
       onRefresh();
     } catch (err) {
-      console.error('Failed to save employment:', err);
+      console.error('Client operation failed');
       if (err instanceof Error) {
         setError(err.message);
       } else {

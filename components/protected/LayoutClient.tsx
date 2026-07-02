@@ -74,7 +74,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
       const totalUnread = noticesData.unread_count + messagesData.unread_count;
       setUnreadCount(totalUnread);
     } catch (error) {
-      console.error('未読通知件数の取得に失敗しました', error);
+      console.error('Client operation failed');
     }
   };
 
@@ -87,7 +87,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
       setRecentUnreadMessages(data.messages.slice(0, 3));
       setMessagesLoaded(true);
     } catch (error) {
-      console.error('未読メッセージの取得に失敗しました', error);
+      console.error('Client operation failed');
     }
   };
 
@@ -97,7 +97,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
       const data = await deadlineApi.getAlerts({ threshold_days: 30 });
       return data.alerts;
     } catch (error) {
-      console.error('更新期限のお知らせの取得に失敗しました', error);
+      console.error('Client operation failed');
       return null;
     }
   };
@@ -141,7 +141,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
       setTotalDeadlineAlerts(data.total);
       setDeadlineAlertsOffset(offset + data.alerts.length);
     } catch (error) {
-      console.error('更新期限のお知らせの取得に失敗しました', error);
+      console.error('Client operation failed');
     }
   };
 
@@ -169,7 +169,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
 
     // CSRFトークンを初期化（ページリフレッシュ時に必要）
     initializeCsrfToken().catch(error => {
-      console.error('CSRFトークンの初期化に失敗しました', error);
+      console.error('Client operation failed');
     });
 
     // 事業所情報が未取得の場合のみ取得
@@ -177,7 +177,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
       officeApi.getMyOffice()
         .then(officeData => setOffice(officeData))
         .catch(error => {
-          console.error('事業所情報の取得に失敗しました', error);
+          console.error('Client operation failed');
         });
     }
 
@@ -227,7 +227,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
           await subscribe();
         }
       } catch (error) {
-        console.error('[Notifications] Failed to initialize notifications:', error);
+        console.error('Client operation failed');
         // エラー時も処理を継続（ユーザー体験に影響を与えない）
       }
     };
@@ -274,7 +274,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
       // これにより、Cookie削除が確実に反映された状態でログインページが読み込まれる
       window.location.href = `/auth/login?${params.toString()}`;
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error('Client operation failed');
       // エラーが発生してもログイン画面にリダイレクト
       window.location.href = '/auth/login';
     }

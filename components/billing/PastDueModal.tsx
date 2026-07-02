@@ -91,7 +91,7 @@ export default function PastDueModal({ isOpen, onClose }: PastDueModalProps) {
 
       window.location.href = '/admin?tab=plan';
     } catch (err) {
-      console.error('課金アクションの開始に失敗しました:', err);
+      console.error('Client operation failed');
       setError(err instanceof Error ? err.message : '課金アクションの開始に失敗しました');
     } finally {
       setIsLoading(false);

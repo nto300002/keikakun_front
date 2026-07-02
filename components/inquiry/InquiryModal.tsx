@@ -65,7 +65,7 @@ export default function InquiryModal({ isOpen, onClose }: InquiryModalProps) {
         handleClose();
       }, 2000);
     } catch (error) {
-      console.error('問い合わせの送信に失敗しました:', error);
+      console.error('Client operation failed');
       setErrors({ submit: '送信に失敗しました。もう一度お試しください。' });
     } finally {
       setIsSubmitting(false);

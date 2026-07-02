@@ -45,7 +45,7 @@ export default function HospitalVisitForm({
       }
       onSuccess();
     } catch (err) {
-      console.error('Failed to save hospital visit:', err);
+      console.error('Client operation failed');
       if (err instanceof Error) {
         setError(err.message);
       } else {

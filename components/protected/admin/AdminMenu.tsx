@@ -213,8 +213,8 @@ export default function AdminMenu({ office }: AdminMenuProps) {
         try {
           const calendar = await calendarApi.getOfficeCalendar(office.id);
           setExistingCalendar(calendar);
-        } catch (refreshError) {
-          console.error('カレンダー設定の再取得に失敗:', refreshError);
+        } catch {
+          console.error('カレンダー設定の再取得に失敗');
         }
       } else {
         setUploadError(response.error_details || '保存に失敗しました。');

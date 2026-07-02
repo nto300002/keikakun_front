@@ -50,8 +50,8 @@ export default function AdminLoginForm() {
       try {
         await authApi.getCurrentUser();
         router.push('/auth/admin/office_setup');
-      } catch (verifyError) {
-        console.error('Cookie verification failed:', verifyError);
+      } catch {
+        console.error('Cookie verification failed');
         setFormError('root', { message: '認証に失敗しました。もう一度お試しください。' });
       }
     } catch (error: unknown) {

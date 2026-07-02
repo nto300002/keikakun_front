@@ -2,10 +2,22 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import DateDrumPicker from '@/components/ui/DateDrumPicker';
 import EmployeeActionRequestModal from '@/components/common/EmployeeActionRequestModal';
 import { useStaffRole } from '@/hooks/useStaffRole';
 import { ActionType, ResourceType } from '@/types/employeeActionRequest';
+import BasicInfoSection from './forms/BasicInfoSection';
+import ContactSection from './forms/ContactSection';
+import DisabilityDetailsSection from './forms/DisabilityDetailsSection';
+import DisabilitySection from './forms/DisabilitySection';
+import EmergencyContactsSection from './forms/EmergencyContactsSection';
+import {
+  createEmptyDisabilityDetail,
+  INITIAL_RECIPIENT_FORM_DATA,
+  RECIPIENT_FORM_SECTIONS,
+} from './forms/recipientFormDefaults';
+import type { RecipientFormData } from './forms/recipientFormTypes';
+import { useRecipientFormState } from './forms/useRecipientFormState';
+import { validateRecipientFormSection } from './forms/recipientFormValidation';
 
 // エラーフィールドの日本語マッピング
 const ERROR_FIELD_MAPPING: Record<string, string> = {
@@ -45,235 +57,35 @@ function translateErrorMessage(error: string): string {
   return translatedError;
 }
 
-// Basic Information Section
-interface BasicInfoData {
-  firstName: string;
-  lastName: string;
-  firstNameFurigana: string;
-  lastNameFurigana: string;
-  birthDay: string;
-  gender: string;
-}
-
-// Contact & Address Information Section
-interface ContactAddressData {
-  address: string;
-  formOfResidence: string;
-  formOfResidenceOtherText?: string;
-  meansOfTransportation: string;
-  meansOfTransportationOtherText?: string;
-  tel: string;
-}
-
-// Emergency Contact Information
-interface EmergencyContactData {
-  firstName: string;
-  lastName: string;
-  firstNameFurigana: string;
-  lastNameFurigana: string;
-  relationship: string;
-  tel: string;
-  address?: string;
-  notes?: string;
-  priority: number;
-}
-
-// Disability & Disease Information Section
-interface DisabilityInfoData {
-  disabilityOrDiseaseName: string;
-  livelihoodProtection: string;
-  specialRemarks?: string;
-}
-
-// Disability Detail Information
-interface DisabilityDetailData {
-  category: string;
-  gradeOrLevel?: string;
-  physicalDisabilityType?: string;
-  physicalDisabilityTypeOtherText?: string;
-  applicationStatus: string;
-}
-
-interface FormData {
-  basicInfo: BasicInfoData;
-  contactAddress: ContactAddressData;
-  emergencyContacts: EmergencyContactData[];
-  disabilityInfo: DisabilityInfoData;
-  disabilityDetails: DisabilityDetailData[];
-}
-
-const createEmptyDisabilityDetail = (): DisabilityDetailData => ({
-  category: '',
-  gradeOrLevel: '',
-  physicalDisabilityType: '',
-  physicalDisabilityTypeOtherText: '',
-  applicationStatus: '',
-});
-
-const INITIAL_FORM_DATA: FormData = {
-  basicInfo: {
-    firstName: '',
-    lastName: '',
-    firstNameFurigana: '',
-    lastNameFurigana: '',
-    birthDay: '',
-    gender: '',
-  },
-  contactAddress: {
-    address: '',
-    formOfResidence: '',
-    formOfResidenceOtherText: '',
-    meansOfTransportation: '',
-    meansOfTransportationOtherText: '',
-    tel: '',
-  },
-  emergencyContacts: [
-    {
-      firstName: '',
-      lastName: '',
-      firstNameFurigana: '',
-      lastNameFurigana: '',
-      relationship: '',
-      tel: '',
-      address: '',
-      notes: '',
-      priority: 1,
-    },
-  ],
-  disabilityInfo: {
-    disabilityOrDiseaseName: '',
-    livelihoodProtection: '',
-    specialRemarks: '',
-  },
-  // 手帳・年金詳細は任意項目のため初期値は空配列とする
-  // （空エントリを持つとバックエンドの enum バリデーションで 422 エラーになる）
-  disabilityDetails: [],
-};
-
-// Enum options for dropdowns
-const GENDER_OPTIONS = [
-  { value: 'male', label: '男性' },
-  { value: 'female', label: '女性' },
-  { value: 'other', label: 'その他' },
-];
-
-const FORM_OF_RESIDENCE_OPTIONS = [
-  { value: 'home_with_family', label: '自宅（家族と同居）' },
-  { value: 'home_alone', label: '自宅（一人暮らし）' },
-  { value: 'group_home', label: 'グループホーム' },
-  { value: 'institution', label: '入所施設' },
-  { value: 'hospital', label: '病院・医療機関' },
-  { value: 'other', label: 'その他' },
-];
-
-const MEANS_OF_TRANSPORTATION_OPTIONS = [
-  { value: 'walk', label: '徒歩' },
-  { value: 'bicycle', label: '自転車' },
-  { value: 'motorbike', label: 'バイク・原付' },
-  { value: 'car_self', label: '自家用車（自分で運転）' },
-  { value: 'car_transport', label: '自家用車（送迎）' },
-  { value: 'public_transport', label: '公共交通機関（電車・バス）' },
-  { value: 'welfare_transport', label: '福祉輸送サービス' },
-  { value: 'other', label: 'その他' },
-];
-
-const LIVELIHOOD_PROTECTION_OPTIONS = [
-  { value: 'not_receiving', label: 'なし' },
-  { value: 'receiving_with_allowance', label: 'あり（他人介護料有り）' },
-  { value: 'receiving_without_allowance', label: 'あり（他人介護料無し）' },
-  { value: 'applying', label: '申請中' },
-  { value: 'planning', label: '申請予定' },
-];
-
-const DISABILITY_CATEGORY_OPTIONS = [
-  { value: 'physical_handbook', label: '身体障害者手帳' },
-  { value: 'intellectual_handbook', label: '療育手帳' },
-  { value: 'mental_health_handbook', label: '精神障害者保健福祉手帳' },
-  { value: 'disability_basic_pension', label: '障害基礎年金' },
-  { value: 'other_disability_pension', label: 'その他の障害年金' },
-  { value: 'public_assistance', label: '生活保護' },
-];
-
-const APPLICATION_STATUS_OPTIONS = [
-  { value: 'acquired', label: '取得済み' },
-  { value: 'applying', label: '申請中' },
-  { value: 'planning', label: '申請予定' },
-  { value: 'not_applicable', label: '該当なし' },
-];
-
-const PHYSICAL_DISABILITY_TYPE_OPTIONS = [
-  { value: 'visual', label: '視覚障害' },
-  { value: 'hearing', label: '聴覚障害' },
-  { value: 'limb', label: '肢体不自由' },
-  { value: 'internal', label: '内部障害' },
-  { value: 'other', label: 'その他' },
-];
-
-const RELATIONSHIP_OPTIONS = [
-  '父', '母', '配偶者', '子', '兄弟姉妹', '相談支援専門員', 'ケースワーカー', '医療機関', '友人・知人', 'その他'
-];
-
-// 等級・レベル選択肢
-const GRADE_LEVEL_OPTIONS = {
-  physical_handbook: [
-    { value: '1', label: '1級' },
-    { value: '2', label: '2級' },
-    { value: '3', label: '3級' },
-    { value: '4', label: '4級' },
-    { value: '5', label: '5級' },
-    { value: '6', label: '6級' },
-  ],
-  intellectual_handbook: [
-    { value: 'A', label: 'A（重度）' },
-    { value: 'B1', label: 'B1（中度）' },
-    { value: 'B2', label: 'B2（軽度）' },
-    { value: 'C', label: 'C（境界域）' },
-  ],
-  mental_health_handbook: [
-    { value: '1', label: '1級' },
-    { value: '2', label: '2級' },
-    { value: '3', label: '3級' },
-  ],
-  disability_basic_pension: [
-    { value: '1', label: '1級' },
-    { value: '2', label: '2級' },
-  ],
-  other_disability_pension: [
-    { value: '1', label: '1級' },
-    { value: '2', label: '2級' },
-    { value: '3', label: '3級' },
-  ],
-  public_assistance: [
-    { value: '介護扶助', label: '介護扶助' },
-    { value: '医療扶助', label: '医療扶助' },
-    { value: '生活扶助', label: '生活扶助' },
-    { value: 'その他', label: 'その他' },
-  ],
-};
-
 const SENIOR_RECIPIENT_FORM_CLASS =
   'space-y-8 [&_h1]:text-4xl [&_h1]:font-bold [&_h2]:text-2xl [&_h2]:font-bold [&_h3]:text-2xl [&_h3]:font-bold [&_h4]:text-xl [&_h4]:font-bold [&_p]:text-base [&_p]:font-semibold [&_label]:text-lg [&_label]:font-bold [&_input]:text-lg [&_input]:font-semibold [&_input]:px-4 [&_input]:py-3 [&_select]:text-lg [&_select]:font-semibold [&_select]:px-4 [&_select]:py-3 [&_textarea]:text-lg [&_textarea]:font-semibold [&_textarea]:px-4 [&_textarea]:py-3 [&_button]:text-lg [&_button]:font-bold';
 
 export default function UserRegistrationForm() {
   const [currentSection, setCurrentSection] = useState(0);
-  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
+  const {
+    formData,
+    setFormData,
+    addEmergencyContact,
+    removeEmergencyContact,
+    addDisabilityDetail,
+    removeDisabilityDetail,
+    handleBasicInfoChange,
+    handleContactAddressChange,
+    handleEmergencyContactChange,
+    handleDisabilityInfoChange,
+    handleDisabilityDetailChange,
+  } = useRecipientFormState(INITIAL_RECIPIENT_FORM_DATA);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
 
   // Employee Action Request Modal state
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
-  const [pendingFormData, setPendingFormData] = useState<FormData | null>(null);
+  const [pendingFormData, setPendingFormData] = useState<RecipientFormData | null>(null);
 
   const { isEmployee } = useStaffRole();
 
-  const sections = [
-    { id: 0, title: '基本情報', description: '氏名・ふりがな・生年月日・性別' },
-    { id: 1, title: '連絡先・住所情報', description: '住所・居住形態・交通手段・電話番号' },
-    { id: 2, title: '緊急連絡先', description: '緊急時の連絡先情報' },
-    { id: 3, title: '障害・疾患情報', description: '障害または疾患名・生活保護受給状況' },
-    { id: 4, title: '手帳・年金詳細', description: '各種手帳・年金の詳細情報' },
-  ];
+  const sections = RECIPIENT_FORM_SECTIONS;
 
   // Progress calculation
   const getProgressPercentage = () => {
@@ -287,45 +99,11 @@ export default function UserRegistrationForm() {
       ...prev,
       disabilityDetails: [createEmptyDisabilityDetail()],
     }));
-  }, [currentSection, formData.disabilityDetails.length]);
+  }, [currentSection, formData.disabilityDetails.length, setFormData]);
 
   // Form validation for each section
   const validateSection = (sectionId: number): boolean => {
-    const newErrors: Record<string, string> = {};
-
-    switch (sectionId) {
-      case 0: // Basic Information
-        if (!formData.basicInfo.firstName) newErrors.firstName = '名は必須です';
-        if (!formData.basicInfo.lastName) newErrors.lastName = '姓は必須です';
-        if (!formData.basicInfo.firstNameFurigana) newErrors.firstNameFurigana = '名（ふりがな）は必須です';
-        if (!formData.basicInfo.lastNameFurigana) newErrors.lastNameFurigana = '姓（ふりがな）は必須です';
-        if (!formData.basicInfo.birthDay) newErrors.birthDay = '生年月日は必須です';
-        if (!formData.basicInfo.gender) newErrors.gender = '性別は必須です';
-        break;
-      case 1: // Contact & Address
-        if (!formData.contactAddress.address) newErrors.address = '住所は必須です';
-        if (!formData.contactAddress.formOfResidence) newErrors.formOfResidence = '居住形態は必須です';
-        if (!formData.contactAddress.meansOfTransportation) newErrors.meansOfTransportation = '交通手段は必須です';
-        if (!formData.contactAddress.tel) newErrors.tel = '電話番号は必須です';
-        break;
-      case 2: // Emergency Contact
-        formData.emergencyContacts.forEach((contact, index) => {
-          if (!contact.firstName) newErrors[`emergencyContact${index}FirstName`] = '緊急連絡先 名は必須です';
-          if (!contact.lastName) newErrors[`emergencyContact${index}LastName`] = '緊急連絡先 姓は必須です';
-          if (!contact.firstNameFurigana) newErrors[`emergencyContact${index}FirstNameFurigana`] = '緊急連絡先 名（ふりがな）は必須です';
-          if (!contact.lastNameFurigana) newErrors[`emergencyContact${index}LastNameFurigana`] = '緊急連絡先 姓（ふりがな）は必須です';
-          if (!contact.tel) newErrors[`emergencyContact${index}Tel`] = '緊急連絡先 電話番号は必須です';
-        });
-        break;
-      case 3: // Disability Info
-        if (!formData.disabilityInfo.disabilityOrDiseaseName) newErrors.disabilityOrDiseaseName = '障害または疾患名は必須です';
-        if (!formData.disabilityInfo.livelihoodProtection) newErrors.livelihoodProtection = '生活保護受給状況は必須です';
-        break;
-      case 4: // Disability Details
-        // Optional validation for disability details
-        break;
-    }
-
+    const newErrors = validateRecipientFormSection(formData, sectionId, 'registration');
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -362,7 +140,7 @@ export default function UserRegistrationForm() {
     await executeSubmit(formData);
   };
 
-  const executeSubmit = async (data: FormData) => {
+  const executeSubmit = async (data: RecipientFormData) => {
     setIsLoading(true);
     try {
       // Import the API client and transformer
@@ -381,7 +159,6 @@ export default function UserRegistrationForm() {
         setErrors({ submit: '登録に失敗しました。もう一度お試しください。' });
       }
     } catch (error) {
-      console.error('Form submission error:', error);
       if (error instanceof Error) {
         const translatedMessage = translateErrorMessage(error.message);
         setErrors({ submit: translatedMessage || '登録に失敗しました。もう一度お試しください。' });
@@ -396,102 +173,6 @@ export default function UserRegistrationForm() {
   const handleRequestSuccess = () => {
     // リクエスト送信成功時の処理
     router.push('/dashboard?message=' + encodeURIComponent('利用者登録リクエストを送信しました。Manager/Ownerの承認をお待ちください。'));
-  };
-
-  // Add emergency contact
-  const addEmergencyContact = () => {
-    if (formData.emergencyContacts.length < 3) {
-      setFormData(prev => ({
-        ...prev,
-        emergencyContacts: [...prev.emergencyContacts, {
-          firstName: '',
-          lastName: '',
-          firstNameFurigana: '',
-          lastNameFurigana: '',
-          relationship: '',
-          tel: '',
-          address: '',
-          notes: '',
-          priority: prev.emergencyContacts.length + 1,
-        }],
-      }));
-    }
-  };
-
-  // Remove emergency contact
-  const removeEmergencyContact = (index: number) => {
-    if (formData.emergencyContacts.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        emergencyContacts: prev.emergencyContacts.filter((_, i) => i !== index),
-      }));
-    }
-  };
-
-  // Add disability detail
-  const addDisabilityDetail = () => {
-    setFormData(prev => ({
-      ...prev,
-      disabilityDetails: [...prev.disabilityDetails, createEmptyDisabilityDetail()],
-    }));
-  };
-
-  // Remove disability detail
-  const removeDisabilityDetail = (index: number) => {
-    if (formData.disabilityDetails.length > 1) {
-      setFormData(prev => ({
-        ...prev,
-        disabilityDetails: prev.disabilityDetails.filter((_, i) => i !== index),
-      }));
-    }
-  };
-
-  // Input handlers
-  const handleBasicInfoChange = (field: keyof BasicInfoData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      basicInfo: { ...prev.basicInfo, [field]: value },
-    }));
-  };
-
-  const handleContactAddressChange = (field: keyof ContactAddressData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      contactAddress: { ...prev.contactAddress, [field]: value },
-    }));
-  };
-
-  const handleEmergencyContactChange = (index: number, field: keyof EmergencyContactData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      emergencyContacts: prev.emergencyContacts.map((contact, i) =>
-        i === index ? { ...contact, [field]: value } : contact
-      ),
-    }));
-  };
-
-  const handleDisabilityInfoChange = (field: keyof DisabilityInfoData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      disabilityInfo: { ...prev.disabilityInfo, [field]: value },
-    }));
-  };
-
-  const handleDisabilityDetailChange = (index: number, field: keyof DisabilityDetailData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      disabilityDetails: prev.disabilityDetails.map((detail, i) => {
-        if (i === index) {
-          const updatedDetail = { ...detail, [field]: value };
-          // カテゴリが変更された場合、等級・レベルをリセット
-          if (field === 'category') {
-            updatedDetail.gradeOrLevel = '';
-          }
-          return updatedDetail;
-        }
-        return detail;
-      }),
-    }));
   };
 
   return (
@@ -540,532 +221,48 @@ export default function UserRegistrationForm() {
         {/* Form Content */}
         <div className="bg-white dark:bg-[#0f1419cc] rounded-lg border border-slate-300 dark:border-[#2a3441] p-8">
           {currentSection === 0 && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-slate-950 dark:text-white mb-4">基本情報</h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                    姓 <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.basicInfo.lastName}
-                    onChange={(e) => handleBasicInfoChange('lastName', e.target.value)}
-                    className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                      errors.lastName ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                    }`}
-                    placeholder="山田"
-                  />
-                  {errors.lastName && <p className="text-red-400 text-sm mt-1">{errors.lastName}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                    名 <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.basicInfo.firstName}
-                    onChange={(e) => handleBasicInfoChange('firstName', e.target.value)}
-                    className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                      errors.firstName ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                    }`}
-                    placeholder="太郎"
-                  />
-                  {errors.firstName && <p className="text-red-400 text-sm mt-1">{errors.firstName}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                    姓（ふりがな） <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.basicInfo.lastNameFurigana}
-                    onChange={(e) => handleBasicInfoChange('lastNameFurigana', e.target.value)}
-                    className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                      errors.lastNameFurigana ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                    }`}
-                    placeholder="やまだ"
-                  />
-                  {errors.lastNameFurigana && <p className="text-red-400 text-sm mt-1">{errors.lastNameFurigana}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                    名（ふりがな） <span className="text-red-400">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.basicInfo.firstNameFurigana}
-                    onChange={(e) => handleBasicInfoChange('firstNameFurigana', e.target.value)}
-                    className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                      errors.firstNameFurigana ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                    }`}
-                    placeholder="たろう"
-                  />
-                  {errors.firstNameFurigana && <p className="text-red-400 text-sm mt-1">{errors.firstNameFurigana}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                    生年月日 <span className="text-red-400">*</span>
-                  </label>
-                  <DateDrumPicker
-                    value={formData.basicInfo.birthDay}
-                    onChange={(date) => handleBasicInfoChange('birthDay', date)}
-                    error={!!errors.birthDay}
-                    minYear={1900}
-                    maxYear={new Date().getFullYear()}
-                  />
-                  {errors.birthDay && <p className="text-red-400 text-sm mt-1">{errors.birthDay}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                    性別 <span className="text-red-400">*</span>
-                  </label>
-                  <select
-                    value={formData.basicInfo.gender}
-                    onChange={(e) => handleBasicInfoChange('gender', e.target.value)}
-                    className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                      errors.gender ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                    }`}
-                  >
-                    <option value="">選択してください</option>
-                    {GENDER_OPTIONS.map(option => (
-                      <option key={option.value} value={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                  {errors.gender && <p className="text-red-400 text-sm mt-1">{errors.gender}</p>}
-                </div>
-              </div>
-            </div>
+            <BasicInfoSection
+              formData={formData}
+              errors={errors}
+              handleBasicInfoChange={handleBasicInfoChange}
+            />
           )}
 
           {currentSection === 1 && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-slate-950 dark:text-white mb-4">連絡先・住所情報</h3>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                  住所 <span className="text-red-400">*</span>
-                </label>
-                <textarea
-                  value={formData.contactAddress.address}
-                  onChange={(e) => handleContactAddressChange('address', e.target.value)}
-                  rows={3}
-                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.address ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                  }`}
-                  placeholder="例：東京都新宿区西新宿1-1-1"
-                />
-                {errors.address && <p className="text-red-400 text-sm mt-1">{errors.address}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                  居住形態 <span className="text-red-400">*</span>
-                </label>
-                <select
-                  value={formData.contactAddress.formOfResidence}
-                  onChange={(e) => handleContactAddressChange('formOfResidence', e.target.value)}
-                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.formOfResidence ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                  }`}
-                >
-                  <option value="">選択してください</option>
-                  {FORM_OF_RESIDENCE_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-                {errors.formOfResidence && <p className="text-red-400 text-sm mt-1">{errors.formOfResidence}</p>}
-              </div>
-
-              {formData.contactAddress.formOfResidence === 'other' && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">その他詳細</label>
-                  <input
-                    type="text"
-                    value={formData.contactAddress.formOfResidenceOtherText || ''}
-                    onChange={(e) => handleContactAddressChange('formOfResidenceOtherText', e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                    placeholder="詳細を入力してください"
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                  交通手段 <span className="text-red-400">*</span>
-                </label>
-                <select
-                  value={formData.contactAddress.meansOfTransportation}
-                  onChange={(e) => handleContactAddressChange('meansOfTransportation', e.target.value)}
-                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.meansOfTransportation ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                  }`}
-                >
-                  <option value="">選択してください</option>
-                  {MEANS_OF_TRANSPORTATION_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-                {errors.meansOfTransportation && <p className="text-red-400 text-sm mt-1">{errors.meansOfTransportation}</p>}
-              </div>
-
-              {formData.contactAddress.meansOfTransportation === 'other' && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">その他詳細</label>
-                  <input
-                    type="text"
-                    value={formData.contactAddress.meansOfTransportationOtherText || ''}
-                    onChange={(e) => handleContactAddressChange('meansOfTransportationOtherText', e.target.value)}
-                    className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                    placeholder="詳細を入力してください"
-                  />
-                </div>
-              )}
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                  電話番号 <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="tel"
-                  value={formData.contactAddress.tel}
-                  onChange={(e) => handleContactAddressChange('tel', e.target.value)}
-                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.tel ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                  }`}
-                  placeholder="例：090-1234-5678"
-                />
-                {errors.tel && <p className="text-red-400 text-sm mt-1">{errors.tel}</p>}
-              </div>
-            </div>
+            <ContactSection
+              formData={formData}
+              errors={errors}
+              handleContactAddressChange={handleContactAddressChange}
+            />
           )}
 
           {currentSection === 2 && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-slate-950 dark:text-white">緊急連絡先情報</h3>
-                <button
-                  onClick={addEmergencyContact}
-                  disabled={formData.emergencyContacts.length >= 3}
-                  className="bg-[#10b981] hover:bg-[#0f9f6e] disabled:bg-gray-600 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
-                  + 連絡先を追加
-                </button>
-              </div>
-
-              {formData.emergencyContacts.map((contact, index) => (
-                <div key={index} className="border border-slate-300 dark:border-[#2a3441] rounded-lg p-6 relative">
-                  {formData.emergencyContacts.length > 1 && (
-                    <button
-                      onClick={() => removeEmergencyContact(index)}
-                      className="absolute top-4 right-4 px-3 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 rounded text-sm transition-colors"
-                    >
-                      削除
-                    </button>
-                  )}
-
-                  <h4 className="text-md font-medium text-slate-900 dark:text-white mb-4">緊急連絡先 {index + 1}</h4>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                        姓 <span className="text-red-400">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={contact.lastName}
-                        onChange={(e) => handleEmergencyContactChange(index, 'lastName', e.target.value)}
-                        className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                          errors[`emergencyContact${index}LastName`] ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                        }`}
-                        placeholder="田中"
-                      />
-                      {errors[`emergencyContact${index}LastName`] && (
-                        <p className="text-red-400 text-sm mt-1">{errors[`emergencyContact${index}LastName`]}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                        名 <span className="text-red-400">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={contact.firstName}
-                        onChange={(e) => handleEmergencyContactChange(index, 'firstName', e.target.value)}
-                        className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                          errors[`emergencyContact${index}FirstName`] ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                        }`}
-                        placeholder="花子"
-                      />
-                      {errors[`emergencyContact${index}FirstName`] && (
-                        <p className="text-red-400 text-sm mt-1">{errors[`emergencyContact${index}FirstName`]}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                        姓（ふりがな） <span className="text-red-400">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={contact.lastNameFurigana}
-                        onChange={(e) => handleEmergencyContactChange(index, 'lastNameFurigana', e.target.value)}
-                        className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                          errors[`emergencyContact${index}LastNameFurigana`] ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                        }`}
-                        placeholder="たなか"
-                      />
-                      {errors[`emergencyContact${index}LastNameFurigana`] && (
-                        <p className="text-red-400 text-sm mt-1">{errors[`emergencyContact${index}LastNameFurigana`]}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                        名（ふりがな） <span className="text-red-400">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        value={contact.firstNameFurigana}
-                        onChange={(e) => handleEmergencyContactChange(index, 'firstNameFurigana', e.target.value)}
-                        className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                          errors[`emergencyContact${index}FirstNameFurigana`] ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                        }`}
-                        placeholder="はなこ"
-                      />
-                      {errors[`emergencyContact${index}FirstNameFurigana`] && (
-                        <p className="text-red-400 text-sm mt-1">{errors[`emergencyContact${index}FirstNameFurigana`]}</p>
-                      )}
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">続柄・関係性</label>
-                      <select
-                        value={contact.relationship}
-                        onChange={(e) => handleEmergencyContactChange(index, 'relationship', e.target.value)}
-                        className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                      >
-                        <option value="">選択してください</option>
-                        {RELATIONSHIP_OPTIONS.map(option => (
-                          <option key={option} value={option}>{option}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                        電話番号 <span className="text-red-400">*</span>
-                      </label>
-                      <input
-                        type="tel"
-                        value={contact.tel}
-                        onChange={(e) => handleEmergencyContactChange(index, 'tel', e.target.value)}
-                        className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                          errors[`emergencyContact${index}Tel`] ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                        }`}
-                        placeholder="例：090-1234-5678"
-                      />
-                      {errors[`emergencyContact${index}Tel`] && (
-                        <p className="text-red-400 text-sm mt-1">{errors[`emergencyContact${index}Tel`]}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">住所</label>
-                    <input
-                      type="text"
-                      value={contact.address || ''}
-                      onChange={(e) => handleEmergencyContactChange(index, 'address', e.target.value)}
-                      className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                      placeholder="住所（任意）"
-                    />
-                  </div>
-
-                  <div className="mt-4">
-                    <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">備考</label>
-                    <textarea
-                      value={contact.notes || ''}
-                      onChange={(e) => handleEmergencyContactChange(index, 'notes', e.target.value)}
-                      rows={2}
-                      className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                      placeholder="備考（任意）"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <EmergencyContactsSection
+              mode="registration"
+              formData={formData}
+              errors={errors}
+              addEmergencyContact={addEmergencyContact}
+              removeEmergencyContact={removeEmergencyContact}
+              handleEmergencyContactChange={handleEmergencyContactChange}
+            />
           )}
 
           {currentSection === 3 && (
-            <div className="space-y-6">
-              <h3 className="text-lg font-semibold text-slate-950 dark:text-white mb-4">障害・疾患情報</h3>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                  障害または疾患名 <span className="text-red-400">*</span>
-                </label>
-                <textarea
-                  value={formData.disabilityInfo.disabilityOrDiseaseName}
-                  onChange={(e) => handleDisabilityInfoChange('disabilityOrDiseaseName', e.target.value)}
-                  rows={3}
-                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.disabilityOrDiseaseName ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                  }`}
-                  placeholder="例：統合失調症、知的障害、身体障害など"
-                />
-                {errors.disabilityOrDiseaseName && <p className="text-red-400 text-sm mt-1">{errors.disabilityOrDiseaseName}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                  生活保護受給状況 <span className="text-red-400">*</span>
-                </label>
-                <select
-                  value={formData.disabilityInfo.livelihoodProtection}
-                  onChange={(e) => handleDisabilityInfoChange('livelihoodProtection', e.target.value)}
-                  className={`w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981] ${
-                    errors.livelihoodProtection ? 'border-red-500' : 'border-slate-300 dark:border-[#2a3441]'
-                  }`}
-                >
-                  <option value="">選択してください</option>
-                  {LIVELIHOOD_PROTECTION_OPTIONS.map(option => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-                {errors.livelihoodProtection && <p className="text-red-400 text-sm mt-1">{errors.livelihoodProtection}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">特記事項</label>
-                <textarea
-                  value={formData.disabilityInfo.specialRemarks || ''}
-                  onChange={(e) => handleDisabilityInfoChange('specialRemarks', e.target.value)}
-                  rows={4}
-                  maxLength={2000}
-                  className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                  placeholder="手帳情報以外の重要な障害特性、配慮事項、医療的ケアの必要性等（2000文字以内）"
-                />
-                <div className="text-right text-xs text-slate-600 dark:text-gray-400 mt-1">
-                  {(formData.disabilityInfo.specialRemarks || '').length}/2000文字
-                </div>
-              </div>
-            </div>
+            <DisabilitySection
+              formData={formData}
+              errors={errors}
+              handleDisabilityInfoChange={handleDisabilityInfoChange}
+            />
           )}
 
           {currentSection === 4 && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-slate-950 dark:text-white">手帳・年金詳細情報</h3>
-                <button
-                  onClick={addDisabilityDetail}
-                  className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
-                  + 手帳・年金情報を追加
-                </button>
-              </div>
-
-              {formData.disabilityDetails.map((detail, index) => (
-                <div key={index} className="border border-slate-300 dark:border-[#2a3441] rounded-lg p-6 relative">
-                  {formData.disabilityDetails.length > 1 && (
-                    <button
-                      onClick={() => removeDisabilityDetail(index)}
-                      className="absolute top-4 right-4 px-3 py-1 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 rounded text-sm transition-colors"
-                    >
-                      削除
-                    </button>
-                  )}
-
-                  <h4 className="text-md font-medium text-slate-900 dark:text-white mb-4">手帳・年金情報 {index + 1}</h4>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                        カテゴリ <span className="text-red-400">*</span>
-                      </label>
-                      <select
-                        value={detail.category}
-                        onChange={(e) => handleDisabilityDetailChange(index, 'category', e.target.value)}
-                        className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                      >
-                        <option value="">選択してください</option>
-                        {DISABILITY_CATEGORY_OPTIONS.map(option => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">等級・レベル</label>
-                      <select
-                        value={detail.gradeOrLevel || ''}
-                        onChange={(e) => handleDisabilityDetailChange(index, 'gradeOrLevel', e.target.value)}
-                        className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                      >
-                        <option value="">選択してください</option>
-                        {detail.category && GRADE_LEVEL_OPTIONS[detail.category as keyof typeof GRADE_LEVEL_OPTIONS]?.map(option => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">
-                        申請状況 <span className="text-red-400">*</span>
-                      </label>
-                      <select
-                        value={detail.applicationStatus}
-                        onChange={(e) => handleDisabilityDetailChange(index, 'applicationStatus', e.target.value)}
-                        className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                      >
-                        <option value="">選択してください</option>
-                        {APPLICATION_STATUS_OPTIONS.map(option => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {detail.category === 'physical_handbook' && (
-                      <>
-                        <div>
-                          <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">身体障害種別</label>
-                          <select
-                            value={detail.physicalDisabilityType || ''}
-                            onChange={(e) => handleDisabilityDetailChange(index, 'physicalDisabilityType', e.target.value)}
-                            className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                          >
-                            <option value="">選択してください</option>
-                            {PHYSICAL_DISABILITY_TYPE_OPTIONS.map(option => (
-                              <option key={option.value} value={option.value}>{option.label}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        {detail.physicalDisabilityType === 'other' && (
-                          <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">その他詳細</label>
-                            <input
-                              type="text"
-                              value={detail.physicalDisabilityTypeOtherText || ''}
-                              onChange={(e) => handleDisabilityDetailChange(index, 'physicalDisabilityTypeOtherText', e.target.value)}
-                              className="w-full px-3 py-2 bg-white dark:bg-[#1a1f2e] border border-slate-300 dark:border-[#2a3441] rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#10b981]"
-                              placeholder="詳細を入力してください"
-                            />
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <DisabilityDetailsSection
+              mode="registration"
+              formData={formData}
+              addDisabilityDetail={addDisabilityDetail}
+              removeDisabilityDetail={removeDisabilityDetail}
+              handleDisabilityDetailChange={handleDisabilityDetailChange}
+            />
           )}
 
           {errors.submit && (

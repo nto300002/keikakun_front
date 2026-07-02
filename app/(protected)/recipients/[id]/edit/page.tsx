@@ -21,8 +21,8 @@ export default function EditRecipientPage({ params }: { params: Promise<{ id: st
       try {
         const data = await welfareRecipientsApi.get(resolvedParams.id);
         setRecipient(data);
-      } catch (err) {
-        console.error('Failed to fetch recipient data:', err);
+      } catch {
+        console.error('Operation failed');
         setError('利用者情報の取得に失敗しました');
       } finally {
         setIsLoading(false);

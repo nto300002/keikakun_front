@@ -37,8 +37,8 @@ export default function AdminPage() {
 
         setStaff(user);
         setOffice(officeData);
-      } catch (error) {
-        console.error('AdminPage: データ取得エラー', error);
+      } catch {
+        console.error('Operation failed');
         // Cookie認証: 401エラーは http.ts で自動処理されるため、ここでは何もしない
       } finally {
         setIsLoading(false);

@@ -40,9 +40,8 @@ export default function MessageSendForm() {
         // 自分以外のスタッフをフィルタリング
         const otherStaffs = staffResponse.filter(staff => staff.id !== currentUser.id);
         setStaffList(otherStaffs);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        console.error('スタッフ一覧の取得に失敗しました', message);
+      } catch {
+        console.error('Operation failed');
         toast.error('スタッフ一覧の取得に失敗しました');
       } finally {
         setIsFetchingStaff(false);

@@ -30,8 +30,8 @@ export default function RecipientsListPage() {
       setTotalPages(response.pages);
       setTotalRecipients(response.total);
       setCurrentPage(page);
-    } catch (err) {
-      console.error('Failed to fetch recipients:', err);
+    } catch {
+      console.error('Operation failed');
       setError('利用者情報の取得に失敗しました');
     } finally {
       setIsLoading(false);

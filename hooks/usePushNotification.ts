@@ -98,7 +98,7 @@ export function usePushNotification(): UsePushNotificationReturn {
         const subscription = await registration.pushManager.getSubscription();
         setIsSubscribed(!!subscription);
       } catch (err) {
-        console.error('[usePushNotification] Error checking subscription:', err);
+        console.error('Operation failed');
         setError(err instanceof Error ? err.message : 'Failed to check subscription');
       } finally {
         setIsLoading(false);
@@ -173,7 +173,7 @@ export function usePushNotification(): UsePushNotificationReturn {
 
       setIsSubscribed(true);
     } catch (err) {
-      console.error('[usePushNotification] Subscribe error:', err);
+      console.error('Operation failed');
       const errorMessage = err instanceof Error ? err.message : 'UNKNOWN_ERROR';
       setError(errorMessage);
       throw err;
@@ -220,7 +220,7 @@ export function usePushNotification(): UsePushNotificationReturn {
 
       setIsSubscribed(false);
     } catch (err) {
-      console.error('[usePushNotification] Unsubscribe error:', err);
+      console.error('Operation failed');
       const errorMessage = err instanceof Error ? err.message : 'UNKNOWN_ERROR';
       setError(errorMessage);
       throw err;

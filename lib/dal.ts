@@ -78,8 +78,8 @@ export const verifySession = cache(async (): Promise<Session | null> => {
         } : null,
       },
     };
-  } catch (error) {
-    console.error('[DAL] セッション検証に失敗しました:', error);
+  } catch {
+    console.error('Operation failed');
     return null;
   }
 });

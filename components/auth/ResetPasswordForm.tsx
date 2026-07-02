@@ -48,8 +48,10 @@ export default function ResetPasswordForm() {
 
   const verifyToken = async (tokenToVerify: string) => {
     try {
-      // 統一されたHTTPクライアントでリクエスト送信
-      const data = await http.get<VerifyTokenResponse>(`/api/v1/auth/verify-reset-token?token=${encodeURIComponent(tokenToVerify)}`);
+      // URL query stringにリセットトークンを残さないよう、POST bodyで検証する
+      const data = await http.post<VerifyTokenResponse>('/api/v1/auth/verify-reset-token', {
+        token: tokenToVerify,
+      });
 
       if (!data.valid) {
         throw new Error(data.message || 'トークンが無効または期限切れです');

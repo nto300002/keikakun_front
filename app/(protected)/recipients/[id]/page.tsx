@@ -38,8 +38,8 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
       try {
         const data = await welfareRecipientsApi.get(resolvedParams.id);
         setRecipient(data);
-      } catch (err) {
-        console.error('Failed to fetch recipient details:', err);
+      } catch {
+        console.error('Operation failed');
         setError('利用者情報の取得に失敗しました。');
       } finally {
         setIsLoadingRecipient(false);
@@ -51,8 +51,8 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
       try {
         const userData = await authApi.getCurrentUser();
         setCurrentUser(userData);
-      } catch (err) {
-        console.error('Failed to fetch current user:', err);
+      } catch {
+        console.error('Operation failed');
       } finally {
         setIsLoadingUser(false);
       }
@@ -63,8 +63,8 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
       try {
         const data = await assessmentApi.getAll(resolvedParams.id);
         setAssessmentData(data);
-      } catch (err) {
-        console.error('Failed to fetch assessment data:', err);
+      } catch {
+        console.error('Operation failed');
         // アセスメントデータがない場合は空のデータを設定
         setAssessmentData({
           family_members: [],
@@ -85,8 +85,8 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
     try {
       const data = await assessmentApi.getAll(resolvedParams.id);
       setAssessmentData(data);
-    } catch (err) {
-      console.error('Failed to refresh assessment data:', err);
+    } catch {
+      console.error('Operation failed');
     }
   };
 
@@ -95,8 +95,8 @@ export default function RecipientDetailPage({ params }: { params: Promise<{ id: 
     try {
       await welfareRecipientsApi.delete(resolvedParams.id);
       router.push('/dashboard?message=' + encodeURIComponent('利用者を削除しました。'));
-    } catch (err) {
-      console.error('Failed to delete recipient:', err);
+    } catch {
+      console.error('Operation failed');
       setError('利用者の削除に失敗しました。');
     } finally {
       setIsDeleting(false);

@@ -20,8 +20,8 @@ export default function AppAdminLayout({ children }: AppAdminLayoutProps) {
 
   useEffect(() => {
     // CSRFトークンを初期化
-    initializeCsrfToken().catch(error => {
-      console.error('CSRFトークンの初期化に失敗しました', error);
+    initializeCsrfToken().catch(() => {
+      console.error('Operation failed');
     });
   }, []);
 
@@ -36,8 +36,8 @@ export default function AppAdminLayout({ children }: AppAdminLayoutProps) {
         hotbar_type: 'success'
       });
       window.location.href = `/auth/app-admin/login?${params.toString()}`;
-    } catch (error) {
-      console.error('Logout failed:', error);
+    } catch {
+      console.error('Operation failed');
       window.location.href = '/auth/app-admin/login';
     } finally {
       setIsLoggingOut(false);

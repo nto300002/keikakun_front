@@ -119,8 +119,8 @@ const handleLogout = async () => {
       method: 'POST',
       credentials: 'include',
     });
-  } catch (error) {
-    console.error('ログアウトに失敗しました:', error);
+  } catch {
+    console.error('Operation failed');
     // ログアウトエンドポイントのエラーは無視（認証エラーの可能性があるため）
   }
 

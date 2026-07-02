@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { MdEdit, MdCheckCircle, MdCancel, MdDelete, MdExitToApp } from 'react-icons/md';
-import { AiOutlineQuestionCircle } from 'react-icons/ai';
 import { QRCodeCanvas } from 'qrcode.react';
 import { StaffResponse } from '@/types/staff';
 import { OfficeResponse, OfficeInfoUpdateRequest, OfficeTypeValue } from '@/types/office';
@@ -12,7 +10,11 @@ import { OfficeCalendarAccount, CalendarConnectionStatus } from '@/types/calenda
 import { authApi, officeApi } from '@/lib/auth';
 import { officesApi } from '@/lib/api/offices';
 import WithdrawalModal from './WithdrawalModal';
-import PlanTab from './PlanTab';
+import BillingPlanTab from './BillingPlanTab';
+import OfficeInfoTab from './OfficeInfoTab';
+import StaffManagementTab from './StaffManagementTab';
+import GoogleIntegrationTab from './GoogleIntegrationTab';
+import OfficeEditModal from './OfficeEditModal';
 
 interface AdminMenuProps {
   office: OfficeResponse | null;
@@ -605,14 +607,12 @@ export default function AdminMenu({ office }: AdminMenuProps) {
             <div>
               <h2 className="text-2xl font-bold mb-4">事業所設定</h2>
 
-              {/* ２段階認証成功メッセージ */}
               {mfaSuccess && (
                 <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
                   <p className="text-green-400 text-base">{mfaSuccess}</p>
                 </div>
               )}
 
-              {/* ２段階認証エラーメッセージ */}
               {mfaError && (
                 <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
                   <p className="text-red-400 text-base font-semibold">エラー</p>
@@ -620,14 +620,12 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                 </div>
               )}
 
-              {/* スタッフ削除成功メッセージ */}
               {deleteStaffSuccess && (
                 <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
                   <p className="text-green-400 text-base">{deleteStaffSuccess}</p>
                 </div>
               )}
 
-              {/* スタッフ削除エラーメッセージ */}
               {deleteStaffError && (
                 <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
                   <p className="text-red-400 text-base font-semibold">エラー</p>
@@ -635,600 +633,62 @@ export default function AdminMenu({ office }: AdminMenuProps) {
                 </div>
               )}
 
-              {/* オフィス情報カード */}
-              <div className="bg-white p-6 rounded-lg mb-6 border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-xl font-semibold">事業所情報</h3>
-                  <button
-                    onClick={handleOpenOfficeEditModal}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
-                  >
-                    <MdEdit className="w-5 h-5" />
-                    編集
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  <div>
-                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">事業所名</p>
-                    <p className="text-slate-900 font-semibold dark:text-white">{office?.name || '未設定'}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">事業所種別</p>
-                    <p className="text-slate-900 font-semibold dark:text-white">
-                      {office?.office_type === 'transition_to_employment' && '移行支援'}
-                      {office?.office_type === 'type_A_office' && '就労A型'}
-                      {office?.office_type === 'type_B_office' && '就労B型'}
-                      {!office?.office_type && '未設定'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">住所</p>
-                    <p className="text-slate-900 font-semibold dark:text-white">{office?.address || '未設定'}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">電話番号</p>
-                    <p className="text-slate-900 font-semibold dark:text-white">{office?.phone_number || '未設定'}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">メールアドレス</p>
-                    <p className="text-slate-900 font-semibold dark:text-white">{office?.email || '未設定'}</p>
-                  </div>
-                </div>
-              </div>
+              <OfficeInfoTab
+                office={office}
+                withdrawalSuccess={withdrawalSuccess}
+                onEditOffice={handleOpenOfficeEditModal}
+                onOpenWithdrawal={() => setShowWithdrawalModal(true)}
+              />
 
-              {/* スタッフ管理セクション */}
-              <div className="bg-white p-6 rounded-lg mb-6 border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-xl font-semibold">事務所スタッフ管理</h3>
-                    <span className="text-slate-600 text-base font-semibold dark:text-gray-400">
-                      {officeStaffs.length}名
-                    </span>
-
-                    {/* QRコード紛失時のヘルプツールチップ */}
-                    <div className="group relative">
-                      <button className="text-blue-400 hover:text-blue-300 text-base font-semibold flex items-center gap-1 transition-colors">
-                        <AiOutlineQuestionCircle className="h-5 w-5" />
-                        <span className="underline">QRコードを紛失した場合</span>
-                      </button>
-
-                      {/* ツールチップ */}
-                      <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-slate-300 dark:bg-gray-900 dark:border-gray-700 rounded-lg p-4 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                        <div className="flex items-start gap-2">
-                          <AiOutlineQuestionCircle className="h-5 w-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                          <div>
-                            <p className="text-base font-semibold text-slate-900 dark:text-white mb-2">QRコード紛失時の対処法</p>
-                            <ol className="text-base text-slate-700 dark:text-gray-300 space-y-2 list-decimal list-inside">
-                              <li>対象スタッフの２段階認証を一度無効化する</li>
-                              <li>再度２段階認証を有効化する</li>
-                              <li>新しいQRコードとシークレットキーが発行される</li>
-                              <li>スタッフに新しいQRコードを共有する</li>
-                            </ol>
-                            <p className="text-sm font-medium text-slate-500 dark:text-gray-400 mt-3">
-                              ⚠️ 無効化すると、既存のTOTPアプリの設定は使用できなくなります。
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleBulkEnableMfa}
-                      disabled={isBulkMfaProcessing || isLoadingStaffs}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-base font-semibold disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
-                    >
-                      {isBulkMfaProcessing ? (
-                        <>
-                          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          処理中...
-                        </>
-                      ) : (
-                        <>
-                          <MdCheckCircle className="w-5 h-5" />
-                          全員２段階認証有効化
-                        </>
-                      )}
-                    </button>
-                    <button
-                      onClick={handleBulkDisableMfa}
-                      disabled={isBulkMfaProcessing || isLoadingStaffs}
-                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-base font-semibold disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
-                    >
-                      {isBulkMfaProcessing ? (
-                        <>
-                          <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          処理中...
-                        </>
-                      ) : (
-                        <>
-                          <MdCancel className="w-5 h-5" />
-                          全員２段階認証無効化
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {/* バルク２段階認証操作エラーメッセージ */}
-                {bulkMfaError && (
-                  <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                    <p className="text-red-400 text-base font-semibold">エラー</p>
-                    <p className="text-red-400 text-base font-semibold mt-1">{bulkMfaError}</p>
-                  </div>
-                )}
-
-                {/* バルク２段階認証操作成功メッセージ */}
-                {bulkMfaSuccess && !showBulkMfaResultModal && (
-                  <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                    <p className="text-green-400 text-base font-semibold">成功</p>
-                    <p className="text-green-400 text-base font-semibold mt-1">{bulkMfaSuccess}</p>
-                  </div>
-                )}
-
-                {/* ローディング中 */}
-                {isLoadingStaffs && (
-                  <div className="p-4 bg-slate-100 border border-slate-300 rounded-lg flex dark:bg-gray-700 dark:border-gray-600 items-center">
-                    <svg className="animate-spin h-5 w-5 text-blue-400 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">スタッフ一覧を読み込み中...</p>
-                  </div>
-                )}
-
-                {/* エラー表示 */}
-                {loadStaffsError && !isLoadingStaffs && (
-                  <div className="p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                    <p className="text-red-400 text-base font-semibold">読み込みエラー</p>
-                    <p className="text-red-400 text-base font-semibold mt-1">{loadStaffsError}</p>
-                  </div>
-                )}
-
-
-
-                {/* スタッフ一覧テーブル */}
-                {!isLoadingStaffs && !loadStaffsError && (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b border-slate-300 dark:border-gray-700">
-                          <th className="text-left py-3 px-4 text-slate-600 dark:text-gray-400 font-semibold">氏名</th>
-                          <th className="text-left py-3 px-4 text-slate-600 dark:text-gray-400 font-semibold">メールアドレス</th>
-                          <th className="text-left py-3 px-4 text-slate-600 dark:text-gray-400 font-semibold">役割</th>
-                          <th className="text-left py-3 px-4 text-slate-600 dark:text-gray-400 font-semibold">
-                            <div className="flex items-center gap-2">
-                              ２段階認証状態/変更
-                              <div className="relative group/help">
-                                <button
-                                  type="button"
-                                  className="w-4 h-4 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 dark:bg-gray-700/50 dark:hover:bg-gray-600/70 dark:text-gray-300 flex items-center justify-center text-sm font-bold transition-colors"
-                                  title="２段階認証について"
-                                >
-                                  ?
-                                </button>
-                                {/* ツールチップ */}
-                                <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-slate-300 dark:bg-gray-900 dark:border-gray-700 rounded-lg p-4 shadow-xl opacity-0 invisible group-hover/help:opacity-100 group-hover/help:visible transition-all duration-200 z-50">
-                                  <div className="flex items-start gap-2">
-                                    <svg className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    <div>
-                                      <p className="text-base font-semibold text-slate-900 dark:text-white mb-2">２段階認証とは</p>
-                                      <p className="text-base text-slate-700 dark:text-gray-300 leading-relaxed mb-3">
-                                        ２段階認証は、パスワードに加えて、スマートフォンアプリで生成される6桁の認証コードを使用する認証方式です。
-                                      </p>
-                                      <ul className="text-base text-slate-700 dark:text-gray-300 space-y-1 list-disc list-inside">
-                                        <li>セキュリティが大幅に向上します</li>
-                                        <li>Google Authenticatorなどのアプリが必要です</li>
-                                        <li>ログイン時に追加の認証コード入力が必要になります</li>
-                                      </ul>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          </th>
-                          <th className="text-left py-3 px-4 text-slate-600 dark:text-gray-400 font-semibold">スタッフ削除</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {officeStaffs.map((s) => {
-                          const isDeleted = s.is_deleted;
-                          const remainingDays = isDeleted ? calculateRemainingDays(s.deleted_at) : 0;
-
-                          return (
-                            <tr key={s.id} className={`border-b border-slate-300 dark:border-gray-700 hover:bg-slate-100 dark:hover:bg-gray-700/50 ${isDeleted ? 'opacity-50' : ''}`}>
-                              <td className="py-3 px-4">
-                                <div className="flex items-center gap-2">
-                                  <span className={isDeleted ? 'text-slate-500 dark:text-gray-500 line-through' : 'text-slate-900 dark:text-white'}>
-                                    {s.full_name}
-                                  </span>
-                                  {isDeleted && (
-                                    <span className="px-2 py-1 rounded-lg text-sm font-semibold bg-red-900/50 text-red-400 border border-red-500">
-                                      削除済み - 残り{remainingDays}日で完全削除
-                                    </span>
-                                  )}
-                                </div>
-                              </td>
-                              <td className="py-3 px-4 text-slate-700 dark:text-gray-300">{s.email}</td>
-                              <td className="py-3 px-4">
-                                <span
-                                  className={`inline-flex min-w-20 justify-center rounded border px-3 py-1 text-base font-semibold ${getRoleBadgeColor(s.role)}`}
-                                >
-                                  {getRoleLabel(s.role)}
-                                </span>
-                              </td>
-                            <td className="py-3 px-4">
-                              <div className="flex items-center gap-2 group">
-                                <span
-                                  className={`inline-flex min-w-20 justify-center rounded border px-3 py-1 text-base font-semibold items-center gap-1 ${
-                                    s.is_mfa_enabled
-                                      ? 'border-green-500 text-green-700 dark:text-green-300'
-                                      : 'border-slate-400 text-slate-600 dark:border-gray-500 dark:text-gray-300'
-                                  }`}
-                                >
-                                  {s.is_mfa_enabled ? (
-                                    <>
-                                      <MdCheckCircle className="w-4 h-4" />
-                                      有効
-                                    </>
-                                  ) : (
-                                    <>
-                                      <MdCancel className="w-4 h-4" />
-                                      無効
-                                    </>
-                                  )}
-                                </span>
-                                {s.is_mfa_enabled ? (
-                                  <button
-                                    onClick={() => handleStaffMfaDisable(s)}
-                                    disabled={staffMfaTogglingId === s.id || isDeleted}
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-base font-semibold disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
-                                  >
-                                    {staffMfaTogglingId === s.id ? (
-                                      <>
-                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        処理中...
-                                      </>
-                                    ) : (
-                                      '無効化'
-                                    )}
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={() => handleStaffMfaEnable(s)}
-                                    disabled={staffMfaTogglingId === s.id || isDeleted}
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-base font-semibold disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
-                                  >
-                                    {staffMfaTogglingId === s.id ? (
-                                      <>
-                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        処理中...
-                                      </>
-                                    ) : (
-                                      '有効化'
-                                    )}
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-                              <td className="py-3 px-4">
-                                {isDeleted ? (
-                                  <span className="text-slate-500 dark:text-gray-500 text-base">削除済み</span>
-                                ) : (
-                                  <button
-                                    onClick={() => handleStaffDelete(s)}
-                                    disabled={staffDeletingId === s.id}
-                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-base font-semibold disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center gap-1"
-                                  >
-                                    {staffDeletingId === s.id ? (
-                                      <>
-                                        <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        削除中...
-                                      </>
-                                    ) : (
-                                      <>
-                                        <MdDelete className="w-4 h-4" />
-                                        削除
-                                      </>
-                                    )}
-                                  </button>
-                                )}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-
-              {/* 退会セクション */}
-              <div className="bg-white p-6 rounded-lg mt-6 border border-red-300 shadow-sm dark:bg-gray-800 dark:border-red-500/30">
-                <div className="flex items-center gap-3 mb-4">
-                  <MdExitToApp className="w-6 h-6 text-red-400" />
-                  <h3 className="text-xl font-semibold text-red-400">退会</h3>
-                </div>
-
-                {withdrawalSuccess && (
-                  <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                    <p className="text-green-400 text-base">{withdrawalSuccess}</p>
-                  </div>
-                )}
-
-                <p className="text-slate-600 mb-4 dark:text-gray-400 text-base">
-                  事務所を退会すると、事務所データと全スタッフのアカウントが削除されます。
-                  退会申請後、アプリ管理者による承認が必要です。
-                </p>
-                <button
-                  onClick={() => setShowWithdrawalModal(true)}
-                  className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors"
-                >
-                  <MdExitToApp className="w-5 h-5" />
-                  退会を申請する
-                </button>
-              </div>
+              <StaffManagementTab
+                officeStaffs={officeStaffs}
+                isLoadingStaffs={isLoadingStaffs}
+                loadStaffsError={loadStaffsError}
+                staffMfaTogglingId={staffMfaTogglingId}
+                staffDeletingId={staffDeletingId}
+                isBulkMfaProcessing={isBulkMfaProcessing}
+                bulkMfaError={bulkMfaError}
+                bulkMfaSuccess={bulkMfaSuccess}
+                showBulkMfaResultModal={showBulkMfaResultModal}
+                onBulkEnableMfa={handleBulkEnableMfa}
+                onBulkDisableMfa={handleBulkDisableMfa}
+                onStaffMfaEnable={handleStaffMfaEnable}
+                onStaffMfaDisable={handleStaffMfaDisable}
+                onStaffDelete={handleStaffDelete}
+                calculateRemainingDays={calculateRemainingDays}
+                getRoleBadgeColor={getRoleBadgeColor}
+                getRoleLabel={getRoleLabel}
+              />
             </div>
           )}
 
           {/* オフィス: 連携 */}
           {activeTab === 'integration' && (
-            <div>
-              <h2 className="text-2xl font-bold mb-4">連携</h2>
-
-              <div className="bg-white p-6 rounded-lg border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
-                <h3 className="text-xl font-semibold mb-4">Google カレンダー</h3>
-                <p className="text-slate-600 mb-4 dark:text-gray-400">
-                  Google Calendarへの通知はGoogle Consoleから設定します 詳しくは下記を参照してください
-                </p>
-
-                <div className="mb-4">
-                  <a
-                    href="https://www.youtube.com/watch?v=xAXWnT_kP2g"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline"
-                  >
-                    Google Calendar設定方法
-                  </a>
-                </div>
-
-                {/* ローディング中 */}
-                {isLoadingCalendar && (
-                  <div className="mb-4 p-4 bg-slate-100 border border-slate-300 rounded-lg flex dark:bg-gray-700 dark:border-gray-600 items-center">
-                    <svg className="animate-spin h-5 w-5 text-blue-400 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <p className="text-slate-600 text-base font-semibold dark:text-gray-400">設定を読み込み中...</p>
-                  </div>
-                )}
-
-                {/* カレンダー設定読み込みエラー */}
-                {loadCalendarError && (
-                  <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                    <p className="text-red-400 text-base font-semibold">設定の読み込みエラー</p>
-                    <p className="text-red-400 text-base font-semibold mt-1">{loadCalendarError}</p>
-                  </div>
-                )}
-
-                {/* 既存のカレンダー設定情報 */}
-                {existingCalendar && !isLoadingCalendar && (
-                  <div className="mb-6 p-4 bg-slate-100 border border-slate-300 rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                    <h4 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                      <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      現在の設定
-                    </h4>
-                    <div className="space-y-3">
-                      <div>
-                        <p className="text-slate-600 text-base font-semibold dark:text-gray-400">接続ステータス</p>
-                        <span className={`inline-block mt-1 px-3 py-1 rounded-lg text-base font-semibold border ${getConnectionStatusColor(existingCalendar.connection_status)}`}>
-                          {getConnectionStatusLabel(existingCalendar.connection_status)}
-                        </span>
-                      </div>
-                      {existingCalendar.google_calendar_id && (
-                        <div>
-                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400">カレンダー ID</p>
-                          <p className="text-slate-900 font-mono text-base font-semibold dark:text-white mt-1 break-all">{existingCalendar.google_calendar_id}</p>
-                        </div>
-                      )}
-                      {existingCalendar.service_account_email && (
-                        <div>
-                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400">サービスアカウント</p>
-                          <p className="text-slate-900 font-mono text-base font-semibold dark:text-white mt-1 break-all">{existingCalendar.service_account_email}</p>
-                        </div>
-                      )}
-                      {existingCalendar.calendar_name && (
-                        <div>
-                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400">カレンダー名</p>
-                          <p className="text-slate-900 text-base font-semibold dark:text-white mt-1">{existingCalendar.calendar_name}</p>
-                        </div>
-                      )}
-                      {existingCalendar.last_sync_at && (
-                        <div>
-                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400">最終同期日時</p>
-                          <p className="text-slate-900 text-base font-semibold dark:text-white mt-1">{new Date(existingCalendar.last_sync_at).toLocaleString('ja-JP')}</p>
-                        </div>
-                      )}
-                      {existingCalendar.last_error_message && (
-                        <div>
-                          <p className="text-red-400 text-base font-semibold">最後のエラー</p>
-                          <p className="text-red-300 text-base font-semibold mt-1">{existingCalendar.last_error_message}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* アップロードエラー */}
-                {uploadError && (
-                  <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                    <p className="text-red-400 text-base font-semibold">アップロードエラー</p>
-                    <p className="text-red-400 text-base font-semibold mt-1">{uploadError}</p>
-                  </div>
-                )}
-
-                {/* アップロード成功 */}
-                {uploadSuccess && (
-                  <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                    <p className="text-green-400 text-base">{uploadSuccess}</p>
-                  </div>
-                )}
-
-                {/* 削除エラー */}
-                {deleteError && (
-                  <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                    <p className="text-red-400 text-base font-semibold">削除エラー</p>
-                    <p className="text-red-400 text-base font-semibold mt-1">{deleteError}</p>
-                  </div>
-                )}
-
-                {/* 削除成功 */}
-                {deleteSuccess && (
-                  <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                    <p className="text-green-400 text-base">{deleteSuccess}</p>
-                  </div>
-                )}
-
-                <div className="space-y-4">
-                  <h4 className="text-xl font-semibold mb-3">
-                    {existingCalendar ? '設定を更新' : '新規設定'}
-                  </h4>
-
-                  <div>
-                    <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">
-                      カレンダー ID <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={calendarId}
-                      onChange={(e) => setCalendarId(e.target.value)}
-                      placeholder="example@group.calendar.google.com"
-                      className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 placeholder-slate-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
-                    />
-                    <p className="mt-1 text-sm font-medium text-slate-500 dark:text-gray-500">
-                      Googleカレンダーの設定から取得できます
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">
-                      サービスアカウント JSON ファイル <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="file"
-                      accept=".json"
-                      onChange={handleFileChange}
-                      className="w-full text-slate-700 dark:text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-base file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
-                    />
-                    {calendarFile && (
-                      <p className="mt-2 text-base font-semibold text-green-400">
-                        選択済み: {calendarFile.name}
-                      </p>
-                    )}
-                    {existingCalendar && !calendarFile && (
-                      <p className="mt-1 text-sm font-medium text-slate-500 dark:text-gray-500">
-                        既存の認証情報が設定されています。変更する場合のみファイルを選択してください。
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={handleCalendarSubmit}
-                    disabled={!calendarFile || !calendarId || isUploading}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center"
-                  >
-                    {isUploading ? (
-                      <>
-                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        アップロード中...
-                      </>
-                    ) : existingCalendar ? (
-                      '設定を更新'
-                    ) : (
-                      'アップロード'
-                    )}
-                  </button>
-                </div>
-
-                {/* 連携解除セクション */}
-                {existingCalendar && (
-                  <div className="mt-8 pt-6 border-t border-slate-300 dark:border-gray-700">
-                    <h4 className="text-xl font-semibold mb-3 text-red-400">カレンダー連携解除</h4>
-                    <p className="text-slate-600 text-base font-semibold dark:text-slate-600 mb-4 dark:text-gray-400">
-                      カレンダー連携を解除すると、今後のイベント同期が停止されます。この操作は元に戻せません。
-                    </p>
-
-                    {!showDeleteConfirm ? (
-                      <button
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg"
-                      >
-                        連携解除
-                      </button>
-                    ) : (
-                      <div className="bg-red-900/30 border border-red-600 rounded-lg p-4">
-                        <p className="text-red-400 font-semibold mb-3">
-                          本当にカレンダー連携を解除しますか？
-                        </p>
-                        <div className="flex gap-3">
-                          <button
-                            onClick={handleCalendarDelete}
-                            disabled={isDeleting}
-                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg disabled:bg-gray-600 disabled:cursor-not-allowed flex items-center"
-                          >
-                            {isDeleting ? (
-                              <>
-                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                解除中...
-                              </>
-                            ) : (
-                              '解除を実行'
-                            )}
-                          </button>
-                          <button
-                            onClick={() => setShowDeleteConfirm(false)}
-                            disabled={isDeleting}
-                            className="bg-slate-200 hover:bg-slate-300 text-slate-900 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-white px-4 py-2 rounded-lg disabled:cursor-not-allowed"
-                          >
-                            キャンセル
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+            <GoogleIntegrationTab
+              calendarFile={calendarFile}
+              calendarId={calendarId}
+              existingCalendar={existingCalendar}
+              isLoadingCalendar={isLoadingCalendar}
+              loadCalendarError={loadCalendarError}
+              uploadError={uploadError}
+              uploadSuccess={uploadSuccess}
+              deleteError={deleteError}
+              deleteSuccess={deleteSuccess}
+              isUploading={isUploading}
+              showDeleteConfirm={showDeleteConfirm}
+              isDeleting={isDeleting}
+              onCalendarIdChange={setCalendarId}
+              onFileChange={handleFileChange}
+              onCalendarSubmit={handleCalendarSubmit}
+              onCalendarDelete={handleCalendarDelete}
+              onShowDeleteConfirmChange={setShowDeleteConfirm}
+              getConnectionStatusLabel={getConnectionStatusLabel}
+              getConnectionStatusColor={getConnectionStatusColor}
+            />
           )}
 
           {/* オフィス: 有料会員 */}
-          {activeTab === 'plan' && <PlanTab />}
+          {activeTab === 'plan' && <BillingPlanTab />}
         </div>
       </div>
 
@@ -1304,128 +764,23 @@ export default function AdminMenu({ office }: AdminMenuProps) {
 
       {/* オフィス編集モーダル */}
       {showOfficeEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 font-medium border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <h3 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">事業所情報を編集</h3>
-
-            {/* エラーメッセージ */}
-            {saveOfficeError && (
-              <div className="mb-4 p-4 bg-red-900/50 border border-red-500 rounded-lg">
-                <p className="text-red-400 text-base font-semibold">エラー</p>
-                <p className="text-red-400 text-base font-semibold mt-1">{saveOfficeError}</p>
-              </div>
-            )}
-
-            {/* 成功メッセージ */}
-            {saveOfficeSuccess && (
-              <div className="mb-4 p-4 bg-green-900/50 border border-green-500 rounded-lg">
-                <p className="text-green-400 text-base">{saveOfficeSuccess}</p>
-              </div>
-            )}
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">
-                  事業所名 <span className="text-red-400">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={officeName}
-                  onChange={(e) => setOfficeName(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:border-blue-500"
-                  placeholder="事業所名を入力"
-                  required
-                  minLength={1}
-                  maxLength={255}
-                  disabled={isSavingOffice}
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">事業所種別</label>
-                <select
-                  value={officeType}
-                  onChange={(e) => setOfficeType(e.target.value as OfficeTypeValue)}
-                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:border-blue-500"
-                  disabled={isSavingOffice}
-                >
-                  <option value="transition_to_employment">移行支援</option>
-                  <option value="type_A_office">就労A型</option>
-                  <option value="type_B_office">就労B型</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">住所</label>
-                <input
-                  type="text"
-                  value={officeAddress}
-                  onChange={(e) => setOfficeAddress(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:border-blue-500"
-                  placeholder="例: 東京都渋谷区1-2-3"
-                  maxLength={500}
-                  disabled={isSavingOffice}
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">電話番号</label>
-                <input
-                  type="tel"
-                  value={officePhoneNumber}
-                  onChange={(e) => setOfficePhoneNumber(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:border-blue-500"
-                  placeholder="例: 03-1234-5678"
-                  pattern="\d{2,4}-\d{2,4}-\d{4}"
-                  disabled={isSavingOffice}
-                />
-                <p className="mt-1 text-sm font-medium text-slate-500 dark:text-gray-500">
-                  形式: 03-1234-5678（ハイフン区切り）
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">メールアドレス</label>
-                <input
-                  type="email"
-                  value={officeEmail}
-                  onChange={(e) => setOfficeEmail(e.target.value)}
-                  className="w-full bg-white border border-slate-300 rounded-lg px-4 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:border-blue-500"
-                  placeholder="例: info@example.com"
-                  disabled={isSavingOffice}
-                />
-              </div>
-            </div>
-
-            {/* ボタン */}
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setShowOfficeEditModal(false)}
-                disabled={isSavingOffice}
-                className="bg-slate-200 hover:bg-slate-300 text-slate-900 dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                キャンセル
-              </button>
-              <button
-                onClick={handleSaveOfficeEdit}
-                disabled={isSavingOffice}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-              >
-                {isSavingOffice ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    保存中...
-                  </>
-                ) : (
-                  '保存'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
+        <OfficeEditModal
+          officeName={officeName}
+          officeType={officeType}
+          officeAddress={officeAddress}
+          officePhoneNumber={officePhoneNumber}
+          officeEmail={officeEmail}
+          isSavingOffice={isSavingOffice}
+          saveOfficeError={saveOfficeError}
+          saveOfficeSuccess={saveOfficeSuccess}
+          onOfficeNameChange={setOfficeName}
+          onOfficeTypeChange={setOfficeType}
+          onOfficeAddressChange={setOfficeAddress}
+          onOfficePhoneNumberChange={setOfficePhoneNumber}
+          onOfficeEmailChange={setOfficeEmail}
+          onClose={() => setShowOfficeEditModal(false)}
+          onSave={handleSaveOfficeEdit}
+        />
       )}
 
       {/* バルク２段階認証有効化結果モーダル */}

@@ -26,13 +26,13 @@ async function getStaffInfo(): Promise<StaffResponse | null> {
     });
 
     if (!response.ok) {
-      console.error('Failed to fetch staff info:', response.status);
+      console.error('Failed to fetch staff info');
       return null;
     }
 
     return await response.json();
-  } catch (error) {
-    console.error('Error fetching staff info:', error);
+  } catch {
+    console.error('Operation failed');
     return null;
   }
 }

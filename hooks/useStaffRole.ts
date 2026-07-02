@@ -18,7 +18,7 @@ export function useStaffRole() {
         setStaff(userData);
         setError(null);
       } catch (err) {
-        console.error('Failed to fetch staff data:', err);
+        console.error('Client operation failed');
         setError(err instanceof Error ? err : new Error('Failed to fetch staff data'));
       } finally {
         setIsLoading(false);

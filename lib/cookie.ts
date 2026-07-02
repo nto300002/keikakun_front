@@ -12,9 +12,9 @@ export async function getTokenFromCookies(): Promise<string | null> {
     const cookieStore = await cookies();
     const token = cookieStore.get('access_token');
     return token?.value || null;
-  } catch (error) {
+  } catch {
     // Server Component以外で呼び出された場合はnullを返す
-    console.error('[Cookie] Failed to get token from cookies:', error);
+    console.error('Operation failed');
     return null;
   }
 }

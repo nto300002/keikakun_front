@@ -6,6 +6,7 @@
 import { type Page } from '@playwright/test';
 import * as path from 'path';
 import { TEST_OWNER } from '../helpers/test-data';
+import { sanitizeE2EApiBody, sanitizeE2EErrorMessage } from '../helpers/log-sanitizer';
 
 export async function loginAsOwner(page: Page): Promise<void> {
   const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? '(未設定)';
@@ -61,8 +62,9 @@ export async function loginAsOwner(page: Page): Promise<void> {
     const loginStatus = loginApiResponse.status();
     const loginUrl = loginApiResponse.url();
     const loginBody = await loginApiResponse.text().catch(() => '(取得失敗)');
+    const sanitizedLoginBody = sanitizeE2EApiBody(loginBody, 300);
     console.log(`[auth] /auth/token → status: ${loginStatus}, url: ${loginUrl}`);
-    console.log(`[auth] /auth/token body(先頭300): ${loginBody.slice(0, 300)}`);
+    console.log(`[auth] /auth/token body(sanitized): ${sanitizedLoginBody}`);
 
     if (loginStatus !== 200) {
       const currentUrl = page.url();
@@ -70,7 +72,7 @@ export async function loginAsOwner(page: Page): Promise<void> {
         `ログイン API がエラーを返しました\n` +
         `  リクエスト先: ${loginUrl}\n` +
         `  status: ${loginStatus}\n` +
-        `  body: ${loginBody}\n` +
+        `  body: ${sanitizeE2EErrorMessage(loginBody)}\n` +
         `  現在 URL: ${currentUrl}`,
       );
     }

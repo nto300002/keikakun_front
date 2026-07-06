@@ -7,6 +7,7 @@
  */
 import { type Page } from '@playwright/test';
 import { type generateRecipientData } from './test-data';
+import { sanitizeE2EApiBody, sanitizeE2EErrorMessage } from './log-sanitizer';
 
 type RecipientData = ReturnType<typeof generateRecipientData>;
 
@@ -103,10 +104,10 @@ export async function fillAndSubmitRecipientForm(
 
   const status = apiResponse.status();
   const bodyText = await apiResponse.text().catch(() => '(body 取得失敗)');
+  const sanitizedBody = sanitizeE2EApiBody(bodyText);
 
-  // ステータス・ボディを必ずログ出力（CI での可視化）
   console.log(`[recipient-form] POST /welfare-recipients → ${status}`);
-  console.log(`[recipient-form] response body: ${bodyText.slice(0, 500)}`);
+  console.log(`[recipient-form] response body(sanitized): ${sanitizedBody}`);
 
   if (status !== 200 && status !== 201) {
     const currentUrl = page.url();
@@ -114,7 +115,7 @@ export async function fillAndSubmitRecipientForm(
     throw new Error(
       `利用者登録 API がエラーを返しました\n` +
       `  status: ${status}\n` +
-      `  body: ${bodyText}\n` +
+      `  body: ${sanitizeE2EErrorMessage(bodyText)}\n` +
       `  現在URL: ${currentUrl}\n` +
       `  画面エラー: ${pageErrorText}`,
     );
@@ -127,7 +128,7 @@ export async function fillAndSubmitRecipientForm(
     const currentUrl = page.url();
     throw new Error(
       `利用者登録 API は 200 を返しましたが success:false でした\n` +
-      `  body: ${bodyText}\n` +
+      `  body: ${sanitizeE2EErrorMessage(bodyText)}\n` +
       `  現在URL: ${currentUrl}`,
     );
   }

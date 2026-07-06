@@ -94,6 +94,7 @@ jobs:
           from app.db.base import Base
           from app.db.session import async_engine
           from app.models.billing import Billing
+          from app.models.push_subscription import PushSubscription  # noqa: F401
           from app.models.webhook_event import WebhookEvent
 
           # Some legacy models use string server defaults for SQL functions.
@@ -138,6 +139,7 @@ jobs:
           from app.models.billing import Billing
           from app.models.enums import BillingStatus, OfficeType, StaffRole
           from app.models.office import Office, OfficeStaff
+          from app.models.push_subscription import PushSubscription  # noqa: F401
           from app.models.staff import Staff
 
           async def main():

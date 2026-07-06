@@ -81,9 +81,22 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
 
-      - name: Run backend migrations
+      - name: Create backend schema
         working-directory: k_back
-        run: alembic upgrade heads
+        run: |
+          python - <<'PY'
+          import asyncio
+
+          import app.models  # noqa: F401 - register all SQLAlchemy models
+          from app.db.base import Base
+          from app.db.session import async_engine
+
+          async def main():
+              async with async_engine.begin() as conn:
+                  await conn.run_sync(Base.metadata.create_all)
+
+          asyncio.run(main())
+          PY
         env:
           DATABASE_URL: ${{ env.BACKEND_DATABASE_URL }}
           TEST_DATABASE_URL: ${{ env.BACKEND_DATABASE_URL }}

@@ -52,7 +52,7 @@ jobs:
       MAIL_PASSWORD: e2e-mail-password
       MAIL_FROM: e2e@example.com
       MAIL_SERVER: localhost
-      MAIL_DEBUG: "true"
+      MAIL_DEBUG: "1"
     steps:
       - uses: actions/checkout@v4
 

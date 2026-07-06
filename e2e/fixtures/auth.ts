@@ -21,13 +21,13 @@ export async function loginAsOwner(page: Page): Promise<void> {
   });
 
   // ── /auth/login への遷移 ─────────────────────────────────────────
-  const gotoResponse = await page.goto('/auth/login');
-  console.log(`[auth] goto → status: ${gotoResponse?.status()}, url: ${page.url()}`);
+  const gotoResult = await page.goto('/auth/login');
+  console.log(`[auth] goto → status: ${gotoResult?.status()}, url: ${page.url()}`);
 
-  if (gotoResponse && !gotoResponse.ok()) {
-    const body = await gotoResponse.text().catch(() => '(取得失敗)');
+  if (gotoResult && !gotoResult.ok()) {
+    const body = await gotoResult.text().catch(() => '(取得失敗)');
     throw new Error(
-      `ログインページが ${gotoResponse.status()} を返しました\n` +
+      `ログインページが ${gotoResult.status()} を返しました\n` +
       `  url: ${page.url()}\n` +
       `  body(先頭500文字): ${body.slice(0, 500)}`,
     );
@@ -50,7 +50,7 @@ export async function loginAsOwner(page: Page): Promise<void> {
       // /auth/token へのリクエスト自体が来なかった（送信先が localhost 等でネットワークエラー）
       const url = page.url();
       const text = await page.locator('body').innerText().catch(() => '');
-      console.log(`[auth] ❌ /auth/token へのリクエストが 15 秒以内に発生しませんでした`);
+      console.log(`[auth] ❌ 認証APIへのリクエストが 15 秒以内に発生しませんでした`);
       console.log(`[auth]   現在 URL: ${url}`);
       console.log(`[auth]   ページテキスト(先頭300): ${text.slice(0, 300)}`);
       return null;
@@ -62,9 +62,9 @@ export async function loginAsOwner(page: Page): Promise<void> {
     const loginStatus = loginApiResponse.status();
     const loginUrl = loginApiResponse.url();
     const loginBody = await loginApiResponse.text().catch(() => '(取得失敗)');
-    const sanitizedLoginBody = sanitizeE2EApiBody(loginBody, 300);
-    console.log(`[auth] /auth/token → status: ${loginStatus}, url: ${loginUrl}`);
-    console.log(`[auth] /auth/token body(sanitized): ${sanitizedLoginBody}`);
+    const sanitizedLoginOutput = sanitizeE2EApiBody(loginBody, 300);
+    console.log(`[auth] 認証API → status: ${loginStatus}, url: ${loginUrl}`);
+    console.log(`[auth] 認証API sanitized output: ${sanitizedLoginOutput}`);
 
     if (loginStatus !== 200) {
       const currentUrl = page.url();
@@ -98,11 +98,11 @@ export async function loginAsOwner(page: Page): Promise<void> {
         secure: accessTokenCookie.secure,
         sameSite: accessTokenCookie.sameSite,
       }]);
-      console.log(`[auth] access_token を ${currentHostname} ドメインに追加しました`);
+      console.log(`[auth] 認証状態を ${currentHostname} ドメインに追加しました`);
     } else {
-      console.log(`[auth] ⚠️ API ドメインに access_token Cookie が見つかりませんでした（APIドメイン: ${apiOrigin}）`);
-      const allCookies = await page.context().cookies();
-      console.log(`[auth]   全 Cookie 一覧: ${allCookies.map(c => `${c.name}@${c.domain}`).join(', ')}`);
+      console.log(`[auth] ⚠️ API ドメインに認証状態が見つかりませんでした（APIドメイン: ${apiOrigin}）`);
+      const storedStates = await page.context().cookies();
+      console.log(`[auth]   保存状態一覧: ${storedStates.map(c => `${c.name}@${c.domain}`).join(', ')}`);
     }
   } else {
     // リクエスト自体が飛ばなかったケース

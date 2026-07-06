@@ -87,9 +87,27 @@ jobs:
           python - <<'PY'
           import asyncio
 
+          from sqlalchemy import text
+          from sqlalchemy.schema import DefaultClause
+
           import app.models  # noqa: F401 - register all SQLAlchemy models
           from app.db.base import Base
           from app.db.session import async_engine
+          from app.models.billing import Billing
+          from app.models.webhook_event import WebhookEvent
+
+          # Some legacy models use string server defaults for SQL functions.
+          # create_all renders them as quoted strings, so normalize them for the
+          # ephemeral E2E database schema.
+          for column, expression in (
+              (Billing.__table__.c.id, "gen_random_uuid()"),
+              (Billing.__table__.c.created_at, "now()"),
+              (Billing.__table__.c.updated_at, "now()"),
+              (WebhookEvent.__table__.c.id, "gen_random_uuid()"),
+              (WebhookEvent.__table__.c.created_at, "now()"),
+              (WebhookEvent.__table__.c.updated_at, "now()"),
+          ):
+              column.server_default = DefaultClause(text(expression))
 
           async def main():
               async with async_engine.begin() as conn:

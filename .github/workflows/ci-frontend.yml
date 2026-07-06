@@ -132,6 +132,7 @@ jobs:
           from datetime import datetime, timedelta, timezone
           from sqlalchemy import select
 
+          import app.models  # noqa: F401 - register relationship targets
           from app.core.security import get_password_hash
           from app.db.session import AsyncSessionLocal
           from app.models.billing import Billing

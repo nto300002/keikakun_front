@@ -104,8 +104,8 @@ jobs:
               (Billing.__table__.c.created_at, "now()"),
               (Billing.__table__.c.updated_at, "now()"),
               (WebhookEvent.__table__.c.id, "gen_random_uuid()"),
+              (WebhookEvent.__table__.c.processed_at, "now()"),
               (WebhookEvent.__table__.c.created_at, "now()"),
-              (WebhookEvent.__table__.c.updated_at, "now()"),
           ):
               column.server_default = DefaultClause(text(expression))
 

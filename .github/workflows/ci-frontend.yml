@@ -48,6 +48,11 @@ jobs:
           --health-retries 5
     env:
       BACKEND_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/keikakun_e2e
+      MAIL_USERNAME: e2e@example.com
+      MAIL_PASSWORD: e2e-mail-password
+      MAIL_FROM: e2e@example.com
+      MAIL_SERVER: localhost
+      MAIL_DEBUG: "true"
     steps:
       - uses: actions/checkout@v4
 

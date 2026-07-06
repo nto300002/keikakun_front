@@ -213,9 +213,9 @@ export function usePushNotification(): UsePushNotificationReturn {
         await http.delete(
           `/api/v1/push-subscriptions/unsubscribe?endpoint=${encodeURIComponent(endpoint)}`
         );
-      } catch (apiErr) {
+      } catch {
         // サーバー側で購読が見つからない場合は警告のみ出して続行
-        console.warn('[usePushNotification] Failed to delete subscription from server:', apiErr);
+        console.warn('[usePushNotification] Failed to delete subscription from server');
       }
 
       setIsSubscribed(false);

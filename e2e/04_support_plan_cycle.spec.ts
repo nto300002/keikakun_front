@@ -16,7 +16,7 @@
  * - そのため API で recipient ID を取得して直接 URL を構築して遷移する。
  */
 import { test, expect } from '@playwright/test';
-import type { Page } from '@playwright/test';
+import type { BrowserContext, Page } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 import { API_BASE_URL } from './helpers/test-data';
@@ -32,6 +32,15 @@ const samplePdfExists = fs.existsSync(SAMPLE_PDF);
 
 /** このスイートが作成した利用者 ID（afterAll でクリーンアップ） */
 let createdRecipientId: string | null = null;
+
+async function getCsrfToken(context: BrowserContext): Promise<string> {
+  const response = await context.request.get(`${API_BASE_URL}/api/v1/csrf-token`);
+  if (!response.ok()) {
+    throw new Error(`CSRFトークンの取得に失敗しました (status: ${response.status()}): ${await response.text()}`);
+  }
+  const data = await response.json();
+  return data.csrf_token;
+}
 
 /**
  * API 経由で指定 recipient の support_plan ページへ移動する
@@ -90,11 +99,15 @@ test.describe('個別支援計画サイクル', () => {
         disability_details: [],
       };
 
+      const csrfToken = await getCsrfToken(context);
       const response = await context.request.post(
         `${API_BASE_URL}/api/v1/welfare-recipients/`,
         {
           data: payload,
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken,
+          },
         }
       );
 
@@ -121,8 +134,14 @@ test.describe('個別支援計画サイクル', () => {
     if (!createdRecipientId) return;
     const context = await browser.newContext({ storageState: AUTH_STATE_PATH });
     try {
+      const csrfToken = await getCsrfToken(context);
       await context.request.delete(
-        `${API_BASE_URL}/api/v1/welfare-recipients/${createdRecipientId}`
+        `${API_BASE_URL}/api/v1/welfare-recipients/${createdRecipientId}`,
+        {
+          headers: {
+            'X-CSRF-Token': csrfToken,
+          },
+        }
       );
     } finally {
       await context.close();

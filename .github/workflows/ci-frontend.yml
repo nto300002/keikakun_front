@@ -32,8 +32,37 @@ jobs:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
     needs: lint
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: keikakun_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d keikakun_e2e"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      BACKEND_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/keikakun_e2e
+      MAIL_USERNAME: e2e@example.com
+      MAIL_PASSWORD: e2e-mail-password
+      MAIL_FROM: e2e@example.com
+      MAIL_SERVER: localhost
+      MAIL_DEBUG: "1"
     steps:
       - uses: actions/checkout@v4
+
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          repository: nto300002/keikakun_back
+          ref: feature/masking-tdd-01
+          path: k_back
+          token: ${{ secrets.CI_REPO_TOKEN || github.token }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -44,59 +73,246 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: k_back/requirements.txt
+
+      - name: Install backend dependencies
+        working-directory: k_back
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Create backend schema
+        working-directory: k_back
+        run: |
+          python - <<'PY'
+          import asyncio
+
+          from sqlalchemy import text
+          from sqlalchemy.schema import DefaultClause
+
+          import app.models  # noqa: F401 - register all SQLAlchemy models
+          from app.db.base import Base
+          from app.db.session import async_engine
+          from app.models.billing import Billing
+          from app.models.push_subscription import PushSubscription  # noqa: F401
+          from app.models.webhook_event import WebhookEvent
+
+          # Some legacy models use string server defaults for SQL functions.
+          # create_all renders them as quoted strings, so normalize them for the
+          # ephemeral E2E database schema.
+          for column, expression in (
+              (Billing.__table__.c.id, "gen_random_uuid()"),
+              (Billing.__table__.c.created_at, "now()"),
+              (Billing.__table__.c.updated_at, "now()"),
+              (WebhookEvent.__table__.c.id, "gen_random_uuid()"),
+              (WebhookEvent.__table__.c.processed_at, "now()"),
+              (WebhookEvent.__table__.c.created_at, "now()"),
+          ):
+              column.server_default = DefaultClause(text(expression))
+
+          async def main():
+              async with async_engine.begin() as conn:
+                  await conn.run_sync(Base.metadata.create_all)
+
+          asyncio.run(main())
+          PY
+        env:
+          DATABASE_URL: ${{ env.BACKEND_DATABASE_URL }}
+          TEST_DATABASE_URL: ${{ env.BACKEND_DATABASE_URL }}
+          TESTING: "1"
+          ENVIRONMENT: development
+          SECRET_KEY: e2e-test-secret-key
+          FRONTEND_URL: http://localhost:3000
+
+      - name: Seed E2E owner
+        working-directory: k_back
+        run: |
+          python - <<'PY'
+          import asyncio
+          import os
+          from datetime import datetime, timedelta, timezone
+          from sqlalchemy import select
+
+          import app.models  # noqa: F401 - register relationship targets
+          from app.core.security import get_password_hash
+          from app.db.session import AsyncSessionLocal
+          from app.models.billing import Billing
+          from app.models.enums import BillingStatus, OfficeType, StaffRole
+          from app.models.office import Office, OfficeStaff
+          from app.models.push_subscription import PushSubscription  # noqa: F401
+          from app.models.staff import Staff
+
+          async def main():
+              async with AsyncSessionLocal() as db:
+                  owner_email = os.environ.get("E2E_OWNER_EMAIL")
+                  owner_password = os.environ.get("E2E_OWNER_PASSWORD")
+                  if not owner_email or not owner_password:
+                      raise RuntimeError("E2E_OWNER_EMAIL / E2E_OWNER_PASSWORD are required")
+
+                  result = await db.execute(select(Staff).where(Staff.email == owner_email))
+                  owner = result.scalar_one_or_none()
+                  if owner is None:
+                      owner = Staff(
+                          email=owner_email,
+                          hashed_password=get_password_hash(owner_password),
+                          name="E2E Owner",
+                          last_name="E2E",
+                          first_name="Owner",
+                          last_name_furigana="いーつーいー",
+                          first_name_furigana="おーなー",
+                          full_name="E2E Owner",
+                          role=StaffRole.owner,
+                          is_email_verified=True,
+                          is_mfa_enabled=False,
+                          is_mfa_verified_by_user=False,
+                          is_test_data=True,
+                      )
+                      db.add(owner)
+                      await db.flush()
+                  else:
+                      owner.hashed_password = get_password_hash(owner_password)
+                      owner.role = StaffRole.owner
+                      owner.is_email_verified = True
+                      owner.is_mfa_enabled = False
+                      owner.is_mfa_verified_by_user = False
+                      owner.is_deleted = False
+
+                  office_result = await db.execute(
+                      select(Office).where(Office.name == "E2E Test Office")
+                  )
+                  office = office_result.scalar_one_or_none()
+                  if office is None:
+                      office = Office(
+                          name="E2E Test Office",
+                          is_group=False,
+                          type=OfficeType.type_B_office,
+                          address="東京都新宿区西新宿1-1-1",
+                          phone_number="03-0000-0000",
+                          email="e2e-office@example.com",
+                          created_by=owner.id,
+                          last_modified_by=owner.id,
+                          is_test_data=True,
+                      )
+                      db.add(office)
+                      await db.flush()
+                  else:
+                      office.is_deleted = False
+                      office.created_by = owner.id
+                      office.last_modified_by = owner.id
+
+                  assoc_result = await db.execute(
+                      select(OfficeStaff).where(
+                          OfficeStaff.staff_id == owner.id,
+                          OfficeStaff.office_id == office.id,
+                      )
+                  )
+                  if assoc_result.scalar_one_or_none() is None:
+                      db.add(OfficeStaff(
+                          staff_id=owner.id,
+                          office_id=office.id,
+                          is_primary=True,
+                          is_test_data=True,
+                      ))
+
+                  billing_result = await db.execute(
+                      select(Billing).where(Billing.office_id == office.id)
+                  )
+                  billing = billing_result.scalar_one_or_none()
+                  now = datetime.now(timezone.utc)
+                  if billing is None:
+                      db.add(Billing(
+                          office_id=office.id,
+                          billing_status=BillingStatus.active,
+                          trial_start_date=now - timedelta(days=1),
+                          trial_end_date=now + timedelta(days=30),
+                          subscription_start_date=now,
+                          next_billing_date=now + timedelta(days=30),
+                          current_plan_amount=6000,
+                      ))
+                  else:
+                      billing.billing_status = BillingStatus.active
+                      billing.trial_start_date = now - timedelta(days=1)
+                      billing.trial_end_date = now + timedelta(days=30)
+                      billing.subscription_start_date = now
+                      billing.next_billing_date = now + timedelta(days=30)
+                      billing.current_plan_amount = 6000
+
+                  await db.commit()
+
+          asyncio.run(main())
+          PY
+        env:
+          DATABASE_URL: ${{ env.BACKEND_DATABASE_URL }}
+          TEST_DATABASE_URL: ${{ env.BACKEND_DATABASE_URL }}
+          TESTING: "1"
+          ENVIRONMENT: development
+          SECRET_KEY: e2e-test-secret-key
+          FRONTEND_URL: http://localhost:3000
+          E2E_OWNER_EMAIL: ${{ secrets.E2E_OWNER_EMAIL }}
+          E2E_OWNER_PASSWORD: ${{ secrets.E2E_OWNER_PASSWORD }}
+
+      - name: Start backend
+        working-directory: k_back
+        run: |
+          python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 > /tmp/keikakun-backend.log 2>&1 &
+          echo $! > /tmp/keikakun-backend.pid
+        env:
+          DATABASE_URL: ${{ env.BACKEND_DATABASE_URL }}
+          TEST_DATABASE_URL: ${{ env.BACKEND_DATABASE_URL }}
+          TESTING: "1"
+          ENVIRONMENT: development
+          SECRET_KEY: e2e-test-secret-key
+          FRONTEND_URL: http://localhost:3000
+
+      - name: Wait for backend
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8000/ > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/keikakun-backend.log
+          exit 1
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:8000
+
+      - name: Start frontend
+        run: |
+          npm run start -- --hostname 0.0.0.0 --port 3000 > /tmp/keikakun-frontend.log 2>&1 &
+          echo $! > /tmp/keikakun-frontend.pid
+
+      - name: Wait for frontend
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:3000/auth/login > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat /tmp/keikakun-frontend.log
+          exit 1
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-
-      # ── PR の場合: Vercel プレビューデプロイの完了を待って URL を取得 ──
-      # Vercel は push イベントを受けて GitHub Deployments API にエントリを作成する。
-      # environment_url が success ステータスで返るまでポーリングする（最大 5 分）。
-      # Vercel token は不要 — GITHUB_TOKEN の読み取り権限で取得できる。
-      - name: Wait for Vercel preview deployment (PR only)
-        id: vercel
-        if: github.event_name == 'pull_request'
-        run: |
-          SHA="${{ github.event.pull_request.head.sha }}"
-          echo "対象 SHA: $SHA"
-
-          for i in $(seq 1 30); do
-            # この SHA に紐づく "Preview" 環境デプロイを検索
-            DEPLOY_ID=$(gh api "repos/${{ github.repository }}/deployments?sha=$SHA" \
-              --jq '[.[] | select(.environment | ascii_downcase | contains("preview"))] | .[0].id // empty')
-
-            if [ -n "$DEPLOY_ID" ] && [ "$DEPLOY_ID" != "null" ]; then
-              # success ステータスの environment_url を取得
-              ENV_URL=$(gh api "repos/${{ github.repository }}/deployments/$DEPLOY_ID/statuses" \
-                --jq '[.[] | select(.state == "success" and .environment_url != null and .environment_url != "")] | .[0].environment_url // empty')
-
-              if [ -n "$ENV_URL" ] && [ "$ENV_URL" != "null" ]; then
-                echo "✅ Vercel プレビュー URL: $ENV_URL"
-                echo "url=$ENV_URL" >> "$GITHUB_OUTPUT"
-                exit 0
-              fi
-            fi
-
-            echo "⏳ Vercel デプロイ待機中... ($i/30)"
-            sleep 10
-          done
-
-          echo "❌ タイムアウト: Vercel デプロイが 5 分以内に完了しませんでした"
-          exit 1
-        env:
-          GH_TOKEN: ${{ github.token }}
 
       - name: Run E2E tests
         run: npm run test:e2e
         env:
           CI: "true"
-          # PR   → Vercel プレビュー URL（PR ブランチのコードに対してテスト）
-          # main → secrets.PLAYWRIGHT_BASE_URL（本番 URL に対してテスト）
-          PLAYWRIGHT_BASE_URL: ${{ steps.vercel.outputs.url || secrets.PLAYWRIGHT_BASE_URL }}
-          NEXT_PUBLIC_API_URL: ${{ secrets.E2E_API_URL }}
+          PLAYWRIGHT_BASE_URL: http://localhost:3000
+          NEXT_PUBLIC_API_URL: http://localhost:8000
           E2E_OWNER_EMAIL: ${{ secrets.E2E_OWNER_EMAIL }}
           E2E_OWNER_PASSWORD: ${{ secrets.E2E_OWNER_PASSWORD }}
           E2E_STAFF_PASSWORD: ${{ secrets.E2E_STAFF_PASSWORD }}
-          # Vercel Deployment Protection バイパス（解決策 B 用: 未設定でも動作する）
-          VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
 
       - name: Upload Playwright report
         if: always()

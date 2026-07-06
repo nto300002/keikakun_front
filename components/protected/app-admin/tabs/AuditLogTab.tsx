@@ -60,6 +60,21 @@ export default function AuditLogTab() {
     return 'text-slate-700 dark:text-gray-300';
   };
 
+  const formatDetailValue = (value: unknown) => {
+    if (value === null || value === undefined || value === '') return '-';
+    if (typeof value === 'object') return '<masked object>';
+    return String(value);
+  };
+
+  const summarizeDetails = (details: AuditLogResponse['details']) => {
+    if (!details || Object.keys(details).length === 0) return '-';
+
+    return Object.entries(details)
+      .slice(0, 3)
+      .map(([key, value]) => `${key}: ${formatDetailValue(value)}`)
+      .join(' / ');
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -199,7 +214,7 @@ export default function AuditLogTab() {
                       {log.office_name || '-'}
                     </td>
                     <td className="py-3 px-4 text-slate-500 text-base max-w-xs truncate dark:text-gray-400">
-                      {JSON.stringify(log.details)}
+                      {summarizeDetails(log.details)}
                     </td>
                   </tr>
                 ))}

@@ -68,12 +68,10 @@ export default function AdminMenu({ office }: AdminMenuProps) {
   const [bulkMfaResultData, setBulkMfaResultData] = useState<{
     enabled_count?: number;
     disabled_count?: number;
-    staff_mfa_data?: Array<{
+    enabled_staffs?: Array<{
       staff_id: string;
       staff_name: string;
-      qr_code_uri: string;
-      secret_key: string;
-      recovery_codes: string[];
+      setup_required: boolean;
     }>;
   } | null>(null);
 
@@ -784,7 +782,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
       )}
 
       {/* バルク２段階認証有効化結果モーダル */}
-      {showBulkMfaResultModal && bulkMfaResultData?.staff_mfa_data && (
+      {showBulkMfaResultModal && bulkMfaResultData?.enabled_staffs && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg border border-slate-300 shadow-xl dark:bg-gray-800 dark:border-gray-700 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-300 dark:border-gray-700">
@@ -798,53 +796,19 @@ export default function AdminMenu({ office }: AdminMenuProps) {
               <div className="mb-4 p-4 bg-yellow-50 border border-yellow-400 rounded-lg dark:bg-yellow-950/40 dark:border-yellow-600">
                 <p className="text-yellow-800 text-base font-semibold dark:text-yellow-300">重要</p>
                 <p className="text-yellow-800 text-base font-semibold mt-1 dark:text-yellow-300">
-                  以下の情報を各スタッフに安全な方法で伝えてください。QRコードをスキャンしてTOTPアプリに登録し、リカバリーコードは安全な場所に保管してください。
+                  一括有効化ではQRコード、シークレットキー、リカバリーコードは表示されません。対象スタッフは次回ログイン時に２段階認証の初回設定を行います。
                 </p>
               </div>
 
-              <div className="space-y-6 font-medium">
-                {bulkMfaResultData.staff_mfa_data.map((staffData, index) => (
+              <div className="space-y-3 font-medium">
+                {bulkMfaResultData.enabled_staffs.map((staffData, index) => (
                   <div key={staffData.staff_id} className="bg-slate-100 border border-slate-300 p-4 rounded-lg dark:bg-gray-700 dark:border-gray-600">
-                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-3">
+                    <h3 className="text-xl font-semibold text-slate-900 dark:text-white">
                       {index + 1}. {staffData.staff_name}
                     </h3>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* QRコード */}
-                      <div>
-                        <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">QRコード</p>
-                        <div className="bg-white p-4 rounded-lg inline-block">
-                          <QRCodeCanvas
-                            value={staffData.qr_code_uri}
-                            size={192}
-                            level="H"
-                          />
-                        </div>
-                      </div>
-
-                      {/* シークレットキーとリカバリーコード */}
-                      <div>
-                        <div className="mb-4">
-                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">シークレットキー</p>
-                          <code className="block bg-slate-50 border border-slate-300 text-slate-900 p-2 rounded text-sm break-all dark:bg-gray-900 dark:border-gray-600 dark:text-green-300">
-                            {staffData.secret_key}
-                          </code>
-                        </div>
-
-                        <div>
-                          <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">リカバリーコード（10個）</p>
-                          <div className="bg-slate-50 border border-slate-300 p-3 rounded max-h-40 overflow-y-auto dark:bg-gray-900 dark:border-gray-600">
-                            <div className="grid grid-cols-2 gap-2">
-                              {staffData.recovery_codes.map((code, codeIndex) => (
-                                <code key={codeIndex} className="text-slate-900 text-sm dark:text-green-300">
-                                  {code}
-                                </code>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <p className="text-slate-600 text-base font-semibold mt-2 dark:text-gray-300">
+                      初回設定が必要です
+                    </p>
                   </div>
                 ))}
               </div>

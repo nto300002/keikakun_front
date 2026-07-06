@@ -104,23 +104,19 @@ export const authApi = {
   enableAllOfficeMfa: (): Promise<{
     message: string;
     enabled_count: number;
-    staff_mfa_data: Array<{
+    enabled_staffs: Array<{
       staff_id: string;
       staff_name: string;
-      qr_code_uri: string;
-      secret_key: string;
-      recovery_codes: string[];
+      setup_required: boolean;
     }>;
   }> => {
     return http.post<{
       message: string;
       enabled_count: number;
-      staff_mfa_data: Array<{
+      enabled_staffs: Array<{
         staff_id: string;
         staff_name: string;
-        qr_code_uri: string;
-        secret_key: string;
-        recovery_codes: string[];
+        setup_required: boolean;
       }>;
     }>(`${API_V1_PREFIX}/auth/admin/office/mfa/enable-all`, {});
   },

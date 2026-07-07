@@ -1,15 +1,21 @@
 import { http } from './http';
 import { tokenUtils } from './token';
 import { initializeCsrfToken } from './csrf';
+import { createAuthFlowClient } from './authFlow';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 const API_V1_PREFIX = '/api/v1';
-import { LoginData, AuthResponse } from '@/types/auth';
 import { AdminCreateData, StaffCreateData, StaffResponse } from '@/types/staff';
 import { OfficeCreateData, OfficeResponse } from '@/types/office';
 
 // Re-export tokenUtils for convenience
 export { tokenUtils };
+
+const authFlowClient = createAuthFlowClient({
+  apiBaseUrl: API_BASE_URL,
+  apiV1Prefix: API_V1_PREFIX,
+  initializeCsrfToken,
+});
 
 // Authentication API calls
 export const authApi = {
@@ -21,40 +27,7 @@ export const authApi = {
     return http.post<StaffResponse>(`${API_V1_PREFIX}/auth/register`, data);
   },
 
-  login: async (data: LoginData): Promise<AuthResponse> => {
-    const params = new URLSearchParams({
-      username: data.username,
-      password: data.password,
-    });
-    // app_admin用合言葉がある場合は追加
-    if (data.passphrase) {
-      params.append('passphrase', data.passphrase);
-    }
-    const response = await fetch(`${API_BASE_URL}${API_V1_PREFIX}/auth/token`, {
-      method: 'POST',
-      credentials: 'include', // Cookie送信のため追加
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: params,
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.detail || 'ログインに失敗しました');
-    }
-
-    const authResponse = await response.json();
-
-    // access_tokenはCookieで管理されるため、localStorageへの保存は不要
-    // Cookieはサーバー側で自動的に設定される
-
-    // ログイン成功後、CSRFトークンを初期化
-    // Cookie認証を使用するため、状態変更リクエストにはCSRFトークンが必要
-    await initializeCsrfToken();
-
-    return authResponse;
-  },
+  login: authFlowClient.login,
 
   getCurrentUser: (): Promise<StaffResponse> => {
     return http.get<StaffResponse>(`${API_V1_PREFIX}/staffs/me`);
@@ -64,18 +37,9 @@ export const authApi = {
     return http.get<{ message: string; role: string }>(`${API_V1_PREFIX}/auth/verify-email?token=${token}`);
   },
 
-  logout: (): Promise<{ message: string }> => {
-    return http.post<{ message: string }>(`${API_V1_PREFIX}/auth/logout`, {});
-  },
+  logout: authFlowClient.logout,
 
-  verifyMfa: async (data: { temporary_token: string; totp_code: string }): Promise<AuthResponse> => {
-    const response = await http.post<AuthResponse>(`${API_V1_PREFIX}/auth/token/verify-mfa`, data);
-
-    // MFA検証成功後もCSRFトークンを初期化
-    await initializeCsrfToken();
-
-    return response;
-  },
+  verifyMfa: authFlowClient.verifyMfa,
 
   // Admin MFA management
   enableStaffMfa: (staffId: string): Promise<{

@@ -69,6 +69,15 @@ const metaByType: Record<string, MessageDisplayMeta> = {
     textClassName: 'text-teal-700 dark:text-teal-400',
     badgeClassName: 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-200',
   },
+  inquiry_reply: {
+    icon: '↩',
+    label: 'お問い合わせ返信',
+    tone: 'inquiry',
+    cardClassName: 'bg-teal-50 dark:bg-teal-900/30',
+    borderClassName: 'border-teal-200 dark:border-teal-700/50',
+    textClassName: 'text-teal-700 dark:text-teal-400',
+    badgeClassName: 'bg-teal-100 text-teal-800 dark:bg-teal-900/50 dark:text-teal-200',
+  },
 };
 
 const fallbackMeta: MessageDisplayMeta = {

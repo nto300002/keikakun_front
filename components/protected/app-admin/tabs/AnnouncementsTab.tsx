@@ -191,9 +191,11 @@ export default function AnnouncementsTab() {
                       </span>
                     </div>
                     <p className="text-slate-700 text-base whitespace-pre-wrap dark:text-gray-300">{announcement.content}</p>
-                    <p className="text-base text-slate-500 mt-2 dark:text-gray-400">
-                      送信者: {announcement.sender_name}
-                    </p>
+                    {typeof announcement.recipient_count === 'number' && (
+                      <p className="text-base text-slate-500 mt-2 dark:text-gray-400">
+                        送信先: {announcement.recipient_count}名
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

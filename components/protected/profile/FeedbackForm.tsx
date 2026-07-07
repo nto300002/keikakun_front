@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { toast } from '@/lib/toast-debug';
 import { inquiryApi } from '@/lib/api/inquiry';
 import type { InquiryCategory } from '@/types/inquiry';
+import { getProfileFeedbackLabel } from '@/components/notice/messageDisplay';
 
 export default function FeedbackForm() {
   const [feedbackContent, setFeedbackContent] = useState('');
@@ -45,7 +46,7 @@ export default function FeedbackForm() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h2 className="text-3xl font-bold mb-7">不具合・ご要望</h2>
+      <h2 className="text-3xl font-bold mb-7">{getProfileFeedbackLabel()}</h2>
 
       <div className="bg-white border border-slate-300 shadow-sm dark:bg-[#1a1a2e] dark:border-[#2a2a3e] rounded-xl p-6">
         <div className="mb-7 bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-700/30 rounded-lg p-5">

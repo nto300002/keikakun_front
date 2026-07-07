@@ -87,7 +87,7 @@ export default function MessageSendForm() {
       return;
     }
     if (messageType === 'announcement' && currentUserRole !== 'owner' && currentUserRole !== 'manager') {
-      toast.error('一斉通知を送信する権限がありません');
+      toast.error('お知らせを送信する権限がありません');
       return;
     }
 
@@ -107,7 +107,7 @@ export default function MessageSendForm() {
           content,
           priority,
         });
-        toast.success('一斉通知を送信しました');
+        toast.success('お知らせを送信しました');
       }
 
       // 送信成功後、通知ページにリダイレクト
@@ -152,7 +152,7 @@ export default function MessageSendForm() {
                   : 'bg-slate-200 text-slate-900 hover:bg-slate-300 dark:bg-gray-700/50 dark:text-gray-300 dark:hover:bg-gray-600/70 border-2 border-slate-300 dark:border-gray-600'
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-              📢 一斉通知
+              📢 お知らせ
               {(currentUserRole !== 'owner' && currentUserRole !== 'manager') && (
                 <span className="block text-sm mt-1">(オーナー/管理者のみ)</span>
               )}

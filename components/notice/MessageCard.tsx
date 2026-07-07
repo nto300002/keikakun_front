@@ -1,6 +1,7 @@
 'use client';
 
-import { MessageInboxItem, MessageType, MessagePriority } from '@/types/message';
+import { MessageInboxItem, MessagePriority } from '@/types/message';
+import { getMessageDisplayMeta, getMessageSenderLabel } from './messageDisplay';
 
 interface MessageCardProps {
   message: MessageInboxItem;
@@ -13,88 +14,6 @@ export default function MessageCard({
   onMarkAsRead,
   onArchive,
 }: MessageCardProps) {
-  // メッセージタイプに応じたスタイルとアイコン
-  const getMessageStyle = (type: MessageType, priority: MessagePriority) => {
-    // 優先度による色の決定
-    if (priority === MessagePriority.URGENT) {
-      return {
-        icon: '🚨',
-        color: 'red',
-        bgColor: 'bg-red-50 dark:bg-red-900/30',
-        borderColor: 'border-red-200 dark:border-red-700/50',
-        textColor: 'text-red-700 dark:text-red-400',
-      };
-    } else if (priority === MessagePriority.HIGH) {
-      return {
-        icon: '⚠️',
-        color: 'orange',
-        bgColor: 'bg-orange-50 dark:bg-orange-900/30',
-        borderColor: 'border-orange-200 dark:border-orange-700/50',
-        textColor: 'text-orange-700 dark:text-orange-400',
-      };
-    }
-
-    // メッセージタイプによる色の決定（通常・低優先度）
-    switch (type) {
-      case MessageType.PERSONAL:
-        return {
-          icon: '💬',
-          color: 'blue',
-          bgColor: 'bg-blue-50 dark:bg-blue-900/30',
-          borderColor: 'border-blue-200 dark:border-blue-700/50',
-          textColor: 'text-blue-700 dark:text-blue-400',
-        };
-      case MessageType.ANNOUNCEMENT:
-        return {
-          icon: '📢',
-          color: 'purple',
-          bgColor: 'bg-purple-50 dark:bg-purple-900/30',
-          borderColor: 'border-purple-200 dark:border-purple-700/50',
-          textColor: 'text-purple-700 dark:text-purple-400',
-        };
-      case MessageType.SYSTEM:
-        return {
-          icon: '⚙️',
-          color: 'gray',
-          bgColor: 'bg-slate-50 dark:bg-gray-900/30',
-          borderColor: 'border-slate-200 dark:border-gray-700/50',
-          textColor: 'text-slate-600 dark:text-gray-400',
-        };
-      case MessageType.INQUIRY:
-        return {
-          icon: '❓',
-          color: 'teal',
-          bgColor: 'bg-teal-50 dark:bg-teal-900/30',
-          borderColor: 'border-teal-200 dark:border-teal-700/50',
-          textColor: 'text-teal-700 dark:text-teal-400',
-        };
-      default:
-        return {
-          icon: 'ℹ️',
-          color: 'blue',
-          bgColor: 'bg-blue-50 dark:bg-blue-900/30',
-          borderColor: 'border-blue-200 dark:border-blue-700/50',
-          textColor: 'text-blue-700 dark:text-blue-400',
-        };
-    }
-  };
-
-  // メッセージタイプのラベル
-  const getMessageTypeLabel = (type: MessageType) => {
-    switch (type) {
-      case MessageType.PERSONAL:
-        return '個別メッセージ';
-      case MessageType.ANNOUNCEMENT:
-        return 'お知らせ';
-      case MessageType.SYSTEM:
-        return 'システム通知';
-      case MessageType.INQUIRY:
-        return 'お問い合わせ';
-      default:
-        return 'メッセージ';
-    }
-  };
-
   // 優先度のラベル
   const getPriorityLabel = (priority: MessagePriority) => {
     switch (priority) {
@@ -111,18 +30,19 @@ export default function MessageCard({
     }
   };
 
-  const style = getMessageStyle(message.message_type, message.priority);
+  const style = getMessageDisplayMeta(message.message_type, message.priority);
+  const senderLabel = getMessageSenderLabel(message);
 
   return (
     <div
-      className={`${style.bgColor} border ${style.borderColor} rounded-lg p-5 mb-4 ${
+      className={`${style.cardClassName} border ${style.borderClassName} rounded-lg p-5 mb-4 ${
         message.is_read ? 'opacity-60' : ''
       }`}
     >
       {/* ヘッダー部分 */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-start gap-3 flex-1">
-          <span className={`text-3xl ${style.textColor}`}>{style.icon}</span>
+          <span className={`text-3xl ${style.textClassName}`}>{style.icon}</span>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
                 <span className="text-slate-900 font-bold text-xl dark:text-white">{message.title}</span>
@@ -147,13 +67,13 @@ export default function MessageCard({
             {/* メッセージタイプラベルと送信者情報 */}
             <div className="flex items-center gap-2 mb-2">
               <span
-                  className={`inline-block px-3 py-1 rounded text-sm font-bold ${style.textColor} bg-white/70 dark:bg-gray-800/50`}
+                  className={`inline-block px-3 py-1 rounded text-sm font-bold ${style.badgeClassName}`}
               >
-                {getMessageTypeLabel(message.message_type)}
+                {style.label}
               </span>
-              {message.sender && (
+              {senderLabel && (
                 <span className="text-slate-600 text-base font-semibold dark:text-gray-400">
-                  送信者: {message.sender.last_name} {message.sender.first_name}
+                  {senderLabel}
                 </span>
               )}
             </div>

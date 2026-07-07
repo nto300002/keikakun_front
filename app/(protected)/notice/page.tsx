@@ -6,6 +6,7 @@ import DeadlineAlertsTab from '@/components/notice/DeadlineAlertsTab';
 import MessagesTab from '@/components/notice/MessagesTab';
 import MessageSendForm from '@/components/messages/MessageSendForm';
 import FeedbackForm from '@/components/protected/profile/FeedbackForm';
+import { getNoticeTabLabel } from '@/components/notice/messageDisplay';
 
 type TabType = 'messages' | 'approvals' | 'deadlines' | 'send' | 'feedback';
 type CategoryType = 'recipients' | 'messages' | 'feedback';
@@ -67,7 +68,7 @@ export default function NoticePage() {
               : 'text-slate-600 hover:text-slate-950 hover:bg-slate-100 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-gray-800/30'
           }`}
         >
-          不具合/ご要望
+          {getNoticeTabLabel('feedback')}
         </button>
       </div>
 

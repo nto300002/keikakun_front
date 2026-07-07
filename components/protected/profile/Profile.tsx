@@ -242,7 +242,7 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
                 : 'text-slate-600 hover:text-slate-950 dark:text-gray-400 dark:hover:text-white'
             }`}
           >
-            不具合・ご要望
+            お問い合わせ
           </button>
           <button
             onClick={() => setActiveTab('notifications')}

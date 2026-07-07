@@ -434,20 +434,28 @@ export default function Dashboard() {
                 </div>
                 {canEdit && (
                   <div className="md:hidden mt-4">
-                    <button
-                      type="button"
-                      data-testid="add-recipient-stats-button"
-                      aria-label="新規利用者を追加"
-                      onClick={() => router.push('/recipients/new')}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          router.push('/recipients/new');
-                        }
-                      }}
-                      className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-base font-semibold transition-colors duration-200 w-full min-h-[44px] flex items-center justify-center gap-2"
-                    >
-                      <span>利用者追加</span>
-                    </button>
+                    <div className="grid grid-cols-1 gap-2">
+                      <Link
+                        href="/calendar/events"
+                        className="flex min-h-[44px] w-full items-center justify-center rounded-lg border border-cyan-600 bg-cyan-50 px-4 py-2 text-base font-semibold text-cyan-800 transition-colors hover:bg-cyan-100 dark:border-cyan-500 dark:bg-cyan-950/40 dark:text-cyan-100 dark:hover:bg-cyan-900/60"
+                      >
+                        期限カレンダー
+                      </Link>
+                      <button
+                        type="button"
+                        data-testid="add-recipient-stats-button"
+                        aria-label="新規利用者を追加"
+                        onClick={() => router.push('/recipients/new')}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            router.push('/recipients/new');
+                          }
+                        }}
+                        className="bg-[#10b981] hover:bg-[#0f9f6e] text-white px-4 py-2 rounded-lg text-base font-semibold transition-colors duration-200 w-full min-h-[44px] flex items-center justify-center gap-2"
+                      >
+                        <span>利用者追加</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -470,6 +478,12 @@ export default function Dashboard() {
                   <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold text-slate-950 dark:text-white">利用者一覧</h2>
                     <div className="flex items-center gap-2">
+                      <Link
+                        href="/calendar/events"
+                        className="flex min-h-[44px] items-center justify-center rounded-lg border border-cyan-600 bg-cyan-50 px-4 py-2 text-base font-semibold text-cyan-800 transition-colors hover:bg-cyan-100 dark:border-cyan-500 dark:bg-cyan-950/40 dark:text-cyan-100 dark:hover:bg-cyan-900/60"
+                      >
+                        期限カレンダー
+                      </Link>
                       {canEdit && (
                         <button
                           type="button"

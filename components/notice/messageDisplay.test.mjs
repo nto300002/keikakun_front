@@ -40,6 +40,14 @@ test('announcement messages are displayed as notices, not other messages', () =>
   assert.match(meta.badgeClassName, /purple|emerald|green/);
 });
 
+test('inquiry replies are displayed as inquiry notices', () => {
+  const meta = getMessageDisplayMeta('inquiry_reply', 'normal');
+
+  assert.equal(meta.label, 'お問い合わせ返信');
+  assert.equal(meta.tone, 'inquiry');
+  assert.notEqual(meta.label, 'その他');
+});
+
 test('personal and fallback message styles are visually distinct', () => {
   const personal = getMessageDisplayMeta('personal', 'normal');
   const fallback = getMessageDisplayMeta('unknown', 'normal');

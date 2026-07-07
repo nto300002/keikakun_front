@@ -1,19 +1,20 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { appAdminApi, InquiryResponse } from '@/lib/api/appAdmin';
+import { inquiryApi } from '@/lib/api/inquiry';
+import type { InquiryListItem, InquiryStatus } from '@/types/inquiry';
 import { FaSync, FaEye, FaEnvelopeOpen, FaEnvelope, FaReply } from 'react-icons/fa';
 import InquiryReplyModal from '../InquiryReplyModal';
 
 export default function InquiriesTab() {
-  const [inquiries, setInquiries] = useState<InquiryResponse[]>([]);
+  const [inquiries, setInquiries] = useState<InquiryListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const [statusFilter, setStatusFilter] = useState<'new' | 'open' | 'in_progress' | 'answered' | 'closed' | 'spam' | ''>('');
-  const [selectedInquiry, setSelectedInquiry] = useState<InquiryResponse | null>(null);
-  const [replyInquiry, setReplyInquiry] = useState<InquiryResponse | null>(null);
+  const [statusFilter, setStatusFilter] = useState<InquiryStatus | ''>('');
+  const [selectedInquiry, setSelectedInquiry] = useState<InquiryListItem | null>(null);
+  const [replyInquiry, setReplyInquiry] = useState<InquiryListItem | null>(null);
 
   const ITEMS_PER_PAGE = 30;
 
@@ -21,7 +22,7 @@ export default function InquiriesTab() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await appAdminApi.getInquiries({
+      const response = await inquiryApi.getInquiries({
         status: statusFilter || undefined,
         skip: currentPage * ITEMS_PER_PAGE,
         limit: ITEMS_PER_PAGE,
@@ -60,7 +61,7 @@ export default function InquiriesTab() {
       case 'in_progress':
         return <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded text-base">担当割当済み</span>;
       case 'answered':
-        return <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-base">回答済み</span>;
+        return <span className="bg-green-100 text-green-700 px-2 py-1 rounded text-base dark:bg-green-500/20 dark:text-green-400">回答済み</span>;
       case 'closed':
         return <span className="bg-gray-500/20 text-gray-400 px-2 py-1 rounded text-base">クローズ</span>;
       case 'spam':
@@ -128,9 +129,9 @@ export default function InquiriesTab() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       {inquiry.status === 'new' ? (
-                        <FaEnvelope className="w-4 h-4 text-red-400" />
+                        <FaEnvelope className="w-4 h-4 text-red-500 dark:text-red-400" />
                       ) : (
-                        <FaEnvelopeOpen className="w-4 h-4 text-slate-400 dark:text-gray-400" />
+                        <FaEnvelopeOpen className="w-4 h-4 text-slate-500 dark:text-gray-400" />
                       )}
                       <span className="font-semibold text-slate-950 dark:text-white">{inquiry.title}</span>
                       {getStatusBadge(inquiry.status)}

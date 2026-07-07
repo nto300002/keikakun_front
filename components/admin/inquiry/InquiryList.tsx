@@ -68,7 +68,7 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
       new: { bg: 'bg-red-500/20', text: 'text-red-400', label: '新規' },
       open: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', label: '確認済み' },
       in_progress: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: '対応中' },
-      answered: { bg: 'bg-green-500/20', text: 'text-green-400', label: '回答済み' },
+      answered: { bg: 'bg-green-100 dark:bg-green-500/20', text: 'text-green-700 dark:text-green-400', label: '回答済み' },
       closed: { bg: 'bg-gray-500/20', text: 'text-slate-600 dark:text-gray-400', label: 'クローズ' },
       spam: { bg: 'bg-purple-500/20', text: 'text-purple-400', label: 'スパム' },
     };

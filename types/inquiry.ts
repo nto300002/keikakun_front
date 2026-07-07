@@ -22,7 +22,8 @@ export type InquiryCategory = '不具合' | '質問' | 'その他';
  */
 export interface StaffInfo {
   id: string;
-  name: string;
+  first_name: string;
+  last_name: string;
   email: string;
 }
 
@@ -52,6 +53,7 @@ export interface InquiryListItem {
   id: string;
   message_id: string;
   title: string;
+  content: string;
   status: InquiryStatus;
   priority: InquiryPriority;
   sender_name: string | null;
@@ -172,4 +174,6 @@ export interface InquiryFilterParams {
   skip?: number;
   limit?: number;
   sort?: 'created_at' | 'updated_at' | 'priority';
+  order?: 'asc' | 'desc';
+  include_test_data?: boolean;
 }

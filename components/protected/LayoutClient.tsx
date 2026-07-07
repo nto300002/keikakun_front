@@ -446,7 +446,7 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                   {/* 通知プレビューポップオーバー */}
                   {isMounted && isNoticePopoverOpen && (
                     <div
-                      className="absolute right-0 top-full z-50 w-[360px] pt-2"
+                      className="absolute right-0 top-full z-50 w-[360px] origin-top pt-2 animate-[notice-popover-stretch_180ms_ease-out]"
                     >
                       <div className="rounded-lg border border-slate-300 bg-white p-4 shadow-xl dark:border-[#2a2a3e] dark:bg-[#0f1419]">
                         <div className="mb-3 grid grid-cols-[auto_1fr_auto] items-center gap-3">
@@ -470,7 +470,11 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                         </div>
                         <div className="mb-3 border-b border-slate-200 pb-3 dark:border-gray-700">
                           <button
-                            onClick={() => router.push('/notice')}
+                            onClick={() => {
+                              setIsNoticePopoverOpen(false);
+                              setIsDeadlinePanelOpen(false);
+                              router.push('/notice');
+                            }}
                             className="w-full rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-center text-base font-semibold text-blue-600 transition-colors hover:bg-blue-100 hover:text-blue-700 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-950/50 dark:hover:text-blue-300"
                           >
                             通知/メッセージ画面を開く
@@ -566,7 +570,11 @@ export default function ProtectedLayoutClient({ children, user }: ProtectedLayou
                                 <div
                                   key={message.message_id}
                                   className="cursor-pointer rounded-lg border border-slate-200 bg-slate-50 p-3 transition-colors hover:bg-slate-100 dark:border-gray-700/50 dark:bg-gray-800/50 dark:hover:bg-gray-800"
-                                  onClick={() => router.push('/notice')}
+                                  onClick={() => {
+                                    setIsNoticePopoverOpen(false);
+                                    setIsDeadlinePanelOpen(false);
+                                    router.push('/notice');
+                                  }}
                                 >
                                   <div className="mb-1 flex items-start justify-between gap-2">
                                     <h5 className="line-clamp-1 text-base font-semibold text-slate-900 dark:text-white">{message.title}</h5>

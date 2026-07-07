@@ -104,10 +104,10 @@ export async function fillAndSubmitRecipientForm(
 
   const status = apiResponse.status();
   const bodyText = await apiResponse.text().catch(() => '(body 取得失敗)');
-  const sanitizedBody = sanitizeE2EApiBody(bodyText);
+  const sanitizedOutput = sanitizeE2EApiBody(bodyText);
 
   console.log(`[recipient-form] POST /welfare-recipients → ${status}`);
-  console.log(`[recipient-form] response body(sanitized): ${sanitizedBody}`);
+  console.log(`[recipient-form] sanitized output: ${sanitizedOutput}`);
 
   if (status !== 200 && status !== 201) {
     const currentUrl = page.url();

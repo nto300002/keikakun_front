@@ -23,7 +23,7 @@ export const initializeCsrfToken = async (): Promise<boolean> => {
     setCsrfToken(token);
     return true;
   } catch {
-    console.error('[CSRF] Failed to initialize CSRF token');
+    console.error('[CSRF] Failed to initialize request guard');
     return false;
   }
 };

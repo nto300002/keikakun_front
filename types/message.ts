@@ -7,6 +7,7 @@ export enum MessageType {
   ANNOUNCEMENT = 'announcement',
   SYSTEM = 'system',
   INQUIRY = 'inquiry',
+  INQUIRY_REPLY = 'inquiry_reply',
 }
 
 export enum MessagePriority {

@@ -9,8 +9,26 @@ import {
   CalendarEvent,
   CalendarEventQuery,
 } from '@/types/calendar';
+import { buildCalendarIcsExportEndpoint, type CalendarIcsExportQuery } from './calendarExport';
 
 const API_V1_PREFIX = '/api/v1';
+const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, '');
+
+function getFilenameFromContentDisposition(contentDisposition: string | null): string {
+  const match = contentDisposition?.match(/filename="([^"]+)"/);
+  return match?.[1] || 'keikakun-calendar.ics';
+}
+
+function triggerFileDownload(blob: Blob, filename: string): void {
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.URL.revokeObjectURL(url);
+}
 
 /**
  * カレンダー連携API
@@ -30,6 +48,26 @@ export const calendarApi = {
       ? `${API_V1_PREFIX}/calendar/events?${queryString}`
       : `${API_V1_PREFIX}/calendar/events`;
     return http.get<CalendarEvent[]>(endpoint);
+  },
+
+  /**
+   * 支援計画ページ向けに期限イベントを .ics ファイルとしてダウンロード
+   */
+  downloadIcs: async (query: CalendarIcsExportQuery = {}): Promise<void> => {
+    const endpoint = buildCalendarIcsExportEndpoint(query);
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ detail: 'カレンダーファイルのダウンロードに失敗しました' }));
+      throw new Error(errorData.detail || 'カレンダーファイルのダウンロードに失敗しました');
+    }
+
+    const blob = await response.blob();
+    const filename = getFilenameFromContentDisposition(response.headers.get('content-disposition'));
+    triggerFileDownload(blob, filename);
   },
 
   /**

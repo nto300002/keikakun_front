@@ -58,6 +58,7 @@ export interface InquiryListItem {
   priority: InquiryPriority;
   sender_name: string | null;
   sender_email: string | null;
+  sender_staff_id: string | null;
   assigned_staff_id: string | null;
   assigned_staff?: StaffInfo | null;
   created_at: string;
@@ -72,6 +73,7 @@ export interface MessageInfo {
   title: string;
   content: string;
   created_at: string;
+  sender_staff_id?: string | null;
 }
 
 /**

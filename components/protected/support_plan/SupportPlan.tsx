@@ -1,12 +1,14 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { FaCheckSquare, FaRegSquare } from 'react-icons/fa';
-import { MdClose, MdDownload, MdHelpOutline, MdWarning, MdNotifications } from 'react-icons/md';
+import { MdWarning, MdNotifications } from 'react-icons/md';
 import PlanDeliverableModal from './PlanDeliverableModal';
 import MonitoringDeadlineModal from './MonitoringDeadlineModal';
 import Breadcrumb, { BreadcrumbItem } from '@/components/ui/Breadcrumb';
+import { IcsDownloadControl } from '@/components/ui/ics-download-control';
 import { welfareRecipientsApi, WelfareRecipient } from '@/lib/welfare-recipients';
 import { supportPlanApi, PlanCycle } from '@/lib/support-plan';
 import { calendarApi } from '@/lib/calendar';
@@ -25,7 +27,6 @@ export default function SupportPlan() {
   const [selectedStepType, setSelectedStepType] = useState<string>('');
 
   const [isDeadlineModalOpen, setIsDeadlineModalOpen] = useState(false);
-  const [isIcsHelpOpen, setIsIcsHelpOpen] = useState(false);
   const [isDownloadingIcs, setIsDownloadingIcs] = useState(false);
   const [currentMonitoringDeadline] = useState(7);
 
@@ -288,24 +289,18 @@ export default function SupportPlan() {
                 フリガナ: {furigana}
               </p>
             </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <button
-                type="button"
-                onClick={() => setIsIcsHelpOpen(true)}
-                className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-base font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+              <Link
+                href="/calendar/events"
+                className="inline-flex min-h-[44px] shrink-0 items-center justify-center rounded-lg border border-slate-400 bg-white px-4 py-2 text-base font-semibold text-slate-800 transition-colors hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
               >
-                <MdHelpOutline className="h-5 w-5" />
-                取り込み手順
-              </button>
-              <button
-                type="button"
-                onClick={handleDownloadIcs}
-                disabled={isDownloadingIcs}
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-base font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <MdDownload className="h-5 w-5" />
-                {isDownloadingIcs ? '作成中...' : '.icsをダウンロード'}
-              </button>
+                期限カレンダー
+              </Link>
+              <IcsDownloadControl
+                isDownloading={isDownloadingIcs}
+                onDownload={handleDownloadIcs}
+                className="md:items-end"
+              />
             </div>
           </div>
         </div>
@@ -696,35 +691,6 @@ export default function SupportPlan() {
         currentDeadline={currentMonitoringDeadline}
       />
 
-      {isIcsHelpOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-slate-300 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <h2 className="text-xl font-bold text-slate-950 dark:text-white">Google Calendarへの手動インポート</h2>
-              <button
-                type="button"
-                onClick={() => setIsIcsHelpOpen(false)}
-                className="rounded-md p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white"
-                aria-label="閉じる"
-              >
-                <MdClose className="h-6 w-6" />
-              </button>
-            </div>
-            <ol className="list-decimal space-y-2 pl-6 text-base font-semibold text-slate-700 dark:text-gray-200">
-              <li>このページから `.ics` ファイルをダウンロードする。</li>
-              <li>Google Calendarを開く。</li>
-              <li>設定の「インポート/エクスポート」を開く。</li>
-              <li>ダウンロードした `.ics` ファイルを選択する。</li>
-              <li>反映先カレンダーを選び、インポートする。</li>
-            </ol>
-            <div className="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700/60 dark:bg-amber-950/30">
-              <p className="text-base font-semibold text-amber-800 dark:text-amber-200">
-                `.ics` は手動インポート用です。支援計画の期限が変わった場合は、再ダウンロードと再インポートが必要です。再インポート時にGoogle Calendar側で予定が重複する場合があります。
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

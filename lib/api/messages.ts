@@ -15,6 +15,7 @@ import {
   MessagePersonalCreateResponse,
   MessageAnnouncementCreateResponse,
 } from '@/types/message';
+import { buildMessageInboxEndpoint, type MessageInboxQueryParams } from './messageQuery';
 
 const API_V1_PREFIX = '/api/v1';
 
@@ -23,30 +24,8 @@ export const messagesApi = {
    * 受信箱（メッセージ一覧）取得
    * @param params - フィルターパラメータ（is_read: 既読/未読、message_type: メッセージタイプ、skip/limit: ページネーション）
    */
-  getInbox: (params?: {
-    is_read?: boolean;
-    message_type?: string;
-    skip?: number;
-    limit?: number;
-  }): Promise<MessageInboxResponse> => {
-    const queryParams = new URLSearchParams();
-    if (params?.is_read !== undefined) {
-      queryParams.append('is_read', String(params.is_read));
-    }
-    if (params?.message_type) {
-      queryParams.append('message_type', params.message_type);
-    }
-    if (params?.skip !== undefined) {
-      queryParams.append('skip', String(params.skip));
-    }
-    if (params?.limit !== undefined) {
-      queryParams.append('limit', String(params.limit));
-    }
-    const queryString = queryParams.toString();
-    const endpoint = queryString
-      ? `${API_V1_PREFIX}/messages/inbox?${queryString}`
-      : `${API_V1_PREFIX}/messages/inbox`;
-    return http.get<MessageInboxResponse>(endpoint);
+  getInbox: (params?: MessageInboxQueryParams): Promise<MessageInboxResponse> => {
+    return http.get<MessageInboxResponse>(buildMessageInboxEndpoint(params));
   },
 
   /**

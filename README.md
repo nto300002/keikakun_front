@@ -1,112 +1,141 @@
-# keikakun_front_
+# けいかくん Frontend
 
-はい、承知いたしました。
-これまでの対話でご提示いただいた全ての情報（機能要件、UI/UX、コンポーネント設計、技術選定など）を統合し、アプリケーション「ケイカくん」の**フロントエンド要件定義書**として出力します。
+Next.js App Router で実装された、けいかくんのフロントエンドです。認証、MFA、利用者管理、支援計画、PDF成果物、通知、課金、事業所管理、app_admin 管理画面を提供します。
 
----
+## 技術スタック
 
-### **アプリケーションフロントエンド要件定義書: ケイカくん**
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Radix UI primitives and local UI components
+- React Hook Form
+- Zod
+- lucide-react / react-icons / Heroicons
+- react-dropzone
+- qrcode.react
+- Sonner
+- Playwright
 
-### 1. システム概要とアーキテクチャ
+API 通信は `lib/http.ts` と `lib/api/*` に集約しています。
 
-#### 1.1. 目的
-本フロントエンドは、バックエンドAPIと連携し、福祉サービス事業所向けWebアプリケーション「ケイカくん」のための、高度にインタラクティブでレスポンシブなユーザーインターフェースを提供する。主な責務は、データの視覚化、ユーザーからの入力受付、そしてバックエンドAPIとの非同期通信である。
+## 開発コマンド
 
-#### 1.2. 技術スタック
-*   **フレームワーク**: Next.js (App Router)
-*   **UIライブラリ**: React
-*   **言語**: TypeScript
-*   **CSSフレームワーク**: Tailwind CSS
-*   **UIコンポーネント**: shadcn/ui
-*   **データ取得・状態管理**: TanStack Query (React Query)
-*   **フォーム管理**: React Hook Form
-*   **スキーマ検証**: Zod
-*   **HTTPクライアント**: axios
-*   **日付操作**: date-fns
-*   **アイコン**: lucide-react
-*   **コード品質**: ESLint, Prettier
+```bash
+npm install
+npm run dev
+npm run lint
+npm run build
+```
 
-#### 1.3. アーキテクチャ
-*   **コンポーネント戦略**: Next.js App Routerの思想に基づき、ページの初期表示に必要なデータは**サーバーコンポーネント (`page.tsx`)**で取得する。ユーザーインタラクションを伴う部分は**クライアントコンポーネント (`'use client'`)**として明確に分離する。
-*   **状態管理**:
-    *   **サーバー状態**: APIから取得するデータは全て**TanStack Query**で管理する。これにより、キャッシュ、非同期処理のローディング/エラー状態、データの再検証を効率的に扱う。
-    *   **UI状態**: モーダルの開閉、タブの選択状態など、UIにのみ関連する状態は`useState`や`useContext`で管理する。
-*   **API通信**: `axios`をラップしたAPIクライアントを実装し、リクエストヘッダーへのJWT付与などを一元管理する。
+E2E テスト:
 
-### 2. 認証とルーティング
+```bash
+npm run test:e2e
+npm run test:e2e:ui
+npm run test:e2e:headed
+npm run test:e2e:report
+```
 
-#### 2.1. サインアップフロー
-ユーザーの役割に応じて、2つの異なるサインアップフローを提供する。
-*   **サービス責任者**:
-    1.  `/admin/signup`から登録。
-    2.  ログイン後、事業所が未登録の場合は`/admin/setup`に強制リダイレクトされる。
-*   **一般社員・マネージャー**:
-    1.  管理者から送られた招待URLを経由して`/signup`ページで登録。
-    2.  ログイン後、事業所に未所属の場合は`/office-setup`に強制リダイレクトされる。
+## 環境変数
 
-#### 2.2. アクセス制御とリダイレクト
-*   `middleware.ts`またはルートレイアウト (`layout.tsx`) を利用し、ログイン状態とユーザーの役割、事業所への所属状態をチェックする。
-*   未ログインユーザーはログインページへリダイレクトする。
-*   ログイン済みだが事業所設定が完了していないユーザーは、それぞれの設定ページ（`/admin/setup` or `/office-setup`）へ強制リダイレクトする。
-*   `service_administrator`ロールを持たないユーザーが`/admin/*`パスにアクセスしようとした場合、ダッシュボードなどへリダイレクトする。
+代表的な値です。
 
-### 3. 主要機能・ページ要件
+- `NEXT_PUBLIC_API_URL`
+- `NEXT_PUBLIC_VAPID_PUBLIC_KEY`
 
-#### 3.1. ダッシュボード (`/dashboard`)
-*   **目的**: ログイン後のホーム画面。利用者一覧と計画の進捗状況を一覧表示する。
-*   **主要コンポーネント**:
-    *   `DashboardHeader.tsx`: 事業所名、現在の利用者数/上限、課金ステータスを表示。
-    *   `DashboardTable.tsx`: 利用者一覧を表示するテーブル。利用者がいない場合は「利用者が登録されていません」と表示。
-    *   `DashboardTableRow.tsx`: テーブルの各行。計画の進捗状況や更新期限までの残り日数を`date-fns`で計算し、色分けして表示する。
-    *   `CreateRecipientButton.tsx`: 利用者新規登録ボタン。**利用者数が上限に達している無料プランの場合、利用者作成ページへの遷移を中断し、課金モーダルを表示する。**
+## ディレクトリ構成
 
-#### 3.2. 利用者管理 (`/recipients/*`)
-*   **利用者作成 (`/recipients/new`)**: `react-hook-form`と`zod`で管理されたフォームで新規利用者を登録する。
-*   **利用者編集 (`/recipients/[id]/edit`)**: ページ読み込み時に既存の利用者データをAPIから取得し、フォームを初期化する。
+```text
+app/
+├── (protected)/       # login required screens
+├── auth/              # login, signup, MFA, email verification
+├── privacy/
+├── terms/
+└── page.tsx
 
-#### 3.3. 個別支援計画ページ (`/recipients/[id]/individual_support_plan`)
-*   **目的**: 特定利用者の全計画サイクルと進捗を管理する。
-*   **UI**: 過去から現在までの全計画サイクルをテーブル形式で表示。
-*   **機能**:
-    *   各ステップのセルをクリックすると、PDFアップロード用のモーダルを表示する。
-    *   アップロード済みのPDFにはプレビューリンクと、削除・再アップロードのためのドロップダウンメニューを表示する。
-    *   Googleカレンダー連携のための認証ボタンと、現在の連携状態を表示する。
+components/
+├── auth/
+├── common/
+├── messages/
+├── notice/
+├── protected/
+└── ui/
 
-#### 3.4. アセスメントシートページ (`/recipients/[id]/assessment`)
-*   **目的**: アセスメントシートのPDFを種類別に管理する。
-*   **UI**: 「基本情報」「就労関係」「課題分析」の3つのステータスカードを表示。
-*   **機能**:
-    *   `FileUploadArea.tsx`コンポーネントで、種類を選択してPDFをアップロードする。
-    *   アップロード済みの項目には、完了状態を示すUIと、ファイルのプレビュー・削除・再アップロード機能を提供する。
+lib/
+├── api/               # endpoint-specific adapters
+├── http.ts            # shared fetch wrapper
+├── dal.ts             # server-side session and role helpers
+└── permissions/
 
-#### 3.5. PDF一覧ページ (`/recipients/[id]/pdf_list`)
-*   **目的**: 特定利用者に関連する全てのPDF成果物を一箇所で閲覧する。
-*   **UI**: アセスメントシートと、サイクルごとにグループ化された個別支援計画のリストを表示する。
-*   **機能**:
-    *   全てのファイルリンクは、バックエンドが生成した**署名付きURL**を`href`に持つ。
-    *   リンクをクリックすると、新しいタブでPDFが安全に表示される。
+hooks/
+types/
+e2e/
+```
 
-#### 3.6. プロフィールページ (`/profile`)
-*   **UI**: 「スタッフ情報」「通知」「認証方法」の3つの機能を持つタブコンポーネントで構成される。
-*   **機能**:
-    *   **スタッフ情報**: 自身の名前とメールアドレスを変更するフォーム。
-    *   **通知**: 各種操作の承認を「申請するフォーム」と、自分宛の申請を「承認・否認する受信箱」を提供する。
-    *   **認証方法**: MFAの有効・無効を切り替えるUI。有効化フローでは、QRコードとリカバリーコードをモーダルで表示し、ワンタイムコードの検証を行う。
+## 主要ルート
 
-#### 3.7. 事務所管理ページ (`/admin/office_management`)
-*   **アクセス**: `service_administrator`ロールのユーザーのみ。
-*   **UI**: 4つの主要機能を持つ。
-    1.  **スタッフ招待**: メールアドレスと役割（`manager`/`employee`）を指定して招待を送信するフォーム。
-    2.  **スタッフ管理**: 所属スタッフの一覧を表示。各スタッフの横に削除ボタンを配置。
-    3.  **事務所情報編集**: 事務所名を変更するフォームと、安全措置（パスワード再入力など）が施された事業所停止（削除）ボタン。
-    4.  **プラン変更**: Stripeカスタマーポータルへ遷移するボタン。**利用者数が11人以上の場合は遷移をブロックし、エラーメッセージを表示する。**
+認証:
 
-### 4. UI/UX要件
-*   **ダークモード**: 目の負担を軽減するため、OSの設定に連動するダークモードに対応する。
-*   **PWA化**: スマートフォンやデスクトップにインストールしてネイティブアプリのように利用できるよう、PWA (Progressive Web App) に対応する。
-*   **レスポンシブデザイン**: 全てのページは、デスクトップとスマートフォンの両方の画面サイズで快適に利用できるよう設計する。
+- `/auth/login`
+- `/auth/signup`
+- `/auth/admin/login`
+- `/auth/admin/signup`
+- `/auth/admin/office_setup`
+- `/auth/app-admin/login`
+- `/auth/mfa-first-setup`
+- `/auth/mfa-setup`
+- `/auth/mfa-verify`
+- `/auth/forgot-password`
+- `/auth/reset-password`
+- `/auth/verify-email`
+- `/auth/verify-email-change`
+- `/auth/select-office`
 
-### 5. 開発・デプロイ要件
-*   **開発環境**: `next dev`によるローカル開発サーバーを使用。
-*   **デプロイ先**: Vercel
-*   **CI/CD**: GitHubリポジトリの`main`ブランチへのプッシュをトリガーに、Vercelへの自動デプロイが実行されるように設定する。
+保護画面:
+
+- `/dashboard`
+- `/recipients`
+- `/recipients/new`
+- `/recipients/[id]`
+- `/support_plan/[id]`
+- `/pdf-list`
+- `/calendar/events`
+- `/notice`
+- `/notice/[id]`
+- `/messages/new`
+- `/profile`
+- `/admin`
+- `/app-admin`
+
+公開ページ:
+
+- `/`
+- `/terms`
+- `/privacy`
+- `/act-on-specified-commercial-transactions`
+
+## ロールと画面制御
+
+- `owner`: 事業所管理、スタッフ管理、課金、主要操作を行います。
+- `manager`: 利用者や支援計画の通常管理を行います。
+- `employee`: 参照と一部操作申請を行います。
+- `app_admin`: アプリ運営者向けの管理画面を使います。
+
+ロール判定は `lib/dal.ts`、`hooks/useStaffRole.ts`、各 protected page の server-side guard で扱います。
+
+## UI と API 実装方針
+
+- 共通 UI は `components/ui` と `components/common` に置きます。
+- 画面固有 UI は `components/protected/*` や機能別ディレクトリに置きます。
+- API 呼び出しは `lib/api/*` に追加し、画面から直接 fetch URL を組み立てないようにします。
+- 認証 Cookie と CSRF の扱いは `lib/http.ts` の共通処理に寄せます。
+- 本番コードに無条件の `console.log` を残しません。
+
+## 課金表示
+
+Stripe の現行サブスクリプション価格は月額6,000円です。表示金額を変更する場合は Stripe 側の Price、バックエンドの `STRIPE_PRICE_ID`、フロントエンドの表示文言を同時に確認します。
+
+## デプロイ
+
+Vercel で配信する Next.js アプリです。production API の接続先は `NEXT_PUBLIC_API_URL` で指定します。

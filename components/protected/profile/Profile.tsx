@@ -71,7 +71,7 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
   const [emailChangePassword, setEmailChangePassword] = useState<string>('');
   const [emailModalError, setEmailModalError] = useState<string | null>(null);
 
-  // Role変更リクエストモーダル用のstate
+  // 権限変更申請モーダル用のstate
   const [isRoleChangeModalOpen, setIsRoleChangeModalOpen] = useState<boolean>(false);
 
   // 権限説明ポップオーバー用のstate
@@ -164,7 +164,7 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
     }
   };
 
-  // メールアドレス変更リクエストハンドラ
+  // メールアドレス変更申請ハンドラ
   const handleEmailChangeRequest = async () => {
     // バリデーション
     setEmailModalError(null);
@@ -213,7 +213,7 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
     } catch (err: unknown) {
       // サーバーエラーをモーダル内に表示
       const message = err instanceof Error ? err.message : String(err);
-      setEmailModalError(message || 'メールアドレス変更リクエストに失敗しました');
+      setEmailModalError(message || 'メールアドレス変更申請に失敗しました');
     } finally {
       setIsLoading(false);
     }
@@ -492,7 +492,7 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
                       onClick={() => setIsRoleChangeModalOpen(true)}
                       className="bg-slate-100 hover:bg-slate-200 text-blue-600 dark:bg-gray-700/50 dark:hover:bg-gray-600/70 dark:text-blue-400 px-5 py-3 rounded-lg text-base font-semibold transition-colors"
                     >
-                      権限変更をリクエスト
+                      権限変更を申請
                     </button>
                   </div>
                 </div>
@@ -588,14 +588,14 @@ export default function Profile({ staff: initialStaff }: ProfileProps) {
         </div>
       )}
 
-      {/* Role変更リクエストモーダル */}
+      {/* 権限変更申請モーダル */}
       {staff && (
         <RoleChangeModal
           currentRole={staff.role as StaffRole}
           isOpen={isRoleChangeModalOpen}
           onClose={() => setIsRoleChangeModalOpen(false)}
           onSuccess={() => {
-            toast.success('権限変更リクエストを送信しました。承認をお待ちください。', { duration: 5000 });
+            toast.success('権限変更申請を送信しました。承認をお待ちください。', { duration: 5000 });
           }}
         />
       )}

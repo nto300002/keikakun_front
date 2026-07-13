@@ -24,7 +24,7 @@ const fetchCsrfToken = async (): Promise<string> => {
   });
 
   if (!response.ok) {
-    throw new Error('CSRFトークンの取得に失敗しました');
+    throw new Error('認証情報の確認に失敗しました。ページを再読み込みして再度お試しください。');
   }
 
   const data = await response.json() as { csrf_token: string };
@@ -38,7 +38,7 @@ const ensureCsrfToken = async (): Promise<string> => {
 };
 
 const isCsrfFailure = (response: Response, errorData: FastAPIErrorResponse): boolean => {
-  return response.status === 403 && errorData.detail === 'CSRF token validation failed';
+  return response.status === 403 && errorData.detail === '画面の有効期限が切れました。ページを再読み込みして、もう一度お試しください。';
 };
 
 // FastAPIのバリデーションエラーの型定義
@@ -193,7 +193,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
       // エラーを投げて処理を中断
       throw new Error('認証されていません');
     }
-    const errorData = await response.json().catch(() => ({ detail: `リクエストが失敗しました (ステータス: ${response.status})` }));
+    const errorData = await response.json().catch(() => ({ detail: `通信に失敗しました。時間をおいて再度お試しください。` }));
     if (isStateMutatingMethod && isCsrfFailure(response, errorData)) {
       const refreshedToken = await fetchCsrfToken();
       const retryResponse = await fetch(url, {
@@ -251,7 +251,7 @@ async function requestWithFormData<T>(
       await handleLogout();
       throw new Error('認証されていません');
     }
-    const errorData = await response.json().catch(() => ({ detail: `リクエストが失敗しました (ステータス: ${response.status})` }));
+    const errorData = await response.json().catch(() => ({ detail: `通信に失敗しました。時間をおいて再度お試しください。` }));
     if (isCsrfFailure(response, errorData)) {
       const refreshedToken = await fetchCsrfToken();
       const retryResponse = await fetch(url, {

@@ -18,13 +18,13 @@ function MfaFirstSetupFormComponent() {
     const [verifyAttempts, setVerifyAttempts] = useState(0)
 
     useEffect(() => {
-        // セッションストレージからMFA設定情報を取得
+        // セッションストレージから2段階認証の設定情報を取得
         const qrUri = sessionStorage.getItem('mfa_qr_code_uri')
         const secret = sessionStorage.getItem('mfa_secret_key')
         const msg = sessionStorage.getItem('mfa_setup_message')
 
         if (!qrUri || !secret) {
-            setError('MFA設定情報が見つかりません。再度ログインしてください。')
+            setError('2段階認証の設定情報が見つかりません。再度ログインしてください。')
             setTimeout(() => {
                 router.push('/auth/login')
             }, 3000)
@@ -33,7 +33,7 @@ function MfaFirstSetupFormComponent() {
 
         setQrCodeUri(qrUri)
         setSecretKey(secret)
-        setMessage(msg || '管理者がMFAを設定しました。以下の情報でTOTPアプリに登録してください。')
+        setMessage(msg || '管理者が2段階認証を設定しました。以下の情報で認証アプリに登録してください。')
     }, [router])
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -42,13 +42,13 @@ function MfaFirstSetupFormComponent() {
         setLoading(true)
 
         try {
-            // 一時トークンを取得
+            // 一時認証情報を取得
             const temporaryToken = tokenUtils.getTemporaryToken()
             if (!temporaryToken) {
-                throw new Error('一時トークンが見つかりません。再度ログインしてください。')
+                throw new Error('一時認証情報が見つかりません。再度ログインしてください。')
             }
 
-            // MFA初回検証を実行
+            // 2段階認証の初回確認を実行
             await mfaApi.verifyMfaFirstTime(temporaryToken, totpCode)
 
             // セッションストレージをクリア
@@ -57,7 +57,7 @@ function MfaFirstSetupFormComponent() {
             sessionStorage.removeItem('mfa_setup_message')
             tokenUtils.removeTemporaryToken()
 
-            toast.success('MFAの初回検証が完了しました。ログインに成功しました。')
+            toast.success('2段階認証の初回確認が完了しました。ログインに成功しました。')
             router.push('/dashboard')
 
         } catch (err: unknown) {
@@ -94,7 +94,7 @@ function MfaFirstSetupFormComponent() {
                 {/* Header */}
                 <div className="text-center">
                     <h2 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
-                        MFA初回設定
+                        2段階認証の初回設定
                     </h2>
                     <p className="text-slate-600 dark:text-gray-400">
                         {message}

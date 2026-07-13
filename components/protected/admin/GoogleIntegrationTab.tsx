@@ -90,7 +90,7 @@ export default function GoogleIntegrationTab({
             </h4>
             <div className="space-y-3">
               <div>
-                <p className="text-slate-600 text-base font-semibold dark:text-gray-400">接続ステータス</p>
+                <p className="text-slate-600 text-base font-semibold dark:text-gray-400">接続状態</p>
                 <span className={`inline-block mt-1 px-3 py-1 rounded-lg text-base font-semibold border ${getConnectionStatusColor(existingCalendar.connection_status)}`}>
                   {getConnectionStatusLabel(existingCalendar.connection_status)}
                 </span>
@@ -178,7 +178,7 @@ export default function GoogleIntegrationTab({
 
           <div>
             <label className="block text-slate-600 text-base font-semibold dark:text-gray-400 mb-2">
-              サービスアカウント JSON ファイル <span className="text-red-400">*</span>
+              カレンダー連携用の設定ファイル <span className="text-red-400">*</span>
             </label>
             <input
               type="file"

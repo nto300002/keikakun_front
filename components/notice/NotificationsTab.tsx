@@ -92,10 +92,10 @@ export default function NotificationsTab() {
     try {
       if (noticeType === NoticeType.ROLE_CHANGE_PENDING) {
         await roleChangeRequestsApi.approveRequest(requestId);
-        toast.success('権限変更リクエストを承認しました');
+        toast.success('権限変更申請を承認しました');
       } else if (noticeType === NoticeType.EMPLOYEE_ACTION_PENDING) {
         await employeeActionRequestsApi.approveRequest(requestId);
-        toast.success('利用者の作成、編集、削除リクエストを承認しました');
+        toast.success('利用者情報の操作申請を承認しました');
       }
       await loadNotices();
     } catch (err: unknown) {
@@ -112,10 +112,10 @@ export default function NotificationsTab() {
     try {
       if (noticeType === NoticeType.ROLE_CHANGE_PENDING) {
         await roleChangeRequestsApi.rejectRequest(requestId);
-        toast.success('Role変更リクエストを却下しました');
+        toast.success('権限変更申請を却下しました');
       } else if (noticeType === NoticeType.EMPLOYEE_ACTION_PENDING) {
         await employeeActionRequestsApi.rejectRequest(requestId);
-        toast.success('Employee制限リクエストを却下しました');
+        toast.success('利用者情報の操作申請を却下しました');
       }
       await loadNotices();
     } catch (err: unknown) {

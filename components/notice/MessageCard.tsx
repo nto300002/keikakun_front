@@ -123,13 +123,13 @@ export default function MessageCard({
           </button>
         )}
 
-        {/* アーカイブボタン */}
+        {/* 保管ボタン */}
         {onArchive && (
           <button
             onClick={() => onArchive(message.message_id, !message.is_archived)}
             className="bg-slate-200 hover:bg-slate-300 text-slate-900 px-6 py-3 rounded-lg text-base font-bold transition-colors dark:bg-gray-700/50 dark:hover:bg-gray-600/70 dark:text-gray-300"
           >
-            {message.is_archived ? 'アーカイブ解除' : 'アーカイブ'}
+            {message.is_archived ? '保管を解除' : '保管'}
           </button>
         )}
       </div>

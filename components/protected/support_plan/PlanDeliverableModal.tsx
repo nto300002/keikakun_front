@@ -46,7 +46,7 @@ export default function PlanDeliverableModal({
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsLoadingPdf(true);
 
-      // CORS対応: mode: 'cors' と credentials を追加
+      // 外部ファイル表示対応: mode: 'cors' と credentials を追加
       fetch(existingPdfUrl, {
         mode: 'cors',
         credentials: 'omit',
@@ -56,7 +56,7 @@ export default function PlanDeliverableModal({
       })
         .then((response) => {
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`PDFの表示に失敗しました`);
           }
           return response.blob();
         })
@@ -74,7 +74,7 @@ export default function PlanDeliverableModal({
         })
         .catch((err) => {
           console.error('Client operation failed');
-          setError('PDFの読み込みに失敗しました。CORS設定を確認してください。');
+          setError('PDFの表示に失敗しました。時間をおいて再度お試しください。');
           setIsLoadingPdf(false);
         });
     }
@@ -254,7 +254,7 @@ export default function PlanDeliverableModal({
                     <iframe
                       src={pdfBlobUrl}
                       className="w-full h-[500px]"
-                      title="PDF Preview"
+                      title="PDFのプレビュー"
                       allow="fullscreen"
                     />
                   ) : (
@@ -269,7 +269,7 @@ export default function PlanDeliverableModal({
 
           {/* 削除確認は今は実装しない(非MVP) */}
 
-          {/* Employee権限の場合は閲覧のみのメッセージを表示 */}
+          {/* 一般スタッフの場合は閲覧のみのメッセージを表示 */}
           {isEmployee ? (
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
               <div className="flex items-start gap-3">
@@ -286,7 +286,7 @@ export default function PlanDeliverableModal({
             </div>
           ) : (
             <>
-              {/* ドラッグ&ドロップエリア（Manager/Ownerのみ） */}
+              {/* ドラッグ&ドロップエリア（管理者または事業所管理者のみ） */}
               <div
                 {...getRootProps()}
                 className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-200 ${

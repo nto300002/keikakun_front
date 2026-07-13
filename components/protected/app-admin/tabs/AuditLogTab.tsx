@@ -112,7 +112,7 @@ export default function AuditLogTab() {
                 <option value="">すべて</option>
                 <option value="staff">スタッフ</option>
                 <option value="office">事務所</option>
-                <option value="withdrawal_request">退会リクエスト</option>
+                <option value="withdrawal_request">退会申請</option>
               </select>
             </div>
             <div>

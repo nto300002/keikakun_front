@@ -16,8 +16,8 @@ interface EmployeeActionRequestModalProps {
 }
 
 /**
- * Employee権限のユーザーが重要な操作を行う際に表示される
- * リクエスト申請確認モーダル
+ * 一般スタッフが重要な操作を行う際に表示される
+ * 承認申請確認モーダル
  */
 export default function EmployeeActionRequestModal({
   isOpen,
@@ -38,7 +38,7 @@ export default function EmployeeActionRequestModal({
     setError(null);
 
     try {
-      // リクエストデータにメモを追加
+      // 申請内容にメモを追加
       const payload = {
         resource_type: resourceType,
         action_type: actionType,
@@ -62,7 +62,7 @@ export default function EmployeeActionRequestModal({
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('リクエストの送信に失敗しました。もう一度お試しください。');
+        setError('申請の送信に失敗しました。もう一度お試しください。');
       }
     } finally {
       setIsSubmitting(false);
@@ -91,8 +91,8 @@ export default function EmployeeActionRequestModal({
         {/* ヘッダー */}
         <div className="flex justify-between items-center p-6 border-b border-[#2a3441]">
           <div>
-            <h3 className="text-lg font-semibold text-white">承認リクエスト</h3>
-            <p className="text-sm text-[#9ca3af] mt-1">マネージャー/オーナーの承認が必要です</p>
+            <h3 className="text-lg font-semibold text-white">承認申請</h3>
+            <p className="text-sm text-[#9ca3af] mt-1">管理者または事業所管理者の承認が必要です</p>
           </div>
           <button
             onClick={handleClose}
@@ -112,11 +112,11 @@ export default function EmployeeActionRequestModal({
             <p className="text-white font-medium">{actionDescription}</p>
           </div>
 
-          { /* リクエスト理由 */ }
+          { /* 申請理由 */ }
           {/* 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
-              リクエスト理由（任意）
+              申請理由（任意）
             </label>
             <textarea
               value={notes}
@@ -142,7 +142,7 @@ export default function EmployeeActionRequestModal({
           {/* 注意事項 */}
           <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
             <p className="text-blue-400 text-sm">
-              💡 このリクエストはマネージャー/オーナーが承認した後に実行されます。承認状況は通知で確認できます。
+              💡 この申請は管理者または事業所管理者が承認した後に実行されます。承認状況は通知で確認できます。
             </p>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function EmployeeActionRequestModal({
             {isSubmitting && (
               <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
             )}
-            {isSubmitting ? '送信中...' : 'リクエスト送信'}
+            {isSubmitting ? '送信中...' : '申請を送信'}
           </button>
         </div>
       </div>

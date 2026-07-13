@@ -214,12 +214,12 @@ export default function PlanTab() {
 
       {/* 現在の有料会員情報 */}
       <div className="bg-white rounded-lg p-6 font-medium border border-slate-300 shadow-sm dark:bg-gray-800 dark:border-gray-700">
-        <h3 className="text-xl font-semibold mb-4">現在のステータス</h3>
+        <h3 className="text-xl font-semibold mb-4">現在の状態</h3>
 
         <div className="space-y-4">
-          {/* 課金ステータス */}
+          {/* 課金状態 */}
           <div>
-            <p className="text-slate-600 dark:text-gray-400 text-base font-semibold mb-2">ステータス</p>
+            <p className="text-slate-600 dark:text-gray-400 text-base font-semibold mb-2">状態</p>
             <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-base font-semibold border ${statusBadge.color}`}>
               <span>{statusBadge.icon}</span>
               <span>{statusBadge.label}</span>

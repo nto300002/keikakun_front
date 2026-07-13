@@ -61,7 +61,7 @@ function CalendarLinkModal({
             </div>
           ) : calendarAccount ? (
             <div className="space-y-4">
-              {/* ステータス */}
+              {/* 状態 */}
               <div className="bg-[#0f1419] border border-[#2a3441] rounded-lg p-4">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl">
@@ -73,7 +73,7 @@ function CalendarLinkModal({
                   </span>
                   <div>
                     <p className="text-white text-sm font-medium">
-                      ステータス: {' '}
+                      状態: {' '}
                       {calendarAccount.connection_status === CalendarConnectionStatus.CONNECTED
                         ? '接続済み'
                         : calendarAccount.connection_status === CalendarConnectionStatus.ERROR

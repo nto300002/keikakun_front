@@ -28,7 +28,7 @@ export default function ResetPasswordForm() {
   const [tokenError, setTokenError] = useState('');
   const router = useRouter();
 
-  // URLフラグメントからトークンを取得
+  // URLから確認情報を取得
   useEffect(() => {
     const hash = window.location.hash;
     if (hash.startsWith('#token=')) {
@@ -38,30 +38,30 @@ export default function ResetPasswordForm() {
       // セキュリティのため、履歴からフラグメントを削除
       window.history.replaceState(null, '', window.location.pathname);
 
-      // トークンの有効性を確認
+      // 確認リンクの有効性を確認
       verifyToken(extractedToken);
     } else {
       setIsVerifyingToken(false);
-      setTokenError('トークンが見つかりません。パスワードリセットメールのリンクからアクセスしてください。');
+      setTokenError('確認リンクが見つかりません。パスワード再設定メールのリンクからアクセスしてください。');
     }
   }, []);
 
   const verifyToken = async (tokenToVerify: string) => {
     try {
-      // URL query stringにリセットトークンを残さないよう、POST bodyで検証する
+      // URL query stringに確認情報を残さないよう、POST bodyで検証する
       const data = await http.post<VerifyTokenResponse>('/api/v1/auth/verify-reset-token', {
         token: tokenToVerify,
       });
 
       if (!data.valid) {
-        throw new Error(data.message || 'トークンが無効または期限切れです');
+        throw new Error(data.message || '確認リンクが無効または期限切れです');
       }
 
       setIsTokenValid(true);
-      toast.success('トークンが有効です。新しいパスワードを設定してください。');
+      toast.success('確認リンクを確認しました。新しいパスワードを設定してください。');
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'トークンの検証に失敗しました';
+      const errorMessage = err instanceof Error ? err.message : '確認リンクの確認に失敗しました';
       setTokenError(errorMessage);
       setIsTokenValid(false);
     } finally {
@@ -88,7 +88,7 @@ export default function ResetPasswordForm() {
     setIsLoading(true);
 
     try {
-      // CSRF保護付きでリクエスト送信
+      // 認証情報を確認して送信
       const data = await http.post<ResetPasswordResponse>('/api/v1/auth/reset-password', {
         token,
         new_password: password,
@@ -110,14 +110,14 @@ export default function ResetPasswordForm() {
     }
   };
 
-  // トークン検証中
+  // 確認リンク検証中
   if (isVerifyingToken) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-[#0C1421] flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#10B981] mx-auto"></div>
-            <p className="mt-4 text-slate-600 dark:text-gray-400">トークンを確認中...</p>
+            <p className="mt-4 text-slate-600 dark:text-gray-400">確認リンクを確認中...</p>
           </div>
         </div>
       </div>
@@ -131,10 +131,10 @@ export default function ResetPasswordForm() {
         <div className="max-w-md w-full space-y-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
-              トークンエラー
+              確認リンクエラー
             </h2>
             <p className="text-slate-600 dark:text-gray-400">
-              トークンが無効または期限切れです
+              確認リンクが無効または期限切れです
             </p>
           </div>
 
@@ -148,7 +148,7 @@ export default function ResetPasswordForm() {
                 onClick={() => router.push('/auth/forgot-password')}
                 className="w-full bg-[#10B981] hover:bg-[#0F9F6E] text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
               >
-                新しいリセットリンクをリクエスト
+                新しい確認リンクを発行する
               </button>
 
               <button

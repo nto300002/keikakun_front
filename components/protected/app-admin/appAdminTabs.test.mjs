@@ -10,7 +10,7 @@ test('app-admin dashboard exposes the main regression tabs', () => {
   );
   assert.deepEqual(
     APP_ADMIN_TABS.map((tab) => tab.label),
-    ['ログ', '問い合わせ', '承認リクエスト', 'お知らせ', '事務所']
+    ['ログ', '問い合わせ', '承認申請', 'お知らせ', '事務所']
   );
 });
 

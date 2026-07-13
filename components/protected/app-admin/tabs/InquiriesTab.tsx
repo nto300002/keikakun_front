@@ -216,7 +216,7 @@ export default function InquiriesTab() {
                     <p className="text-slate-950 whitespace-pre-wrap flex-1 dark:text-white">{selectedInquiry.content}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-base text-slate-500 w-24 dark:text-gray-400">ステータス:</span>
+                    <span className="text-base text-slate-500 w-24 dark:text-gray-400">状態:</span>
                     {getStatusBadge(selectedInquiry.status)}
                   </div>
                   <div className="flex items-center gap-2">

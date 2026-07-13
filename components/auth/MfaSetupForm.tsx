@@ -51,7 +51,7 @@ function MfaSetupFormComponent() {
                 setEnrollError(false)
             } catch (err: unknown) {
                 const message = err instanceof Error ? err.message : String(err)
-                setError(message || 'MFA登録の開始に失敗しました。')
+                setError(message || '2段階認証の設定の開始に失敗しました。')
                 setEnrollError(true)
             } finally {
                 setLoading(false)
@@ -81,7 +81,7 @@ function MfaSetupFormComponent() {
                 setEnrollError(false)
             } catch (err: unknown) {
                 const message = err instanceof Error ? err.message : String(err)
-                setError(message || 'MFA登録の開始に失敗しました。')
+                setError(message || '2段階認証の設定の開始に失敗しました。')
                 setEnrollError(true)
             } finally {
                 setLoading(false)

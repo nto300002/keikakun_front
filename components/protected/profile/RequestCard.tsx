@@ -12,7 +12,7 @@ interface RequestCardProps {
   onDelete?: (requestId: string, type: 'role_change' | 'employee_action') => void;
 }
 
-// Roleのラベルマップ
+// 権限のラベルマップ
 const roleLabels: Record<StaffRole, string> = {
   owner: '管理者',
   manager: 'マネージャー',
@@ -30,11 +30,11 @@ const actionTypeLabels: Record<ActionType, string> = {
 const resourceTypeLabels: Record<ResourceType, string> = {
   welfare_recipient: '利用者',
   support_plan_cycle: '計画サイクル',
-  support_plan_status: '計画ステータス',
+  support_plan_status: '計画状態',
 };
 
 export default function RequestCard({ request, type, onDelete }: RequestCardProps) {
-  // ステータスに応じたスタイルとアイコン
+  // 状態に応じたスタイルとアイコン
   const getStatusStyle = (status: RequestStatus) => {
     switch (status) {
       case RequestStatus.APPROVED:
@@ -74,7 +74,7 @@ export default function RequestCard({ request, type, onDelete }: RequestCardProp
 
   const statusStyle = getStatusStyle(request.status);
 
-  // Role変更リクエストの内容をレンダリング
+  // 権限変更申請の内容をレンダリング
   const renderRoleChangeContent = (req: RoleChangeRequest) => (
     <>
       <div className="mb-4">
@@ -82,9 +82,9 @@ export default function RequestCard({ request, type, onDelete }: RequestCardProp
           <span className="text-2xl">{statusStyle.icon}</span>
           <div>
             <h3 className={`text-lg font-bold ${statusStyle.textColor}`}>
-              権限変更リクエスト
+              権限変更申請
             </h3>
-            <p className="text-xs text-slate-500 dark:text-gray-500">Role Change Request</p>
+            <p className="text-xs text-slate-500 dark:text-gray-500">権限変更申請</p>
           </div>
         </div>
       </div>
@@ -139,7 +139,7 @@ export default function RequestCard({ request, type, onDelete }: RequestCardProp
     </>
   );
 
-  // Employee制限リクエストの内容をレンダリング
+  // 利用者情報の操作申請の内容をレンダリング
   const renderEmployeeActionContent = (req: EmployeeActionRequest) => (
     <>
       <div className="mb-4">
@@ -147,9 +147,9 @@ export default function RequestCard({ request, type, onDelete }: RequestCardProp
           <span className="text-2xl">{statusStyle.icon}</span>
           <div>
             <h3 className={`text-lg font-bold ${statusStyle.textColor}`}>
-              {resourceTypeLabels[req.resource_type]}の{actionTypeLabels[req.action_type]}リクエスト
+              {resourceTypeLabels[req.resource_type]}の{actionTypeLabels[req.action_type]}申請
             </h3>
-            <p className="text-xs text-slate-500 dark:text-gray-500">Employee Action Request</p>
+            <p className="text-xs text-slate-500 dark:text-gray-500">利用者情報の操作申請</p>
           </div>
         </div>
       </div>
@@ -182,10 +182,10 @@ export default function RequestCard({ request, type, onDelete }: RequestCardProp
           </div>
         </div>
 
-        {/* リクエストデータ */}
+        {/* 申請内容 */}
         {req.request_data && Object.keys(req.request_data).length > 0 && (
           <div className="bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-700/30 rounded-lg p-3">
-            <p className="text-xs text-blue-700 dark:text-blue-400 mb-2 font-semibold">変更データ</p>
+            <p className="text-xs text-blue-700 dark:text-blue-400 mb-2 font-semibold">変更内容</p>
             <div className="space-y-1">
               {Object.entries(req.request_data).map(([key, value]) => (
                 <div key={key} className="flex items-start gap-2 text-sm">

@@ -34,7 +34,7 @@ export default function Dashboard() {
     deleteRecipient,
   } = useDashboardData();
 
-  // Employee Action Request Modal state
+  // 承認申請モーダル state
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [pendingDeleteRequest, setPendingDeleteRequest] = useState<{
     recipientId: string;
@@ -125,7 +125,7 @@ export default function Dashboard() {
   }, [isLoadingRef, resetDashboardData, resetFiltersForDisplayReset]);
 
   const handleDeleteRecipient = useCallback(async (recipientId: string, recipientName: string) => {
-    // Employeeの場合はリクエスト申請モーダルを表示
+    // 一般スタッフの場合は承認申請モーダルを表示
     if (isEmployee) {
       setPendingDeleteRequest({ recipientId, recipientName });
       setIsRequestModalOpen(true);
@@ -138,14 +138,14 @@ export default function Dashboard() {
       if (deleted) {
         toast.success(`${recipientName}を削除しました`);
       } else {
-        toast.error('利用者の削除に失敗しました。ページをリロードして再度お試しください。');
+        toast.error('利用者の削除に失敗しました。ページを再読み込みして、もう一度お試しください。');
       }
     }
   }, [deleteRecipient, isEmployee]);
 
   const handleRequestSuccess = () => {
-    // リクエスト送信成功時の処理
-    toast.success('削除リクエストを送信しました。マネージャー/オーナーの承認をお待ちください。');
+    // 申請送信成功時の処理
+    toast.success('削除申請を送信しました。管理者または事業所管理者の承認をお待ちください。');
     setPendingDeleteRequest(null);
   };
 
@@ -889,7 +889,7 @@ export default function Dashboard() {
           </>
       </main>
 
-      {/* Employee Action Request Modal */}
+      {/* 承認申請モーダル */}
       {pendingDeleteRequest && (
         <EmployeeActionRequestModal
           isOpen={isRequestModalOpen}

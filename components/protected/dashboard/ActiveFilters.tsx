@@ -78,10 +78,10 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
           />
         )}
 
-        {/* ステータス */}
+        {/* 状態 */}
         {activeFilters.status && (
           <FilterChip
-            label={`ステータス: ${getStatusLabel(activeFilters.status)}`}
+            label={`状態: ${getStatusLabel(activeFilters.status)}`}
             onRemove={() => onFilterRemove('status')}
             color="purple"
           />
@@ -132,7 +132,7 @@ const FilterChip: React.FC<FilterChipProps> = ({ label, onRemove, color = 'blue'
 };
 
 /**
- * ステータスの表示名を取得
+ * 状態の表示名を取得
  */
 function getStatusLabel(status: string): string {
   const statusLabels: Record<string, string> = {

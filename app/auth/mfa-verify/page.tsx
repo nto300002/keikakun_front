@@ -20,7 +20,7 @@ export default function MfaVerifyPage() {
 
     const temporaryToken = tokenUtils.getTemporaryToken();
     if (!temporaryToken) {
-      setError('一時トークンが見つかりません。ログインからやり直してください。');
+      setError('一時認証情報が見つかりません。ログインからやり直してください。');
       setIsLoading(false);
       return;
     }
@@ -44,14 +44,14 @@ export default function MfaVerifyPage() {
       } else {
         // それ以外はダッシュボードへ
         const params = new URLSearchParams({
-          hotbar_message: 'MFA認証に成功しました',
+          hotbar_message: '2段階認証に成功しました',
           hotbar_type: 'success'
         });
         router.push(`/dashboard?${params.toString()}`);
       }
     } catch (err) {
       setVerifyAttempts(prev => prev + 1);
-      const errorMessage = err instanceof Error ? err.message : 'MFA検証に失敗しました。';
+      const errorMessage = err instanceof Error ? err.message : '2段階認証の確認に失敗しました。';
       let fullErrorMessage = errorMessage;
 
       // エラーヒントを追加
@@ -73,7 +73,7 @@ export default function MfaVerifyPage() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-slate-950 dark:text-white mb-2">
-            MFA認証
+            2段階認証
           </h2>
           <p className="text-slate-600 dark:text-gray-400">
             認証アプリで生成されたコードを入力してください。

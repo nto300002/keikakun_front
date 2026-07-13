@@ -97,18 +97,18 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
   const getNoticeLabel = () => {
     if (isPendingNotice) {
       return noticeType === NoticeType.ROLE_CHANGE_PENDING
-        ? '権限変更リクエスト'
-        : '一般社員の作成、編集、削除リクエスト';
+        ? '権限変更申請'
+        : '利用者情報の操作申請';
     }
     if (isRequesterNotice) {
       return noticeType === NoticeType.ROLE_CHANGE_REQUEST_SENT
-        ? '権限変更リクエスト送信済み'
-        : '一般社員の作成、編集、削除リクエスト送信済み';
+        ? '権限変更申請送信済み'
+        : '利用者情報の操作申請送信済み';
     }
     return noticeType === NoticeType.ROLE_CHANGE_APPROVED ||
       noticeType === NoticeType.ROLE_CHANGE_REJECTED
       ? '権限変更通知'
-      : '一般社員の作成、編集、削除に関する通知';
+      : '利用者情報の操作に関する通知';
   };
 
   // 承認処理
@@ -119,10 +119,10 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
     try {
       if (noticeType === NoticeType.ROLE_CHANGE_PENDING) {
         await roleChangeRequestsApi.approveRequest(requestId);
-        toast.success('権限変更リクエストを承認しました');
+        toast.success('権限変更申請を承認しました');
       } else if (noticeType === NoticeType.EMPLOYEE_ACTION_PENDING) {
         await employeeActionRequestsApi.approveRequest(requestId);
-        toast.success('利用者の作成、編集、削除リクエストを承認しました');
+        toast.success('利用者情報の操作申請を承認しました');
       }
       if (onUpdate) {
         onUpdate();
@@ -144,10 +144,10 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
     try {
       if (noticeType === NoticeType.ROLE_CHANGE_PENDING) {
         await roleChangeRequestsApi.rejectRequest(requestId);
-        toast.success('権限変更リクエストを却下しました');
+        toast.success('権限変更申請を却下しました');
       } else if (noticeType === NoticeType.EMPLOYEE_ACTION_PENDING) {
         await employeeActionRequestsApi.rejectRequest(requestId);
-        toast.success('一般社員の作成、編集、削除リクエストを却下しました');
+        toast.success('利用者情報の操作申請を却下しました');
       }
       if (onUpdate) {
         onUpdate();
@@ -244,7 +244,7 @@ export default function NoticeDetail({ notice, onUpdate }: NoticeDetailProps) {
                 承認待ち
               </p>
               <p className="text-slate-700 dark:text-gray-300 text-lg font-semibold mb-4">
-                このリクエストを承認または却下してください
+                この申請を承認または却下してください
               </p>
               <div className="flex gap-3">
                 <button

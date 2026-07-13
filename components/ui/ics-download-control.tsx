@@ -85,7 +85,7 @@ export function IcsDownloadControl({
                 `.ics` ファイルは、カレンダー予定を外部カレンダーアプリへ取り込むための標準形式です。
               </p>
               <p>
-                ダウンロードしたファイルをGoogle Calendarなどへインポートすると、支援計画の期限をカレンダー予定として確認できます。
+                ダウンロードしたファイルをGoogle Calendarなどへ取り込むと、支援計画の期限をカレンダー予定として確認できます。
               </p>
             </div>
             <div className="mb-3 mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -105,9 +105,9 @@ export function IcsDownloadControl({
             <ol className="list-decimal space-y-2 pl-6 text-base font-semibold text-slate-700 dark:text-gray-200">
               <li>このページから `.ics` ファイルをダウンロードする。</li>
               <li>Google Calendarを開く。</li>
-              <li>設定の「インポート/エクスポート」を開く。</li>
+              <li>設定の「取り込み/書き出し」を開く。</li>
               <li>ダウンロードした `.ics` ファイルを選択する。</li>
-              <li>反映先カレンダーを選び、インポートする。</li>
+              <li>反映先カレンダーを選び、取り込む。</li>
             </ol>
             {showImageGuide && (
               <div className="mt-5 space-y-4 rounded-lg border border-slate-300 bg-slate-50 p-4 dark:border-gray-700 dark:bg-gray-900/50">
@@ -149,7 +149,7 @@ export function IcsDownloadControl({
             )}
             <div className="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700/60 dark:bg-amber-950/30">
               <p className="text-base font-semibold text-amber-800 dark:text-amber-200">
-                `.ics` は手動インポート用です。支援計画の期限が変わった場合は、再ダウンロードと再インポートが必要です。再インポート時にGoogle Calendar側で予定が重複する場合があります。
+                `.ics` は手動で取り込むためのファイルです。支援計画の期限が変わった場合は、再ダウンロードと再取り込みが必要です。再取り込み時にGoogle Calendar側で予定が重複する場合があります。
               </p>
             </div>
           </div>

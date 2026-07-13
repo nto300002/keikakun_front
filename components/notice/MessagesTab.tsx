@@ -73,15 +73,15 @@ export default function MessagesTab() {
     }
   };
 
-  // アーカイブ/解除
+  // 保管/解除
   const handleArchive = async (messageId: string, isArchived: boolean) => {
     try {
       await messagesApi.archiveMessage(messageId, isArchived);
       await loadMessages();
-      toast.success(isArchived ? 'メッセージをアーカイブしました' : 'アーカイブを解除しました');
+      toast.success(isArchived ? 'メッセージを保管しました' : '保管を解除しました');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      toast.error(message || 'アーカイブ処理に失敗しました');
+      toast.error(message || '保管処理に失敗しました');
     }
   };
 

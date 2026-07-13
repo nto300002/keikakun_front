@@ -31,7 +31,7 @@ export default function ApprovalRequestsTab() {
       setRequests(response.requests);
       setTotal(response.total);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '退会リクエストの取得に失敗しました';
+      const errorMessage = err instanceof Error ? err.message : '退会申請の取得に失敗しました';
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -104,7 +104,7 @@ export default function ApprovalRequestsTab() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold">退会リクエスト</h2>
+        <h2 className="text-3xl font-bold">退会申請</h2>
         <div className="flex gap-2">
           <select
             value={statusFilter}
@@ -144,7 +144,7 @@ export default function ApprovalRequestsTab() {
           </div>
         ) : requests.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-slate-600 dark:text-gray-400">退会リクエストがありません</p>
+            <p className="text-slate-600 dark:text-gray-400">退会申請がありません</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-200 dark:divide-gray-700">
@@ -269,7 +269,7 @@ export default function ApprovalRequestsTab() {
       {selectedRequest && !showApproveConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full dark:bg-gray-800">
-            <h3 className="text-2xl font-bold text-slate-950 mb-4 dark:text-white">退会リクエストを却下</h3>
+            <h3 className="text-2xl font-bold text-slate-950 mb-4 dark:text-white">退会申請を却下</h3>
             <div className="mb-4 p-3 bg-slate-100 rounded-lg dark:bg-gray-700">
               <p className="text-base text-slate-500 mb-1 dark:text-gray-400">タイトル: {selectedRequest.title}</p>
               <p className="text-slate-700 dark:text-gray-300">{selectedRequest.reason}</p>

@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { inquiryApi } from '@/lib/api/inquiry';
 import { toast } from '@/lib/toast-debug';
+import { getInquiryReplyDeliveryMessage, getInquiryReplyDeliveryMode } from './inquiryReplyDelivery';
 
 interface InquiryReplyModalProps {
   inquiryId: string;
   inquiryTitle: string;
   senderEmail: string | null;
+  senderStaffId: string | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -16,11 +18,14 @@ export default function InquiryReplyModal({
   inquiryId,
   inquiryTitle,
   senderEmail,
+  senderStaffId,
   onClose,
   onSuccess,
 }: InquiryReplyModalProps) {
   const [replyContent, setReplyContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const deliveryMode = getInquiryReplyDeliveryMode(senderEmail, senderStaffId);
+  const deliveryMessage = getInquiryReplyDeliveryMessage(deliveryMode);
 
   const handleSubmit = async () => {
     // バリデーション
@@ -97,20 +102,18 @@ export default function InquiryReplyModal({
           </p>
         </div>
 
-        {/* メール連動 */}
-        {senderEmail && (
+        {deliveryMode !== 'app_only' && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 dark:bg-blue-900/30 dark:border-blue-700/50">
             <p className="text-blue-800 text-base dark:text-blue-100">
-              返信はアプリ内通知とメールの両方で送信されます。
+              {deliveryMessage}
             </p>
           </div>
         )}
 
-        {/* 注意事項 */}
-        {!senderEmail && (
+        {deliveryMode === 'app_only' && (
           <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-6 dark:bg-yellow-900/30 dark:border-yellow-700/50">
             <p className="text-yellow-800 text-base dark:text-yellow-200">
-              送信者のメールアドレスが未設定のため、アプリ内通知のみ送信されます。
+              {deliveryMessage}
             </p>
           </div>
         )}

@@ -5,6 +5,7 @@ import { MessageInboxItem, MessageType } from '@/types/message';
 import { messagesApi } from '@/lib/api/messages';
 import MessageCard from './MessageCard';
 import { toast } from '@/lib/toast-debug';
+import { filterNoticeMessages, NOTICE_MESSAGE_TYPES } from './messageDisplay';
 
 export default function MessagesTab() {
   const [messages, setMessages] = useState<MessageInboxItem[]>([]);
@@ -18,6 +19,8 @@ export default function MessagesTab() {
       const params: {
         is_read?: boolean;
         message_type?: string;
+        message_types?: readonly string[];
+        limit?: number;
       } = {};
 
       if (filter === 'unread') {
@@ -25,11 +28,12 @@ export default function MessagesTab() {
       } else if (filter === 'personal') {
         params.message_type = MessageType.PERSONAL;
       } else if (filter === 'announcement') {
-        params.message_type = MessageType.ANNOUNCEMENT;
+        params.message_types = NOTICE_MESSAGE_TYPES;
       }
 
       const data = await messagesApi.getInbox(params);
-      setMessages(data?.messages || []);
+      const loadedMessages = data?.messages || [];
+      setMessages(filter === 'announcement' ? filterNoticeMessages(loadedMessages) : loadedMessages);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
       toast.error(message || 'メッセージの取得に失敗しました');

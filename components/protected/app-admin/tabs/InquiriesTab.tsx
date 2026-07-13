@@ -301,6 +301,7 @@ export default function InquiriesTab() {
           inquiryId={replyInquiry.id}
           inquiryTitle={replyInquiry.title}
           senderEmail={replyInquiry.sender_email}
+          senderStaffId={replyInquiry.sender_staff_id}
           onClose={() => setReplyInquiry(null)}
           onSuccess={() => {
             // 返信成功後、問い合わせ一覧を再取得

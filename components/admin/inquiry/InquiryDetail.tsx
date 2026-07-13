@@ -181,12 +181,12 @@ export default function InquiryDetail({ inquiryId, onBack, onOpenReply }: Inquir
             </button>
           </div>
 
-          {/* ステータス・優先度 */}
+          {/* 状態・優先度 */}
           <div className="bg-white dark:bg-gray-800 rounded-lg border border-slate-300 dark:border-gray-700 p-6">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">管理情報</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">ステータス</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-gray-300 mb-2">状態</label>
                 <select
                   value={inquiry.inquiry_detail.status}
                   onChange={(e) => handleStatusChange(e.target.value as InquiryStatus)}

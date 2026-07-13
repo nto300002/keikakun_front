@@ -154,7 +154,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
 
   const handleCalendarSubmit = async () => {
     if (!calendarFile || !calendarId || !office?.id) {
-      setUploadError('カレンダーIDとJSONファイルを入力してください。');
+      setUploadError('カレンダーIDと設定ファイルを入力してください。');
       return;
     }
 
@@ -177,11 +177,11 @@ export default function AdminMenu({ office }: AdminMenuProps) {
         reader.readAsText(calendarFile);
       });
 
-      // JSONとして検証
+      // 設定ファイルとして検証
       try {
         JSON.parse(fileContent);
       } catch {
-        setUploadError('無効なJSONファイルです。正しいサービスアカウントJSONファイルを選択してください。');
+        setUploadError('設定ファイルの形式が正しくありません。カレンダー連携用の設定ファイルを選択してください。');
         setIsUploading(false);
         return;
       }
@@ -703,7 +703,7 @@ export default function AdminMenu({ office }: AdminMenuProps) {
             <div className="mb-6 p-4 bg-slate-100 border border-slate-300 rounded-lg dark:bg-gray-700 dark:border-gray-600">
               <h4 className="text-xl font-semibold mb-3 text-slate-900 dark:text-white">QRコード</h4>
               <p className="text-slate-600 text-base font-semibold dark:text-gray-400 mb-3">
-                Google AuthenticatorなどのTOTPアプリで以下のQRコードをスキャンしてください。
+                Google Authenticatorなどの認証アプリで以下のQRコードをスキャンしてください。
               </p>
               <div className="bg-white p-4 rounded-lg inline-block">
                 <QRCodeCanvas

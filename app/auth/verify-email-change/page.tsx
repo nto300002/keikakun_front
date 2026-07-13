@@ -11,12 +11,12 @@ function VerifyEmailChangeContent() {
 
   // tokenがない場合は初期状態をerrorに設定
   const [status, setStatus] = useState(() => token ? 'verifying' : 'error');
-  const [error, setError] = useState(() => token ? '' : '確認トークンが見つかりません。');
+  const [error, setError] = useState(() => token ? '' : '確認リンクが見つかりません。');
   const [newEmail, setNewEmail] = useState('');
 
   useEffect(() => {
     if (!token) {
-      console.error('メールアドレス変更トークンが見つかりません');
+      console.error('メールアドレス変更の確認リンクが見つかりません');
       return;
     }
 
@@ -118,7 +118,7 @@ function VerifyEmailChangeContent() {
                 <strong>⚠️ よくある原因</strong><br />
                 • 確認リンクの有効期限が切れています（30分）<br />
                 • リンクが既に使用されています<br />
-                • トークンが無効です
+                • 確認リンクが無効です
               </p>
             </div>
 

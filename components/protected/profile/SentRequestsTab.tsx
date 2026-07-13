@@ -22,7 +22,7 @@ export default function SentRequestsTab() {
     setIsLoading(true);
     setError(null);
     try {
-      // Role変更リクエストとEmployee制限リクエストを並行で取得
+      // 権限変更申請と利用者情報の操作申請を並行で取得
       const [roleChangeData, employeeActionData] = await Promise.all([
         roleChangeRequestsApi.getRequests().catch(() => ({ requests: [], total: 0 })),
         employeeActionRequestsApi.getRequests().catch(() => ({ requests: [], total: 0 })),
@@ -65,8 +65,8 @@ export default function SentRequestsTab() {
       setRequests(filtered);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error('リクエストの取得に失敗しました');
-      setError(message || 'リクエストの取得に失敗しました');
+      console.error('申請の取得に失敗しました');
+      setError(message || '申請の取得に失敗しました');
       // エラー時も空配列を設定
       setRequests([]);
     } finally {
@@ -74,38 +74,38 @@ export default function SentRequestsTab() {
     }
   };
 
-  // リクエスト一覧取得
+  // 申請一覧取得
   useEffect(() => {
     loadRequests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  // リクエスト削除ハンドラ
+  // 申請削除ハンドラ
   const handleDelete = async (requestId: string, type: 'role_change' | 'employee_action') => {
-    if (!confirm('このリクエストを取り消しますか？')) {
+    if (!confirm('この申請を取り消しますか？')) {
       return;
     }
 
     try {
       if (type === 'role_change') {
         await roleChangeRequestsApi.deleteRequest(requestId);
-        setSuccessMessage('権限変更リクエストを取り消しました');
+        setSuccessMessage('権限変更申請を取り消しました');
       } else {
         await employeeActionRequestsApi.deleteRequest(requestId);
-        setSuccessMessage('利用者の作成、編集、削除リクエストを取り消しました');
+        setSuccessMessage('利用者情報の操作申請を取り消しました');
       }
       await loadRequests();
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || 'リクエストの削除に失敗しました');
+      setError(message || '申請の削除に失敗しました');
       setTimeout(() => setError(null), 3000);
     }
   };
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">送信済みリクエスト</h2>
+      <h2 className="text-2xl font-bold mb-6">送信済み申請</h2>
 
       {/* 成功メッセージ */}
       {successMessage && (
@@ -160,14 +160,14 @@ export default function SentRequestsTab() {
         </button>
       </div>
 
-      {/* リクエスト一覧 */}
+      {/* 申請一覧 */}
       {isLoading ? (
         <div className="text-center py-8 text-slate-600 dark:text-gray-400">読み込み中...</div>
       ) : requests.length === 0 ? (
         <div className="text-center py-8 text-slate-600 dark:text-gray-400">
-          {filter === 'pending' && '承認待ちのリクエストはありません'}
-          {filter === 'completed' && '処理済みのリクエストはありません'}
-          {filter === 'all' && 'リクエストはありません'}
+          {filter === 'pending' && '承認待ちの申請はありません'}
+          {filter === 'completed' && '処理済みの申請はありません'}
+          {filter === 'all' && '申請はありません'}
         </div>
       ) : (
         requests.map((item) => (

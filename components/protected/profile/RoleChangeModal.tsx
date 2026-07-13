@@ -55,7 +55,7 @@ export default function RoleChangeModal({
       onClose();
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      setError(message || 'リクエストの送信に失敗しました');
+      setError(message || '申請の送信に失敗しました');
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +73,7 @@ export default function RoleChangeModal({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white border border-slate-300 shadow-sm dark:bg-[#1a1a2e] dark:border-[#2a2a3e] rounded-xl p-6 w-full max-w-md">
-        <h3 className="text-xl font-bold mb-4">権限変更リクエスト</h3>
+        <h3 className="text-xl font-bold mb-4">権限変更申請</h3>
 
         {/* エラーメッセージ */}
         {error && (
@@ -121,10 +121,10 @@ export default function RoleChangeModal({
             </div>
           </div>
 
-          {/* リクエストする権限 */}
+          {/* 申請する権限 */}
           <div>
             <label className="text-slate-600 dark:text-gray-400 text-sm block mb-2">
-              リクエストする権限 <span className="text-red-500">*</span>
+              申請する権限 <span className="text-red-500">*</span>
             </label>
             <select
               value={requestedRole}
@@ -163,7 +163,7 @@ export default function RoleChangeModal({
             disabled={isLoading || !requestedRole}
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'リクエスト送信中...' : 'リクエスト送信'}
+            {isLoading ? '申請送信中...' : '申請を送信'}
           </button>
           <button
             onClick={handleClose}

@@ -78,7 +78,7 @@ export function createAuthFlowClient({
       });
 
       if (!response.ok) {
-        throw new Error(await parseErrorMessage(response, 'MFA認証に失敗しました'));
+        throw new Error(await parseErrorMessage(response, '2段階認証に失敗しました'));
       }
 
       const authResponse = await response.json() as AuthResponse;

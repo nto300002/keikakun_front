@@ -214,7 +214,7 @@ export default function OfficePreview({ officeId }: OfficePreviewProps) {
                   <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">氏名</th>
                   <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">メールアドレス</th>
                   <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">役割</th>
-                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">MFA</th>
+                  <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">2段階認証</th>
                   <th className="text-left py-3 px-4 text-slate-700 font-semibold dark:text-gray-300">メール認証</th>
                 </tr>
               </thead>

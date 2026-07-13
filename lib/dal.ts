@@ -104,7 +104,7 @@ export async function requireAuth(): Promise<Session> {
   const session = await verifySession();
 
   if (!session) {
-    throw new Error('未認証: 認証が必要です');
+    throw new Error('ログインが必要です。');
   }
 
   return session;
@@ -120,7 +120,7 @@ export async function requireRole(allowedRoles: string[]): Promise<Session> {
   const session = await requireAuth();
 
   if (!allowedRoles.includes(session.user.role)) {
-    throw new Error(`アクセス拒否: 必要な権限は [${allowedRoles.join(', ')}] のいずれかです`);
+    throw new Error('この操作を行う権限がありません。');
   }
 
   return session;
@@ -135,7 +135,7 @@ export async function requireOffice(): Promise<Session> {
   const session = await requireAuth();
 
   if (!session.user.office) {
-    throw new Error('アクセス拒否: 事業所への所属が必要です');
+    throw new Error('この操作には事業所への所属が必要です。');
   }
 
   return session;

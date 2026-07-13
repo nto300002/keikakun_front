@@ -135,7 +135,7 @@ export default function NoticePage() {
                       }`}
                       role="menuitem"
                     >
-                      承認リクエスト
+                      承認申請
                     </button>
                   </div>
                 )}

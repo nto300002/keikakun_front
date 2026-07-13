@@ -402,7 +402,7 @@ export default function PdfViewContent({
               <iframe
                 src={selectedPdf.download_url || selectedPdf.file_path}
                 className="w-full h-full"
-                title="PDF Preview"
+                title="PDFのプレビュー"
               />
             )}
           </div>

@@ -11,7 +11,7 @@ function VerifyEmailContent() {
 
   // tokenがない場合は初期状態をerrorに設定
   const [status, setStatus] = useState(() => token ? 'verifying' : 'error');
-  const [error, setError] = useState(() => token ? '' : '認証トークンが見つかりません。');
+  const [error, setError] = useState(() => token ? '' : '確認リンクが見つかりません。');
   const [userRole, setUserRole] = useState('');
 
   useEffect(() => {

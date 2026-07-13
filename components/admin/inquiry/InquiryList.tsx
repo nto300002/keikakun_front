@@ -123,7 +123,7 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
             </div>
           </div>
 
-          {/* ステータスフィルター */}
+          {/* 状態フィルター */}
           <div>
             <select
               value={filters.status || ''}
@@ -133,7 +133,7 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
               }}
               className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="">すべてのステータス</option>
+              <option value="">すべての状態</option>
               <option value="new">新規</option>
               <option value="open">確認済み</option>
               <option value="in_progress">対応中</option>
@@ -205,7 +205,7 @@ export default function InquiryList({ onSelectInquiry }: InquiryListProps) {
                     送信者
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 dark:text-gray-300 uppercase tracking-wider">
-                    ステータス
+                    状態
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-slate-700 dark:text-gray-300 uppercase tracking-wider">
                     優先度

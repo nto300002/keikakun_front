@@ -117,16 +117,16 @@ export default function NoticeCard({
               <span className={`inline-block px-3 py-1 rounded text-sm font-bold ${style.textColor} bg-white/70 dark:bg-gray-800/50`}>
                 {isPendingNotice
                   ? noticeType === NoticeType.ROLE_CHANGE_PENDING
-                    ? '権限変更リクエスト'
-                    : '一般社員の作成、編集、削除リクエスト'
+                    ? '権限変更申請'
+                    : '利用者情報の操作申請'
                   : isRequesterNotice
                   ? noticeType === NoticeType.ROLE_CHANGE_REQUEST_SENT
-                    ? '権限変更リクエスト送信済み'
-                    : '一般社員の作成、編集、削除リクエスト送信済み'
+                    ? '権限変更申請送信済み'
+                    : '利用者情報の操作申請送信済み'
                   : noticeType === NoticeType.ROLE_CHANGE_APPROVED ||
                     noticeType === NoticeType.ROLE_CHANGE_REJECTED
                   ? '権限変更通知'
-                  : '一般社員の作成、編集、削除に関する通知'}
+                  : '利用者情報の操作に関する通知'}
               </span>
             </div>
           </div>
@@ -161,7 +161,7 @@ export default function NoticeCard({
             <div className="flex-1 bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-3 dark:bg-yellow-900/20 dark:border-yellow-700/50">
               <p className="text-yellow-700 text-base font-bold mb-2 dark:text-yellow-400">⚠️ 承認待ち</p>
               <p className="text-slate-600 text-base font-semibold mb-3 dark:text-gray-400">
-                このリクエストを承認または却下してください
+                この申請を承認または却下してください
               </p>
               <div className="flex gap-2">
                 <button

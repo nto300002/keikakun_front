@@ -69,7 +69,7 @@ export default function StaffManagementTab({
                     <li>スタッフに新しいQRコードを共有する</li>
                   </ol>
                   <p className="text-sm font-medium text-slate-500 dark:text-gray-400 mt-3">
-                    ⚠️ 無効化すると、既存のTOTPアプリの設定は使用できなくなります。
+                    ⚠️ 無効化すると、既存の認証アプリの設定は使用できなくなります。
                   </p>
                 </div>
               </div>

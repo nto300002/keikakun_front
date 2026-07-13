@@ -79,7 +79,7 @@ export default function UserRegistrationForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
 
-  // Employee Action Request Modal state
+  // 承認申請モーダル state
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [pendingFormData, setPendingFormData] = useState<RecipientFormData | null>(null);
 
@@ -129,14 +129,14 @@ export default function UserRegistrationForm() {
       return;
     }
 
-    // Employeeの場合はリクエスト申請モーダルを表示
+    // 一般スタッフの場合は承認申請モーダルを表示
     if (isEmployee) {
       setPendingFormData(formData);
       setIsRequestModalOpen(true);
       return;
     }
 
-    // Manager/Ownerの場合は直接実行
+    // 管理者または事業所管理者の場合は直接実行
     await executeSubmit(formData);
   };
 
@@ -171,8 +171,8 @@ export default function UserRegistrationForm() {
   };
 
   const handleRequestSuccess = () => {
-    // リクエスト送信成功時の処理
-    router.push('/dashboard?message=' + encodeURIComponent('利用者登録リクエストを送信しました。Manager/Ownerの承認をお待ちください。'));
+    // 申請送信成功時の処理
+    router.push('/dashboard?message=' + encodeURIComponent('利用者登録の申請を送信しました。管理者または事業所管理者の承認をお待ちください。'));
   };
 
   return (
@@ -312,7 +312,7 @@ export default function UserRegistrationForm() {
           </div>
         </div>
 
-      {/* Employee Action Request Modal */}
+      {/* 承認申請モーダル */}
       {pendingFormData && (
         <EmployeeActionRequestModal
           isOpen={isRequestModalOpen}

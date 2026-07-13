@@ -289,7 +289,7 @@ function TermsContent() {
 
       <h4 className="text-lg font-semibold text-slate-950 dark:text-white mt-4 mb-2">【システムログ（90日間）】</h4>
       <ul className="list-disc pl-6 space-y-1">
-        <li>Webhook処理ログ（決済イベント等）</li>
+        <li>決済通知の処理記録（決済イベント等）</li>
       </ul>
 
       <p className="mt-4">
@@ -546,7 +546,7 @@ function PrivacyContent() {
 
       <h4 className="text-lg font-semibold text-slate-950 dark:text-white mt-4 mb-2">【システムログ（90日間）】</h4>
       <ul className="list-disc pl-6 space-y-1">
-        <li>Webhook処理ログ（決済イベント、有料会員登録の変更等）</li>
+        <li>決済通知の処理記録（決済イベント、有料会員登録の変更等）</li>
         <li>決済エラーログ</li>
       </ul>
 
@@ -586,7 +586,7 @@ function PrivacyContent() {
       <h4 className="text-lg font-semibold text-slate-950 dark:text-white mt-4 mb-2">【決済情報の安全管理】</h4>
       <ul className="list-disc pl-6 space-y-1">
         <li>クレジットカード情報は<strong>PCI DSS準拠</strong>のStripe社が管理</li>
-        <li>運営者はクレジットカード番号を保持せず、安全なトークン方式を採用</li>
+        <li>運営者はクレジットカード番号を保持せず、安全な一時認証方式を採用</li>
         <li>すべての決済通信はStripe社の暗号化通信を使用</li>
         <li>不正検知システム（Stripe Radar）による24時間監視</li>
       </ul>

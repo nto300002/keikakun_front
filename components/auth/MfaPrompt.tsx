@@ -11,7 +11,7 @@ export default function MfaPrompt() {
                 </div>
                 <div>
                     <p className="font-bold">アカウントのセキュリティを強化しましょう</p>
-                    <p className="text-sm">2段階認証（MFA）が設定されていません。第三者による不正アクセスを防ぐため、設定を強くお勧めします。</p>
+                    <p className="text-sm">2段階認証が設定されていません。第三者による不正アクセスを防ぐため、設定を強くお勧めします。</p>
                     <p className="text-sm font-semibold mt-1">利用者を登録・編集するには、2段階認証の設定が必要です。</p>
                     <Link href="/auth/mfa-setup" className="mt-2 inline-block bg-yellow-500 text-white font-bold py-2 px-4 rounded hover:bg-yellow-600 transition-colors duration-200">
                         今すぐ設定する

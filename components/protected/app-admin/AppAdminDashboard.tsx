@@ -22,7 +22,7 @@ export default function AppAdminDashboard({ staff }: AppAdminDashboardProps) {
   const tabs: { id: TabType; label: string; icon: React.ReactNode }[] = [
     { id: 'logs', label: 'ログ', icon: <FaHistory className="w-4 h-4" /> },
     { id: 'inquiries', label: '問い合わせ', icon: <FaEnvelope className="w-4 h-4" /> },
-    { id: 'approvals', label: '承認リクエスト', icon: <FaCheckCircle className="w-4 h-4" /> },
+    { id: 'approvals', label: '承認申請', icon: <FaCheckCircle className="w-4 h-4" /> },
     { id: 'announcements', label: 'お知らせ', icon: <FaBullhorn className="w-4 h-4" /> },
     { id: 'offices', label: '事務所', icon: <FaBuilding className="w-4 h-4" /> },
   ];

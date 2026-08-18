@@ -42,6 +42,21 @@ export default function AppAdminLoginForm() {
         passphrase: data.passphrase,
       });
 
+      if (response.requires_mfa_first_setup && response.temporary_token) {
+        tokenUtils.setTemporaryToken(response.temporary_token);
+        if (response.qr_code_uri) {
+          sessionStorage.setItem('mfa_qr_code_uri', response.qr_code_uri);
+        }
+        if (response.secret_key) {
+          sessionStorage.setItem('mfa_secret_key', response.secret_key);
+        }
+        if (response.message) {
+          sessionStorage.setItem('mfa_setup_message', response.message);
+        }
+        router.push('/auth/mfa-first-setup');
+        return;
+      }
+
       // MFA認証が必要な場合の処理
       if (response.requires_mfa_verification && response.temporary_token) {
         tokenUtils.setTemporaryToken(response.temporary_token);

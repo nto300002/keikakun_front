@@ -4,7 +4,8 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { QRCodeCanvas } from 'qrcode.react'
 import { mfaApi } from '@/lib/api/mfa'
-import { tokenUtils } from '@/lib/auth'
+import { authApi, tokenUtils } from '@/lib/auth'
+import { getPostMfaRoute } from '@/lib/auth/mfaNavigation'
 import { toast } from '@/lib/toast-debug'
 
 function MfaFirstSetupFormComponent() {
@@ -57,8 +58,14 @@ function MfaFirstSetupFormComponent() {
             sessionStorage.removeItem('mfa_setup_message')
             tokenUtils.removeTemporaryToken()
 
+            const currentUser = await authApi.getCurrentUser()
+            const route = getPostMfaRoute({
+                role: currentUser.role,
+                hasOffice: Boolean(currentUser.office),
+            })
+
             toast.success('2段階認証の初回確認が完了しました。ログインに成功しました。')
-            router.push('/dashboard')
+            router.push(route)
 
         } catch (err: unknown) {
             setVerifyAttempts(prev => prev + 1)

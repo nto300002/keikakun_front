@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApi, tokenUtils } from '@/lib/auth';
+import { getPostMfaRoute } from '@/lib/auth/mfaNavigation';
 import { useSlowLoadingMessage } from '@/hooks/useSlowLoadingMessage';
 
 export default function MfaVerifyPage() {
@@ -38,17 +39,15 @@ export default function MfaVerifyPage() {
       // ログインユーザーの情報を取得して適切なページに遷移
       const currentUser = await authApi.getCurrentUser();
 
-      if (currentUser.role !== 'owner' && !currentUser.office) {
-        // ownerではなく、事業所にも所属していない場合
-        router.push('/auth/select-office');
-      } else {
-        // それ以外はダッシュボードへ
-        const params = new URLSearchParams({
-          hotbar_message: '2段階認証に成功しました',
-          hotbar_type: 'success'
-        });
-        router.push(`/dashboard?${params.toString()}`);
-      }
+      const params = new URLSearchParams({
+        hotbar_message: '2段階認証に成功しました',
+        hotbar_type: 'success'
+      });
+      const route = getPostMfaRoute({
+        role: currentUser.role,
+        hasOffice: Boolean(currentUser.office),
+      });
+      router.push(`${route}?${params.toString()}`);
     } catch (err) {
       setVerifyAttempts(prev => prev + 1);
       const errorMessage = err instanceof Error ? err.message : '2段階認証の確認に失敗しました。';

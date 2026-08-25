@@ -138,6 +138,7 @@ export interface InquiryReplyRequest {
 export interface InquiryReplyResponse {
   id: string;
   message: string;
+  email_sent: boolean | null;
 }
 
 /**

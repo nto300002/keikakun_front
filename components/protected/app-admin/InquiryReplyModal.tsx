@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { inquiryApi } from '@/lib/api/inquiry';
 import { toast } from '@/lib/toast-debug';
 import { getInquiryReplyDeliveryMessage, getInquiryReplyDeliveryMode } from './inquiryReplyDelivery';
@@ -23,9 +23,14 @@ export default function InquiryReplyModal({
   onSuccess,
 }: InquiryReplyModalProps) {
   const [replyContent, setReplyContent] = useState('');
+  const [sendEmail, setSendEmail] = useState(Boolean(senderEmail));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const deliveryMode = getInquiryReplyDeliveryMode(senderEmail, senderStaffId);
   const deliveryMessage = getInquiryReplyDeliveryMessage(deliveryMode);
+
+  useEffect(() => {
+    setSendEmail(Boolean(senderEmail));
+  }, [inquiryId, senderEmail]);
 
   const handleSubmit = async () => {
     // バリデーション
@@ -39,16 +44,19 @@ export default function InquiryReplyModal({
     try {
       const response = await inquiryApi.replyToInquiry(inquiryId, {
         body: replyContent,
-        send_email: true,
+        send_email: sendEmail,
       });
 
-      toast.success(response.message || '返信を送信しました');
+      if (response.email_sent === false) {
+        toast.error(response.message);
+      } else {
+        toast.success(response.message || '返信を送信しました');
+      }
 
       // 成功時にコールバックを実行してモーダルを閉じる
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Client operation failed');
       const message = error instanceof Error ? error.message : String(error);
       toast.error(message || '返信の送信に失敗しました');
     } finally {
@@ -102,11 +110,16 @@ export default function InquiryReplyModal({
           </p>
         </div>
 
-        {deliveryMode !== 'app_only' && (
+        {senderEmail && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 dark:bg-blue-900/30 dark:border-blue-700/50">
-            <p className="text-blue-800 text-base dark:text-blue-100">
-              {deliveryMessage}
-            </p>
+            <label className="flex items-center gap-2 text-blue-800 text-base dark:text-blue-100">
+              <input
+                type="checkbox"
+                checked={sendEmail}
+                onChange={(event) => setSendEmail(event.target.checked)}
+              />
+              メールアドレスにも返信を送信する
+            </label>
           </div>
         )}
 

@@ -11,6 +11,7 @@ import InquiriesTab from './tabs/InquiriesTab';
 import ApprovalRequestsTab from './tabs/ApprovalRequestsTab';
 import AnnouncementsTab from './tabs/AnnouncementsTab';
 import OfficesTab from './tabs/OfficesTab';
+import PasskeyManagement from './PasskeyManagement';
 
 interface AppAdminDashboardProps {
   staff: StaffResponse;
@@ -167,6 +168,7 @@ export default function AppAdminDashboard({ staff }: AppAdminDashboardProps) {
                 2段階認証を設定する
               </Link>
             )}
+            <PasskeyManagement />
           </section>
         )}
       </main>

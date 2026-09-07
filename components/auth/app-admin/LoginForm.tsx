@@ -8,11 +8,13 @@ import { z } from 'zod';
 import { authApi, tokenUtils } from '@/lib/auth';
 import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { MdAdminPanelSettings } from 'react-icons/md';
+import { webauthnApi } from '@/lib/api/webauthn';
+import { getJapaneseWebAuthnError, isWebAuthnSupported, serializePublicKeyCredential, toRequestOptions } from '@/lib/webauthnClient.mjs';
 
 const loginSchema = z.object({
   email: z.string().email('有効なメールアドレスを入力してください'),
   password: z.string().min(1, 'パスワードを入力してください'),
-  passphrase: z.string().min(1, '合言葉を入力してください'),
+  passphrase: z.string().optional(),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -41,6 +43,17 @@ export default function AppAdminLoginForm() {
         password: data.password,
         passphrase: data.passphrase,
       });
+
+      if (response.requires_webauthn_verification && response.webauthn_pending_token) {
+        if (!isWebAuthnSupported()) {
+          setFormError('root', { message: 'このブラウザはパスキーに対応していません。対応ブラウザまたはセキュリティキーをご利用ください。' });
+          return;
+        }
+        const options = await webauthnApi.getAuthenticationOptions(response.webauthn_pending_token);
+        const credential = await navigator.credentials.get({ publicKey: toRequestOptions(options.publicKey) });
+        if (!credential) throw new Error('パスキー認証がキャンセルされました。');
+        await webauthnApi.verifyAuthentication(response.webauthn_pending_token, serializePublicKeyCredential(credential));
+      }
 
       if (response.requires_mfa_first_setup && response.temporary_token) {
         tokenUtils.setTemporaryToken(response.temporary_token);
@@ -85,7 +98,7 @@ export default function AppAdminLoginForm() {
       }
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : String(error);
-      setFormError('root', { message: msg });
+      setFormError('root', { message: getJapaneseWebAuthnError(error, 'パスキー認証') || msg });
     } finally {
       setIsLoading(false);
     }
@@ -104,12 +117,15 @@ export default function AppAdminLoginForm() {
           <p className="text-slate-600 dark:text-gray-400">
             ケイカくん管理コンソールにアクセス
           </p>
+          <p className="mt-3 text-sm text-slate-600 dark:text-gray-400">
+            ログイン時は指紋・顔認証・端末PINなどのパスキーを使用します。生体情報はサーバーへ送信されません。端末に認証器がない場合はセキュリティキーを利用できます。
+          </p>
         </div>
 
         <div className="bg-white dark:bg-[#2A2A2A] rounded-lg border border-purple-500/30 p-8">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {errors.root && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm">
+              <div role="alert" className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400 text-sm">
                 {errors.root.message}
               </div>
             )}

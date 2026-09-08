@@ -15,6 +15,7 @@ import type {
   InquiryReplyResponse,
 } from '@/types/inquiry';
 import { buildInquiryListEndpoint, type InquiryListQueryParams } from './inquiryQuery';
+import { buildInquiryReplyEndpoint, buildInquiryReplyPayload } from './inquiryReply';
 
 const API_V1_PREFIX = '/api/v1';
 
@@ -52,8 +53,8 @@ export const inquiryApi = {
     data: InquiryReplyRequest
   ): Promise<InquiryReplyResponse> => {
     return http.post<InquiryReplyResponse>(
-      `${API_V1_PREFIX}/admin/inquiries/${inquiryId}/reply`,
-      data
+      buildInquiryReplyEndpoint(inquiryId),
+      buildInquiryReplyPayload(data)
     );
   },
 

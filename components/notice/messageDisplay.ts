@@ -12,6 +12,16 @@ export interface MessageDisplayMeta {
   badgeClassName: string;
 }
 
+export const NOTICE_MESSAGE_TYPES = ['announcement', 'inquiry_reply'] as const;
+
+export function isNoticeMessageType(type: MessageType | string): boolean {
+  return NOTICE_MESSAGE_TYPES.includes(type as (typeof NOTICE_MESSAGE_TYPES)[number]);
+}
+
+export function filterNoticeMessages<T extends { message_type: MessageType | string }>(messages: T[]): T[] {
+  return messages.filter((message) => isNoticeMessageType(message.message_type));
+}
+
 const urgentMeta: MessageDisplayMeta = {
   icon: '🚨',
   label: '緊急',

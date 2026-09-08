@@ -6,6 +6,8 @@ import {
   getMessageSenderLabel,
   getNoticeTabLabel,
   getProfileFeedbackLabel,
+  filterNoticeMessages,
+  isNoticeMessageType,
 } from './messageDisplay.ts';
 
 function buildMessage(overrides = {}) {
@@ -46,6 +48,22 @@ test('inquiry replies are displayed as inquiry notices', () => {
   assert.equal(meta.label, 'お問い合わせ返信');
   assert.equal(meta.tone, 'inquiry');
   assert.notEqual(meta.label, 'その他');
+});
+
+test('notice view includes announcements and inquiry replies', () => {
+  const messages = [
+    buildMessage({ message_id: 'announcement-1', message_type: 'announcement' }),
+    buildMessage({ message_id: 'reply-1', message_type: 'inquiry_reply' }),
+    buildMessage({ message_id: 'personal-1', message_type: 'personal' }),
+  ];
+
+  assert.equal(isNoticeMessageType('announcement'), true);
+  assert.equal(isNoticeMessageType('inquiry_reply'), true);
+  assert.equal(isNoticeMessageType('personal'), false);
+  assert.deepEqual(
+    filterNoticeMessages(messages).map((message) => message.message_id),
+    ['announcement-1', 'reply-1']
+  );
 });
 
 test('personal and fallback message styles are visually distinct', () => {

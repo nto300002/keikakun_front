@@ -13,6 +13,7 @@ e2e/
 ├── 02_staff_signup.spec.ts         # スタッフ登録
 ├── 03_welfare_recipient.spec.ts    # 利用者登録（5セクションフォーム）
 ├── 04_support_plan_cycle.spec.ts   # 個別支援計画サイクル
+├── app-admin-tabs.spec.ts           # app-admin 主要タブ smoke
 ├── dashboard-filtering.spec.ts     # ダッシュボード複合条件検索
 ├── fixtures/
 │   └── auth.ts                     # loginAsOwner() ヘルパー（auth.setup.ts が使用）
@@ -41,10 +42,16 @@ e2e/
 E2E_OWNER_EMAIL=e2e_owner@example.com
 E2E_OWNER_PASSWORD=<パスワード>
 NEXT_PUBLIC_API_URL=http://localhost:8000
+
+# app-admin smoke を実行する場合のみ必要
+E2E_APP_ADMIN_EMAIL=e2e_app_admin@example.com
+E2E_APP_ADMIN_PASSWORD=<パスワード>
+E2E_APP_ADMIN_PASSPHRASE=<合言葉>
 ```
 
 > **注意**: `E2E_OWNER_EMAIL` / `E2E_OWNER_PASSWORD` が未設定の場合、テスト起動時に
 > `requireEnv()` がエラーをスローします。フォールバック値は設定されていません。
+> `E2E_APP_ADMIN_*` が未設定の場合、`app-admin-tabs.spec.ts` は skip されます。
 
 ### テスト実行コマンド
 

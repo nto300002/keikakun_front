@@ -1,13 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { inquiryApi } from '@/lib/api/inquiry';
 import { toast } from '@/lib/toast-debug';
+import { getInquiryReplyDeliveryMessage, getInquiryReplyDeliveryMode } from './inquiryReplyDelivery';
 
 interface InquiryReplyModalProps {
   inquiryId: string;
   inquiryTitle: string;
   senderEmail: string | null;
+  senderStaffId: string | null;
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -16,11 +18,19 @@ export default function InquiryReplyModal({
   inquiryId,
   inquiryTitle,
   senderEmail,
+  senderStaffId,
   onClose,
   onSuccess,
 }: InquiryReplyModalProps) {
   const [replyContent, setReplyContent] = useState('');
+  const [sendEmail, setSendEmail] = useState(Boolean(senderEmail));
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const deliveryMode = getInquiryReplyDeliveryMode(senderEmail, senderStaffId);
+  const deliveryMessage = getInquiryReplyDeliveryMessage(deliveryMode);
+
+  useEffect(() => {
+    setSendEmail(Boolean(senderEmail));
+  }, [inquiryId, senderEmail]);
 
   const handleSubmit = async () => {
     // バリデーション
@@ -34,16 +44,19 @@ export default function InquiryReplyModal({
     try {
       const response = await inquiryApi.replyToInquiry(inquiryId, {
         body: replyContent,
-        send_email: true,
+        send_email: sendEmail,
       });
 
-      toast.success(response.message || '返信を送信しました');
+      if (response.email_sent === false) {
+        toast.error(response.message);
+      } else {
+        toast.success(response.message || '返信を送信しました');
+      }
 
       // 成功時にコールバックを実行してモーダルを閉じる
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Client operation failed');
       const message = error instanceof Error ? error.message : String(error);
       toast.error(message || '返信の送信に失敗しました');
     } finally {
@@ -97,20 +110,23 @@ export default function InquiryReplyModal({
           </p>
         </div>
 
-        {/* メール連動 */}
         {senderEmail && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6 dark:bg-blue-900/30 dark:border-blue-700/50">
-            <p className="text-blue-800 text-base dark:text-blue-100">
-              返信はアプリ内通知とメールの両方で送信されます。
-            </p>
+            <label className="flex items-center gap-2 text-blue-800 text-base dark:text-blue-100">
+              <input
+                type="checkbox"
+                checked={sendEmail}
+                onChange={(event) => setSendEmail(event.target.checked)}
+              />
+              メールアドレスにも返信を送信する
+            </label>
           </div>
         )}
 
-        {/* 注意事項 */}
-        {!senderEmail && (
+        {deliveryMode === 'app_only' && (
           <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3 mb-6 dark:bg-yellow-900/30 dark:border-yellow-700/50">
             <p className="text-yellow-800 text-base dark:text-yellow-200">
-              送信者のメールアドレスが未設定のため、アプリ内通知のみ送信されます。
+              {deliveryMessage}
             </p>
           </div>
         )}

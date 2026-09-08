@@ -1,21 +1,25 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
 import { authApi } from '@/lib/auth';
+import { extractTokenFromHash } from '@/lib/tokenUrl';
 import Link from 'next/link';
 
 function VerifyEmailContent() {
-  const searchParams = useSearchParams();
-  const token = searchParams.get('token');
-
-  // tokenがない場合は初期状態をerrorに設定
-  const [status, setStatus] = useState(() => token ? 'verifying' : 'error');
-  const [error, setError] = useState(() => token ? '' : '確認リンクが見つかりません。');
+  const [status, setStatus] = useState('verifying');
+  const [error, setError] = useState('');
   const [userRole, setUserRole] = useState('');
 
   useEffect(() => {
-    if (!token) return;
+    const token = extractTokenFromHash(window.location.hash);
+    window.history.replaceState(null, '', window.location.pathname);
+    if (!token) {
+      queueMicrotask(() => {
+        setStatus('error');
+        setError('確認リンクが見つかりません。');
+      });
+      return;
+    }
 
     const verify = async () => {
       try {
@@ -33,7 +37,7 @@ function VerifyEmailContent() {
     };
 
     verify();
-  }, [token]);
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-[#0C1421]">

@@ -160,3 +160,48 @@ test.describe('app_admin WebAuthn registration', () => {
     expect(await page.evaluate(() => `${localStorage.getItem('credentialId')} ${sessionStorage.getItem('credentialId')}`)).not.toContain('mock-credential');
   });
 });
+
+test.describe('token URL protection', () => {
+  test('decodes an encoded token from the token fragment and removes it from the URL', async ({ page }) => {
+    let requestToken = '';
+    await page.route('**/api/v1/auth/verify-email', async (route) => {
+      requestToken = route.request().postDataJSON().token;
+      await route.fulfill({ json: { message: 'メールアドレスの確認が完了しました', role: 'employee' } });
+    });
+
+    await page.goto('/auth/verify-email#token=token%2Fwith%20encoding');
+
+    await expect(page.getByText('Eメールの確認が完了しました')).toBeVisible();
+    expect(requestToken).toBe('token/with encoding');
+    expect(new URL(page.url()).hash).toBe('');
+  });
+
+  test('rejects fragments other than token', async ({ page }) => {
+    let verifyCalled = false;
+    await page.route('**/api/v1/auth/verify-email', (route) => {
+      verifyCalled = true;
+      return route.fulfill({ json: { message: 'unexpected', role: 'employee' } });
+    });
+
+    await page.goto('/auth/verify-email#other=value');
+
+    await expect(page.getByText('確認リンクが見つかりません。')).toBeVisible();
+    expect(verifyCalled).toBe(false);
+    expect(new URL(page.url()).hash).toBe('');
+  });
+
+  test('rejects malformed URL encoding without calling the verification API', async ({ page }) => {
+    let verifyCalled = false;
+    await page.route('**/api/v1/auth/verify-email', (route) => {
+      verifyCalled = true;
+      return route.fulfill({ json: { message: 'unexpected', role: 'employee' } });
+    });
+
+    await page.goto('/auth/verify-email?token=query-leak#token=%E0%A4%A');
+
+    await expect(page.getByText('確認リンクが見つかりません。')).toBeVisible();
+    expect(verifyCalled).toBe(false);
+    expect(new URL(page.url()).search).toBe('');
+    expect(new URL(page.url()).hash).toBe('');
+  });
+});

@@ -1,22 +1,24 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { profileApi } from '@/lib/profile';
+import { extractTokenFromHash } from '@/lib/tokenUrl';
 
 function VerifyEmailChangeContent() {
-  const searchParams = useSearchParams();
   const router = useRouter();
-  const token = searchParams.get('token');
-
-  // tokenがない場合は初期状態をerrorに設定
-  const [status, setStatus] = useState(() => token ? 'verifying' : 'error');
-  const [error, setError] = useState(() => token ? '' : '確認リンクが見つかりません。');
+  const [status, setStatus] = useState('verifying');
+  const [error, setError] = useState('');
   const [newEmail, setNewEmail] = useState('');
 
   useEffect(() => {
+    const token = extractTokenFromHash(window.location.hash);
+    window.history.replaceState(null, '', window.location.pathname);
     if (!token) {
-      console.error('メールアドレス変更の確認リンクが見つかりません');
+      queueMicrotask(() => {
+        setStatus('error');
+        setError('メールアドレス変更の確認リンクが見つかりません。');
+      });
       return;
     }
 
@@ -42,7 +44,7 @@ function VerifyEmailChangeContent() {
     };
 
     verify();
-  }, [token, router]);
+  }, [router]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 dark:bg-gray-900">

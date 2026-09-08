@@ -1,4 +1,4 @@
-export type AppAdminTabId = 'logs' | 'inquiries' | 'approvals' | 'announcements' | 'offices';
+export type AppAdminTabId = 'logs' | 'inquiries' | 'approvals' | 'announcements' | 'offices' | 'security';
 
 export type AppAdminPanelId = `${AppAdminTabId}-panel`;
 
@@ -8,6 +8,7 @@ export const APP_ADMIN_TABS: { id: AppAdminTabId; label: string; panelId: AppAdm
   { id: 'approvals', label: '承認申請', panelId: 'approvals-panel' },
   { id: 'announcements', label: 'お知らせ', panelId: 'announcements-panel' },
   { id: 'offices', label: '事務所', panelId: 'offices-panel' },
+  { id: 'security', label: 'セキュリティ', panelId: 'security-panel' },
 ];
 
 export function selectAppAdminTab(_currentTab: AppAdminTabId, nextTab: AppAdminTabId): AppAdminTabId {

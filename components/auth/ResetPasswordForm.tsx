@@ -6,6 +6,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from 'react-icons/ai';
 import { toast } from '@/lib/toast-debug';
 import { validatePassword, ALLOWED_PASSWORD_SYMBOLS } from '@/lib/password-validation';
 import { http } from '@/lib/http';
+import { extractTokenFromHash } from '@/lib/tokenUrl';
 
 interface VerifyTokenResponse {
   valid: boolean;
@@ -30,9 +31,8 @@ export default function ResetPasswordForm() {
 
   // URLから確認情報を取得
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash.startsWith('#token=')) {
-      const extractedToken = hash.substring(7); // '#token='の7文字を除去
+    const extractedToken = extractTokenFromHash(window.location.hash);
+    if (extractedToken) {
       setToken(extractedToken);
 
       // セキュリティのため、履歴からフラグメントを削除

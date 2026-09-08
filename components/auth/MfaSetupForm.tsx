@@ -4,6 +4,8 @@ import { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
 import { QRCodeCanvas } from 'qrcode.react'
 import { http } from '@/lib/http'
+import { authApi } from '@/lib/auth'
+import { getPostMfaRoute } from '@/lib/auth/mfaNavigation'
 
 type EnrollResponse = {
   qr_code_uri: string
@@ -101,8 +103,14 @@ function MfaSetupFormComponent() {
                 { totp_code: totpCode }
             )
 
-            alert('2段階認証が有効になりました。ダッシュボードに戻ります。')
-            router.push('/dashboard')
+            const currentUser = await authApi.getCurrentUser()
+            const route = getPostMfaRoute({
+                role: currentUser.role,
+                hasOffice: Boolean(currentUser.office),
+            })
+
+            alert('2段階認証が有効になりました。')
+            router.push(route)
 
         } catch (err: unknown) {
             setVerifyAttempts(prev => prev + 1)

@@ -5,6 +5,8 @@ export interface AuthResponse {
   requires_mfa_setup?: boolean;
   requires_mfa_verification?: boolean;
   requires_mfa_first_setup?: boolean; // 管理者が設定したMFAの初回セットアップが必要
+  requires_webauthn_verification?: boolean;
+  webauthn_pending_token?: string;
   temporary_token?: string;
   qr_code_uri?: string; // MFA初回セットアップ用QRコードURI
   secret_key?: string; // MFA初回セットアップ用シークレットキー

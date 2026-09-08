@@ -34,7 +34,7 @@ export const authApi = {
   },
 
   verifyEmail: (token: string): Promise<{ message: string; role: string }> => {
-    return http.get<{ message: string; role: string }>(`${API_V1_PREFIX}/auth/verify-email?token=${token}`);
+    return http.post<{ message: string; role: string }>(`${API_V1_PREFIX}/auth/verify-email`, { token });
   },
 
   logout: authFlowClient.logout,

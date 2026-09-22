@@ -150,7 +150,8 @@ test.describe('app_admin WebAuthn registration', () => {
 
     const consoleMessages: string[] = [];
     page.on('console', (message) => consoleMessages.push(message.text()));
-    await page.goto('/e2e/webauthn');
+    const response = await page.goto('/e2e/webauthn');
+    expect(response?.status()).toBe(200);
     await page.getByLabel('パスキー名').fill('MacBook Touch ID');
     await page.getByRole('button', { name: 'パスキーを登録' }).click();
     await expect(page.getByRole('status')).toContainText('パスキーを登録しました');
